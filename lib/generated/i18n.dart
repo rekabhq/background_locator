@@ -14,12 +14,13 @@ class S implements WidgetsLocalizations {
   static S current;
 
   static const GeneratedLocalizationsDelegate delegate =
-      GeneratedLocalizationsDelegate();
+  GeneratedLocalizationsDelegate();
 
   static S of(BuildContext context) => Localizations.of<S>(context, S);
 
   @override
   TextDirection get textDirection => TextDirection.ltr;
+
 }
 
 class $en extends S {
@@ -112,9 +113,8 @@ class GeneratedLocalizationsDelegate extends LocalizationsDelegate<S> {
         }
 
         // If no country requirement is requested, check if this locale has no country.
-        if (true != withCountry &&
-            (supportedLocale.countryCode == null ||
-                supportedLocale.countryCode.isEmpty)) {
+        if (true != withCountry && (supportedLocale.countryCode == null ||
+            supportedLocale.countryCode.isEmpty)) {
           return true;
         }
       }
@@ -126,5 +126,5 @@ class GeneratedLocalizationsDelegate extends LocalizationsDelegate<S> {
 String getLang(Locale l) => l == null
     ? null
     : l.countryCode != null && l.countryCode.isEmpty
-        ? l.languageCode
-        : l.toString();
+    ? l.languageCode
+    : l.toString();
