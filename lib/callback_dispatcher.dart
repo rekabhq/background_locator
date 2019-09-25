@@ -6,9 +6,10 @@ import 'package:flutter/services.dart';
 
 import 'keys.dart';
 
+@pragma('vm:entry-point')
 void callbackDispatcher() {
   const MethodChannel _backgroundChannel =
-      MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
+  MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
   WidgetsFlutterBinding.ensureInitialized();
 
   _backgroundChannel.setMethodCallHandler((MethodCall call) async {
