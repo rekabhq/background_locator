@@ -181,6 +181,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     [self setCallbackHandle:callback];
     [_locationManager startUpdatingLocation];
+    [_locationManager startMonitoringSignificantLocationChanges];
 }
 
 - (void)removeLocator {
