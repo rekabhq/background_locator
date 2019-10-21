@@ -134,7 +134,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     _eventQueue = [[NSMutableArray alloc] init];
     _locationManager = [[CLLocationManager alloc] init];
     [_locationManager setDelegate:self];
-    [_locationManager requestAlwaysAuthorization];
     _locationManager.pausesLocationUpdatesAutomatically = NO;
     if (@available(iOS 9.0, *)) {
         _locationManager.allowsBackgroundLocationUpdates = YES;
@@ -172,6 +171,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 - (void)registerLocator:(int64_t) callback settings: (NSDictionary*) settings {
+    [self->_locationManager requestAlwaysAuthorization];
+        
     long accuracyKey = [[settings objectForKey:ARG_ACCURACY] longValue];
     CLLocationAccuracy accuracy = [self getAccuracy:accuracyKey];
     double distanceFilter = [[settings objectForKey:ARG_DISTANCE_FILTER] doubleValue];
