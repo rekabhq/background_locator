@@ -111,5 +111,5 @@ static void callback(LocationDto locationDto) async {
 
 3) Don't forget to unregister the locator when you are done:
 ```dart
-BackgroundLocator.registerLocationUpdate(callback);
+BackgroundLocator.unRegisterLocationUpdate();
 ```
