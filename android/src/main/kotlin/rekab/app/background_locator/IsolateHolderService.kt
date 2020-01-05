@@ -29,6 +29,9 @@ class IsolateHolderService : Service() {
         fun setBackgroundFlutterView(view: FlutterNativeView?) {
             backgroundFlutterView = view
         }
+
+        @JvmStatic
+        var isRunning = false
     }
 
     var notificationTitle = "Start Location Tracking"
@@ -39,6 +42,10 @@ class IsolateHolderService : Service() {
     }
 
     private fun start() {
+        if (isRunning) {
+            return
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Notification channel is available in Android O and up
             val channel = NotificationChannel(CHANNEL_ID, "Flutter Locator Plugin",
@@ -66,6 +73,8 @@ class IsolateHolderService : Service() {
 
         // Starting Service as foreground with a notification prevent service from closing
         startForeground(1, notification)
+
+        isRunning = true
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -79,6 +88,7 @@ class IsolateHolderService : Service() {
             }
             stopForeground(true)
             stopSelf()
+            isRunning = false
         } else if (intent.action == ACTION_START) {
             notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
             notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)

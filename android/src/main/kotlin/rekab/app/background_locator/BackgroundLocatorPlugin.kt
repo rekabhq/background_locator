@@ -53,6 +53,12 @@ class BackgroundLocatorPlugin(private val context: Context, private val activity
                                     client: FusedLocationProviderClient,
                                     args: Map<Any, Any>,
                                     result: Result?) {
+            if (IsolateHolderService.isRunning) {
+                // The service is running already
+                print("Locator service is already running")
+                return
+            }
+
             val callbackHandle = args[ARG_CALLBACK] as Long
             setCallbackHandle(context, callbackHandle)
 
@@ -134,8 +140,13 @@ class BackgroundLocatorPlugin(private val context: Context, private val activity
         @JvmStatic
         private fun removeLocator(context: Context,
                                   client: FusedLocationProviderClient) {
-            client.removeLocationUpdates(getLocatorPendingIndent(context))
+            if (!IsolateHolderService.isRunning) {
+                // The service is not running
+                print("Locator service is not running, nothing to stop")
+                return
+            }
 
+            client.removeLocationUpdates(getLocatorPendingIndent(context))
             stopIsolateService(context)
         }
 
