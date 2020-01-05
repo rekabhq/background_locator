@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import io.flutter.view.FlutterNativeView
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
+import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 
 class IsolateHolderService : Service() {
@@ -36,6 +37,7 @@ class IsolateHolderService : Service() {
 
     var notificationTitle = "Start Location Tracking"
     var notificationMsg = "Track location in background"
+    var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -66,8 +68,7 @@ class IsolateHolderService : Service() {
         (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
                 setReferenceCounted(false)
-                // Maximum wake lock time is set to 60 minute to prevent any excessive use of battery
-                acquire(60 * 60 * 1000L /*60 minutes*/)
+                acquire(wakeLockTime)
             }
         }
 
@@ -92,7 +93,7 @@ class IsolateHolderService : Service() {
         } else if (intent.action == ACTION_START) {
             notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
             notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
-
+            wakeLockTime = intent.getIntExtra(ARG_WAKE_LOCK_TIME, 60) * 60 * 1000L
             start()
         }
         return START_STICKY;

@@ -19,9 +19,12 @@ class LocationSettings {
   final String requestPermissionMsg;
   final String notificationTitle;
   final String notificationMsg;
+  /// minute
+  final int wakeLockTime;
 
   LocationSettings(this.accuracy, this.interval, this.distanceFilter,
-      this.requestPermissionMsg, this.notificationTitle, this.notificationMsg);
+      this.requestPermissionMsg, this.notificationTitle, this.notificationMsg,
+      this.wakeLockTime);
 
   Map<String, dynamic> toMap() {
     return {
@@ -31,6 +34,7 @@ class LocationSettings {
       Keys.ARG_LOCATION_PERMISSION_MSG: requestPermissionMsg,
       Keys.ARG_NOTIFICATION_TITLE: notificationTitle,
       Keys.ARG_NOTIFICATION_MSG: notificationMsg,
+      Keys.ARG_WAKE_LOCK_TIME: wakeLockTime,
     };
   }
 }

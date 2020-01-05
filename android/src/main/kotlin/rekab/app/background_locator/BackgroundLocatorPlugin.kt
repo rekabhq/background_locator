@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
@@ -25,6 +26,7 @@ import rekab.app.background_locator.Keys.Companion.ARG_LOCATION_PERMISSION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
 import rekab.app.background_locator.Keys.Companion.ARG_SETTINGS
+import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
@@ -55,7 +57,7 @@ class BackgroundLocatorPlugin(private val context: Context, private val activity
                                     result: Result?) {
             if (IsolateHolderService.isRunning) {
                 // The service is running already
-                print("Locator service is already running")
+                Log.d("BackgroundLocatorPlugin", "Locator service is already running")
                 return
             }
 
@@ -84,6 +86,10 @@ class BackgroundLocatorPlugin(private val context: Context, private val activity
             intent.action = IsolateHolderService.ACTION_START
             intent.putExtra(ARG_NOTIFICATION_TITLE, settings[ARG_NOTIFICATION_TITLE] as String)
             intent.putExtra(ARG_NOTIFICATION_MSG, settings[ARG_NOTIFICATION_MSG] as String)
+
+            if (settings.containsKey(ARG_WAKE_LOCK_TIME)) {
+                intent.putExtra(ARG_WAKE_LOCK_TIME, settings[ARG_WAKE_LOCK_TIME] as Int)
+            }
 
             ContextCompat.startForegroundService(context, intent)
         }
@@ -142,7 +148,7 @@ class BackgroundLocatorPlugin(private val context: Context, private val activity
                                   client: FusedLocationProviderClient) {
             if (!IsolateHolderService.isRunning) {
                 // The service is not running
-                print("Locator service is not running, nothing to stop")
+                Log.d("BackgroundLocatorPlugin", "Locator service is not running, nothing to stop")
                 return
             }
 

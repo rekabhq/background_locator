@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
+import 'package:background_locator/location_settings.dart';
 import 'package:flutter/material.dart';
 
 import 'file_manager.dart';
@@ -68,7 +69,15 @@ class _MyAppState extends State<MyApp> {
         child: RaisedButton(
           child: Text('Start'),
           onPressed: () {
-            BackgroundLocator.registerLocationUpdate(callback);
+            BackgroundLocator.registerLocationUpdate(callback,
+                settings: LocationSettings(
+                    LocationAccuracy.NAVIGATION,
+                    5,
+                    0,
+                    "'registerLocator' requires the ACCESS_FINE_LOCATION permission.",
+                    "Start Location Tracking example",
+                    "Track location in background exapmle",
+                    20));
           },
         ));
     final stop = SizedBox(

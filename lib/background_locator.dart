@@ -18,8 +18,9 @@ class BackgroundLocator {
       5,
       0,
       "'registerLocator' requires the ACCESS_FINE_LOCATION permission.",
-      "Start Location Tracking 2",
-      "Track location in background");
+      "Start Location Tracking",
+      "Track location in background",
+      60);
 
   static Future<void> initialize() async {
     final CallbackHandle callback =
