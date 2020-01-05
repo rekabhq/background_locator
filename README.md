@@ -7,7 +7,7 @@ A Flutter plugin for updating location in background.
 Add this to your package's pubspec.yaml file:
 ```ruby
 dependencies:
-  background_locator: ^0.0.3-beta
+  background_locator: ^0.0.4-beta
   ```
 
 ##### 2. Install it
