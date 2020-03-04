@@ -15,7 +15,11 @@ class FileManager {
 
   static Future<File> _getTempLogFile() async {
     final directory = await getTemporaryDirectory();
-    return File('${directory.path}/log.txt');
+    final file = File('${directory.path}/log.txt');
+    if (!await file.exists()) {
+      await file.writeAsString('');
+    }
+    return file;
   }
 
   static Future<void> clearLogFile() async {
