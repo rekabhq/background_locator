@@ -28,4 +28,5 @@ class Keys {
   static const String ARG_NOTIFICATION_TITLE = 'notificationTitle';
   static const String ARG_NOTIFICATION_MSG = 'notificationMsg';
   static const String ARG_WAKE_LOCK_TIME = 'wakeLockTime';
+  static const String ARG_AUTO_STOP = 'autoStop';
 }
