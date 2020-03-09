@@ -1,3 +1,7 @@
+## 1.0.0+1
+* Add auto stop feature.
+* Update flutter plugin library to version 2.
+
 ## 0.0.4-beta
 * Add parameter to setting to change android wakelock time.
 * Prevent service from registering twice.
