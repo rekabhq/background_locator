@@ -52,26 +52,10 @@ import 'package:background_locator/background_locator.dart';
             android:permission="android.permission.FOREGROUND_SERVICE"
             android:exported="true"
             />
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
 ```
-
-3) Create an `Application` class and add the following lines:
-```kotlin
-class Application: FlutterApplication(), PluginRegistry.PluginRegistrantCallback {
-    override fun onCreate() {
-        super.onCreate()
-        LocatorService.setPluginRegistrant(this)
-    }
-    override fun registerWith(p0: PluginRegistry?) {
-        GeneratedPluginRegistrant.registerWith(p0)
-    }
-}
-```
-
-**Note**: Don't forget to reference your `Application` class in `AndroidManifest.xml`:
-```xml
-<application
-        android:name=".Application"
-``` 
 
 ### iOS
 

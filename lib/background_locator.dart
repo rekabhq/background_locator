@@ -1,26 +1,19 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:background_locator/auto_stop_handler.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/location_settings.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'callback_dispatcher.dart';
 import 'keys.dart';
 
-class BackgroundLocator {
+class BackgroundLocator{
   static const MethodChannel _channel = const MethodChannel(Keys.CHANNEL_ID);
   static const MethodChannel _background =
       MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
-
-  static final _defaultSettings = LocationSettings(
-      LocationAccuracy.NAVIGATION,
-      5,
-      0,
-      "'registerLocator' requires the ACCESS_FINE_LOCATION permission.",
-      "Start Location Tracking",
-      "Track location in background",
-      60);
 
   static Future<void> initialize() async {
     final CallbackHandle callback =
@@ -32,7 +25,10 @@ class BackgroundLocator {
   static Future<void> registerLocationUpdate(
       void Function(LocationDto) callback,
       {LocationSettings settings}) async {
-    final _settings = settings ?? _defaultSettings;
+    final _settings = settings ?? LocationSettings();
+    if (_settings.autoStop) {
+      WidgetsBinding.instance.addObserver(AutoStopHandler());
+    }
 
     final args = {
       Keys.ARG_CALLBACK:
