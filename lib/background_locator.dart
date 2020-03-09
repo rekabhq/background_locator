@@ -14,13 +14,14 @@ class BackgroundLocator {
       MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
 
   static final _defaultSettings = LocationSettings(
-      LocationAccuracy.NAVIGATION,
-      5,
-      0,
-      "'registerLocator' requires the ACCESS_FINE_LOCATION permission.",
-      "Start Location Tracking",
-      "Track location in background",
-      60);
+      accuracy: LocationAccuracy.NAVIGATION,
+      interval: 5,
+      distanceFilter: 0,
+      requestPermissionMsg:
+          "'registerLocator' requires the ACCESS_FINE_LOCATION permission.",
+      notificationTitle: "Start Location Tracking",
+      notificationMsg: "Track location in background",
+      wakeLockTime: 60);
 
   static Future<void> initialize() async {
     final CallbackHandle callback =

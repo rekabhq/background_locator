@@ -22,9 +22,9 @@ class LocationSettings {
   /// minute
   final int wakeLockTime;
 
-  LocationSettings(this.accuracy, this.interval, this.distanceFilter,
+  LocationSettings({this.accuracy, this.interval, this.distanceFilter,
       this.requestPermissionMsg, this.notificationTitle, this.notificationMsg,
-      this.wakeLockTime);
+      this.wakeLockTime});
 
   Map<String, dynamic> toMap() {
     return {
