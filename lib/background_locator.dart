@@ -25,10 +25,7 @@ class BackgroundLocator{
   static Future<void> registerLocationUpdate(
       void Function(LocationDto) callback,
       {LocationSettings settings}) async {
-    print('===============registerLocationUpdate===============');
-
     final _settings = settings ?? LocationSettings();
-    print('===============autoStop: ${_settings.autoStop}===============');
     if (_settings.autoStop) {
       WidgetsBinding.instance.addObserver(AutoStopHandler());
     }
