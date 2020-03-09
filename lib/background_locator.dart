@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'callback_dispatcher.dart';
 import 'keys.dart';
 
-class BackgroundLocator {
+class BackgroundLocator{
   static const MethodChannel _channel = const MethodChannel(Keys.CHANNEL_ID);
   static const MethodChannel _background =
       MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
