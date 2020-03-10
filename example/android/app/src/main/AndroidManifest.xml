@@ -14,7 +14,7 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
     <application
-        android:name=".Application"
+        android:name="io.flutter.app.FlutterApplication"
         android:label="background_locator_example"
         android:icon="@mipmap/ic_launcher"
         >
@@ -26,13 +26,12 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
             >
-            <!-- This keeps the window background of the activity showing
-                 until Flutter renders its first frame. It can be removed if
-                 there is no splash screen (such as the default splash screen
-                 defined in @style/LaunchTheme). -->
             <meta-data
-                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
-                android:value="true"
+                android:name="io.flutter.embedding.android.SplashScreenDrawable"
+                android:resource="@drawable/launch_background" />
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme"
                 />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,5 +54,8 @@
             android:permission="android.permission.FOREGROUND_SERVICE"
             android:exported="true"
             />
+
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
+
     </application>
 </manifest>

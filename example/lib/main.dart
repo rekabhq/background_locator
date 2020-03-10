@@ -71,13 +71,10 @@ class _MyAppState extends State<MyApp> {
           onPressed: () {
             BackgroundLocator.registerLocationUpdate(callback,
                 settings: LocationSettings(
-                    LocationAccuracy.NAVIGATION,
-                    5,
-                    0,
-                    "'registerLocator' requires the ACCESS_FINE_LOCATION permission.",
-                    "Start Location Tracking example",
-                    "Track location in background exapmle",
-                    20));
+                    notificationTitle: "Start Location Tracking example",
+                    notificationMsg: "Track location in background exapmle",
+                    wakeLockTime: 20,
+                    autoStop: true));
           },
         ));
     final stop = SizedBox(

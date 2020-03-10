@@ -8,7 +8,6 @@ import androidx.core.app.JobIntentService
 import com.google.android.gms.location.LocationResult
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.PluginRegistry
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
 import io.flutter.view.FlutterNativeView
@@ -43,16 +42,8 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
         private val serviceStarted = AtomicBoolean(false)
 
         @JvmStatic
-        private lateinit var pluginRegistrantCallback: PluginRegistry.PluginRegistrantCallback
-
-        @JvmStatic
         fun enqueueWork(context: Context, work: Intent) {
             enqueueWork(context, LocatorService::class.java, JOB_ID, work)
-        }
-
-        @JvmStatic
-        fun setPluginRegistrant(callback: PluginRegistry.PluginRegistrantCallback) {
-            pluginRegistrantCallback = callback
         }
     }
 
@@ -76,8 +67,6 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                 // Flutter background view without any view
                 backgroundFlutterView = FlutterNativeView(context, true)
 
-                val registry = backgroundFlutterView!!.pluginRegistry
-                pluginRegistrantCallback.registerWith(registry)
                 val args = FlutterRunArguments()
                 args.bundlePath = FlutterMain.findAppBundlePath(context)
                 args.entrypoint = callbackInfo.callbackName

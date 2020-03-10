@@ -1,7 +1,6 @@
 package rekab.app.background_locator
 
 import android.Manifest
-import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -12,11 +11,12 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
 import rekab.app.background_locator.Keys.Companion.ARG_ACCURACY
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
@@ -36,19 +36,14 @@ import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOC
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
 
-class BackgroundLocatorPlugin(private val context: Context, private val activity: Activity?) : MethodCallHandler {
-    private val locatorClient = LocationServices.getFusedLocationProviderClient(context)
+class BackgroundLocatorPlugin()
+    : MethodCallHandler, FlutterPlugin {
+    private lateinit var locatorClient: FusedLocationProviderClient
+    private var context: Context? = null
 
     companion object {
         @JvmStatic
         private var channel: MethodChannel? = null
-
-        @JvmStatic
-        fun registerWith(registrar: Registrar) {
-            val plugin = BackgroundLocatorPlugin(registrar.context(), registrar.activity())
-            channel = MethodChannel(registrar.messenger(), CHANNEL_ID)
-            channel?.setMethodCallHandler(plugin)
-        }
 
         @JvmStatic
         private fun registerLocator(context: Context,
@@ -182,24 +177,39 @@ class BackgroundLocatorPlugin(private val context: Context, private val activity
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             METHOD_PLUGIN_INITIALIZE_SERVICE -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    activity?.requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            12312)
-                }
                 val args: Map<Any, Any> = call.arguments()
-                initializeService(context, args)
+                initializeService(context!!, args)
                 result.success(true)
             }
             METHOD_PLUGIN_REGISTER_LOCATION_UPDATE -> {
                 val args: Map<Any, Any> = call.arguments()
-                registerLocator(context,
+                registerLocator(context!!,
                         locatorClient,
                         args,
                         result)
             }
-            METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context,
+            METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
                     locatorClient)
             else -> result.notImplemented()
         }
+    }
+
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        onAttachedToEngine(binding.applicationContext, binding.binaryMessenger)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        removeLocator(context!!, locatorClient)
+        context = null
+        channel?.setMethodCallHandler(null)
+    }
+
+    private fun onAttachedToEngine(context: Context, messenger: BinaryMessenger) {
+        val plugin = BackgroundLocatorPlugin()
+        plugin.context = context
+        plugin.locatorClient = LocationServices.getFusedLocationProviderClient(context)
+
+        channel = MethodChannel(messenger, CHANNEL_ID)
+        channel?.setMethodCallHandler(plugin)
     }
 }

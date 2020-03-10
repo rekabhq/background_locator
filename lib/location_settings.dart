@@ -19,12 +19,21 @@ class LocationSettings {
   final String requestPermissionMsg;
   final String notificationTitle;
   final String notificationMsg;
+
   /// minute
   final int wakeLockTime;
+  final bool autoStop;
 
-  LocationSettings(this.accuracy, this.interval, this.distanceFilter,
-      this.requestPermissionMsg, this.notificationTitle, this.notificationMsg,
-      this.wakeLockTime);
+  LocationSettings(
+      {this.accuracy = LocationAccuracy.NAVIGATION,
+      this.interval = 5,
+      this.distanceFilter = 0,
+      this.requestPermissionMsg =
+          "'registerLocator' requires the ACCESS_FINE_LOCATION permission.",
+      this.notificationTitle = 'Start Location Tracking',
+      this.notificationMsg = 'Track location in background',
+      this.wakeLockTime = 60, //minute
+      this.autoStop = false});
 
   Map<String, dynamic> toMap() {
     return {
@@ -35,6 +44,7 @@ class LocationSettings {
       Keys.ARG_NOTIFICATION_TITLE: notificationTitle,
       Keys.ARG_NOTIFICATION_MSG: notificationMsg,
       Keys.ARG_WAKE_LOCK_TIME: wakeLockTime,
+      Keys.ARG_AUTO_STOP: autoStop,
     };
   }
 }
