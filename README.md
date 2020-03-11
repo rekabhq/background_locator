@@ -117,6 +117,8 @@ static void callback(LocationDto locationDto) async {
   }
 ```
 
+**Note:** Before starting the plugin you have to get location permission.
+
 3) Don't forget to unregister the locator when you are done:
 ```dart
 BackgroundLocator.unRegisterLocationUpdate();
