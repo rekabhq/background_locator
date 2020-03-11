@@ -7,6 +7,7 @@ import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/location_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:location_permissions/location_permissions.dart';
 
 import 'file_manager.dart';
 
@@ -69,12 +70,7 @@ class _MyAppState extends State<MyApp> {
         child: RaisedButton(
           child: Text('Start'),
           onPressed: () {
-            BackgroundLocator.registerLocationUpdate(callback,
-                settings: LocationSettings(
-                    notificationTitle: "Start Location Tracking example",
-                    notificationMsg: "Track location in background exapmle",
-                    wakeLockTime: 20,
-                    autoStop: true));
+            _checkLocationPermission();
           },
         ));
     final stop = SizedBox(
@@ -117,5 +113,34 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  void _checkLocationPermission() async {
+    final access = await LocationPermissions().checkPermissionStatus();
+    switch (access) {
+      case PermissionStatus.unknown:
+      case PermissionStatus.denied:
+      case PermissionStatus.restricted:
+        final permission = await LocationPermissions().requestPermissions(
+            permissionLevel: LocationPermissionLevel.locationAlways);
+        if (permission == PermissionStatus.granted) {
+          _startLocator();
+        } else {
+          // show error
+        }
+        break;
+      case PermissionStatus.granted:
+        _startLocator();
+        break;
+    }
+  }
+
+  void _startLocator() {
+    BackgroundLocator.registerLocationUpdate(callback,
+        settings: LocationSettings(
+            notificationTitle: "Start Location Tracking example",
+            notificationMsg: "Track location in background exapmle",
+            wakeLockTime: 20,
+            autoStop: false));
   }
 }
