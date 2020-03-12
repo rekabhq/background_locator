@@ -33,6 +33,7 @@ import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERVICE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
+import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
 
@@ -152,6 +153,20 @@ class BackgroundLocatorPlugin()
         }
 
         @JvmStatic
+        private fun isRegisterLocator(context: Context,
+                                  client: FusedLocationProviderClient,
+                                  result: Result?) {
+            if (IsolateHolderService?.isRunning) {
+                Log.d("BackgroundLocatorPlugin", "Check Locator service: running")
+                result?.success(true)
+            } else {
+                Log.d("BackgroundLocatorPlugin", "Check Locator service: not running")
+                result?.success(false)
+            }
+            return 
+        }
+
+        @JvmStatic
         private fun setCallbackDispatcherHandle(context: Context, handle: Long) {
             context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .edit()
@@ -190,6 +205,8 @@ class BackgroundLocatorPlugin()
             }
             METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
                     locatorClient)
+            METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(context!!,
+                    locatorClient, result)
             else -> result.notImplemented()
         }
     }
