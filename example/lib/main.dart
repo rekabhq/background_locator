@@ -139,7 +139,8 @@ class _MyAppState extends State<MyApp> {
     BackgroundLocator.registerLocationUpdate(callback,
         settings: LocationSettings(
             notificationTitle: "Start Location Tracking example",
-            notificationMsg: "Track location in background exapmle",
+            notificationMsg: "Track location in background example",
+            notificationIcon: "ic_location",
             wakeLockTime: 20,
             autoStop: false));
   }
