@@ -130,7 +130,7 @@ class _MyAppState extends State<MyApp> {
         }
         break;
       case PermissionStatus.granted:
-         _startLocator();
+        _startLocator();
         break;
     }
   }
