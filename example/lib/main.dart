@@ -116,23 +116,23 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _checkLocationPermission() async {
-    final access = await LocationPermissions().checkPermissionStatus();
-    switch (access) {
-      case PermissionStatus.unknown:
-      case PermissionStatus.denied:
-      case PermissionStatus.restricted:
-        final permission = await LocationPermissions().requestPermissions(
-            permissionLevel: LocationPermissionLevel.locationAlways);
-        if (permission == PermissionStatus.granted) {
-          _startLocator();
-        } else {
-          // show error
-        }
-        break;
-      case PermissionStatus.granted:
+//    final access = await LocationPermissions().checkPermissionStatus();
+//    switch (access) {
+//      case PermissionStatus.unknown:
+//      case PermissionStatus.denied:
+//      case PermissionStatus.restricted:
+//        final permission = await LocationPermissions().requestPermissions(
+//            permissionLevel: LocationPermissionLevel.locationAlways);
+//        if (permission == PermissionStatus.granted) {
+//          _startLocator();
+//        } else {
+//          // show error
+//        }
+//        break;
+//      case PermissionStatus.granted:
         _startLocator();
-        break;
-    }
+//        break;
+//    }
   }
 
   void _startLocator() {
