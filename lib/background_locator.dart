@@ -4,13 +4,13 @@ import 'dart:ui';
 import 'package:background_locator/auto_stop_handler.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/location_settings.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
 import 'callback_dispatcher.dart';
 import 'keys.dart';
 
-class BackgroundLocator{
+class BackgroundLocator {
   static const MethodChannel _channel = const MethodChannel(Keys.CHANNEL_ID);
   static const MethodChannel _background =
       MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
@@ -42,5 +42,9 @@ class BackgroundLocator{
 
   static Future<void> unRegisterLocationUpdate() async {
     await _channel.invokeMethod(Keys.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE);
+  }
+
+  static Future<bool> isRegisterLocationUpdate() async {
+    return await _channel.invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE);
   }
 }
