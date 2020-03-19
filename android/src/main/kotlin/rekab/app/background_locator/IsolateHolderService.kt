@@ -6,12 +6,14 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import io.flutter.view.FlutterNativeView
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
+import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
 import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 
@@ -37,6 +39,7 @@ class IsolateHolderService : Service() {
 
     var notificationTitle = "Start Location Tracking"
     var notificationMsg = "Track location in background"
+    var icon = 0 
     var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -56,12 +59,11 @@ class IsolateHolderService : Service() {
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
         }
 
-        val imageId = resources.getIdentifier("ic_launcher", "mipmap", packageName)
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
 
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationMsg)
-                .setSmallIcon(imageId)
+                .setSmallIcon(icon)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .build()
 
@@ -93,6 +95,12 @@ class IsolateHolderService : Service() {
         } else if (intent.action == ACTION_START) {
             notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
             notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
+            val iconNameDefault = "ic_launcher"
+            var iconName = intent.getStringExtra(ARG_NOTIFICATION_ICON)
+            if (iconName == null || iconName.isEmpty()) {
+                iconName = iconNameDefault
+            }
+            icon = resources.getIdentifier(iconName, "mipmap", packageName)
             wakeLockTime = intent.getIntExtra(ARG_WAKE_LOCK_TIME, 60) * 60 * 1000L
             start()
         }

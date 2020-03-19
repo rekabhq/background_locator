@@ -14,13 +14,12 @@ class LocationAccuracy {
 
 class LocationSettings {
   final LocationAccuracy accuracy;
-  final int interval; //second
+  final int interval; //seconds
   final double distanceFilter;
   final String notificationTitle;
   final String notificationMsg;
-
-  /// minute
-  final int wakeLockTime;
+  final String notificationIcon;
+  final int wakeLockTime; //minutes
   final bool autoStop;
 
   LocationSettings(
@@ -29,7 +28,8 @@ class LocationSettings {
       this.distanceFilter = 0,
       this.notificationTitle = 'Start Location Tracking',
       this.notificationMsg = 'Track location in background',
-      this.wakeLockTime = 60, //minute
+      this.notificationIcon = '',
+      this.wakeLockTime = 60,
       this.autoStop = false});
 
   Map<String, dynamic> toMap() {
@@ -39,6 +39,7 @@ class LocationSettings {
       Keys.ARG_DISTANCE_FILTER: distanceFilter,
       Keys.ARG_NOTIFICATION_TITLE: notificationTitle,
       Keys.ARG_NOTIFICATION_MSG: notificationMsg,
+      Keys.ARG_NOTIFICATION_ICON: notificationIcon,
       Keys.ARG_WAKE_LOCK_TIME: wakeLockTime,
       Keys.ARG_AUTO_STOP: autoStop,
     };

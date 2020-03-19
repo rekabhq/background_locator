@@ -36,8 +36,6 @@ NSString *ARG_SETTINGS = @"settings";
 NSString *ARG_CALLBACK_DISPATCHER = @"callbackDispatcher";
 NSString *ARG_INTERVAL = @"interval";
 NSString *ARG_DISTANCE_FILTER = @"distanceFilter";
-NSString *ARG_NOTIFICATION_TITLE = @"notificationTitle";
-NSString *ARG_NOTIFICATION_MSG = @"notificationMsg";
 
 #pragma mark FlutterPlugin Methods
 
