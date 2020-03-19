@@ -16,7 +16,6 @@ class LocationSettings {
   final LocationAccuracy accuracy;
   final int interval; //second
   final double distanceFilter;
-  final String requestPermissionMsg;
   final String notificationTitle;
   final String notificationMsg;
 
@@ -28,8 +27,6 @@ class LocationSettings {
       {this.accuracy = LocationAccuracy.NAVIGATION,
       this.interval = 5,
       this.distanceFilter = 0,
-      this.requestPermissionMsg =
-          "'registerLocator' requires the ACCESS_FINE_LOCATION permission.",
       this.notificationTitle = 'Start Location Tracking',
       this.notificationMsg = 'Track location in background',
       this.wakeLockTime = 60, //minute
@@ -40,7 +37,6 @@ class LocationSettings {
       Keys.ARG_ACCURACY: accuracy.value,
       Keys.ARG_INTERVAL: interval,
       Keys.ARG_DISTANCE_FILTER: distanceFilter,
-      Keys.ARG_LOCATION_PERMISSION_MSG: requestPermissionMsg,
       Keys.ARG_NOTIFICATION_TITLE: notificationTitle,
       Keys.ARG_NOTIFICATION_MSG: notificationMsg,
       Keys.ARG_WAKE_LOCK_TIME: wakeLockTime,

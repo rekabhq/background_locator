@@ -23,6 +23,8 @@ class Keys {
         val METHOD_PLUGIN_REGISTER_LOCATION_UPDATE = "LocatorPlugin.registerLocationUpdate"
         @JvmStatic
         val METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE = "LocatorPlugin.unRegisterLocationUpdate"
+        @JvmStatic
+        val METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE = "LocatorPlugin.isRegisterLocationUpdate"
 
         @JvmStatic
         val ARG_LATITUDE = "latitude"
@@ -50,8 +52,6 @@ class Keys {
         val ARG_INTERVAL = "interval"
         @JvmStatic
         val ARG_DISTANCE_FILTER = "distanceFilter"
-        @JvmStatic
-        val ARG_LOCATION_PERMISSION_MSG = "requestPermissionMsg"
         @JvmStatic
         val ARG_NOTIFICATION_TITLE = "notificationTitle"
         @JvmStatic
