@@ -1,3 +1,7 @@
+## 1.0.1+1
+Add isRegistered method.
+Bug fixes.
+
 ## 1.0.0+1
 * Add auto stop feature.
 * Update flutter plugin library to version 2.
