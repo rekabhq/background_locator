@@ -16,6 +16,7 @@ import rekab.app.background_locator.Keys.Companion.ARG_ACCURACY
 import rekab.app.background_locator.Keys.Companion.ARG_ALTITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_HEADING
+import rekab.app.background_locator.Keys.Companion.ARG_TIME
 import rekab.app.background_locator.Keys.Companion.ARG_LATITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_LOCATION
 import rekab.app.background_locator.Keys.Companion.ARG_LONGITUDE
@@ -112,7 +113,8 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                             ARG_ALTITUDE to location.altitude,
                             ARG_SPEED to location.speed,
                             ARG_SPEED_ACCURACY to speedAccuracy,
-                            ARG_HEADING to location.bearing)
+                            ARG_HEADING to location.bearing,
+                            ARG_TIME to location.time.toDouble())
 
             val callback = BackgroundLocatorPlugin.getCallbackHandle(context)
 
