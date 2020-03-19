@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:background_locator/location_dto.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
 import 'keys.dart';

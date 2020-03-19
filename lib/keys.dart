@@ -10,6 +10,8 @@ class Keys {
       'LocatorPlugin.registerLocationUpdate';
   static const String METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE =
       'LocatorPlugin.unRegisterLocationUpdate';
+  static const String METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE =
+      'LocatorPlugin.isRegisterLocationUpdate';
 
   static const String ARG_LATITUDE = 'latitude';
   static const String ARG_LONGITUDE = 'longitude';
@@ -24,7 +26,6 @@ class Keys {
   static const String ARG_CALLBACK_DISPATCHER = 'callbackDispatcher';
   static const String ARG_INTERVAL = 'interval';
   static const String ARG_DISTANCE_FILTER = 'distanceFilter';
-  static const String ARG_LOCATION_PERMISSION_MSG = 'requestPermissionMsg';
   static const String ARG_NOTIFICATION_TITLE = 'notificationTitle';
   static const String ARG_NOTIFICATION_MSG = 'notificationMsg';
   static const String ARG_NOTIFICATION_ICON = 'notificationIcon';

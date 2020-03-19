@@ -22,30 +22,64 @@ class _MyAppState extends State<MyApp> {
   ReceivePort port = ReceivePort();
 
   String logStr = '';
+  bool isRunning;
+  LocationDto lastLocation;
+  DateTime lastTimeLocation;
 
   @override
   void initState() {
     super.initState();
 
     IsolateNameServer.registerPortWithName(port.sendPort, 'LocatorIsolate');
-    port.listen((dynamic data) {
-      setLog(data);
-    });
+    port.listen(
+      (dynamic data) async {
+        await setLog(data);
+        await updateUI(data);
+      },
+      onError: (err) {
+        print("Error log in dart: $err");
+      },
+      cancelOnError: false,
+    );
     initPlatformState();
   }
 
-  double dp(double val, int places) {
+  @override
+  void dispose() {
+    IsolateNameServer.removePortNameMapping('LocatorIsolate');
+    super.dispose();
+  }
+
+  static double dp(double val, int places) {
     double mod = pow(10.0, places);
     return ((val * mod).round().toDouble() / mod);
   }
 
+  static String formatDateLog(DateTime date) {
+    return date.hour.toString() +
+        ":" +
+        date.minute.toString() +
+        ":" +
+        date.second.toString();
+  }
+
+  static String formatLog(LocationDto locationDto) {
+    return dp(locationDto.latitude, 4).toString() +
+        " " +
+        dp(locationDto.longitude, 4).toString();
+  }
+
   Future<void> setLog(LocationDto data) async {
     final date = DateTime.now();
-    final dateStr = '${date.hour}:${date.minute}:${date.second}';
-    FileManager.writeToLogFile(
-        '$dateStr --> ${dp(data.latitude, 4)}. ${dp(data.longitude, 4)}\n');
+    await FileManager.writeToLogFile(
+        '${formatDateLog(date)} --> ${formatLog(data)}\n');
+  }
+
+  Future<void> updateUI(LocationDto data) async {
     final log = await FileManager.readLogFile();
     setState(() {
+      lastLocation = data;
+      lastTimeLocation = DateTime.now();
       logStr = log;
     });
   }
@@ -55,6 +89,11 @@ class _MyAppState extends State<MyApp> {
     await BackgroundLocator.initialize();
     logStr = await FileManager.readLogFile();
     print('Initialization done');
+    final _isRunning = await BackgroundLocator.isRegisterLocationUpdate();
+    setState(() {
+      isRunning = _isRunning;
+    });
+    print('Running ${isRunning.toString()}');
   }
 
   static void callback(LocationDto locationDto) async {
@@ -66,32 +105,47 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final start = SizedBox(
-        width: double.maxFinite,
-        child: RaisedButton(
-          child: Text('Start'),
-          onPressed: () {
-            _checkLocationPermission();
-          },
-        ));
+      width: double.maxFinite,
+      child: RaisedButton(
+        child: Text('Start'),
+        onPressed: () {
+          _checkLocationPermission();
+        },
+      ),
+    );
     final stop = SizedBox(
-        width: double.maxFinite,
-        child: RaisedButton(
-          child: Text('Stop'),
-          onPressed: () {
-            BackgroundLocator.unRegisterLocationUpdate();
-          },
-        ));
+      width: double.maxFinite,
+      child: RaisedButton(
+        child: Text('Stop'),
+        onPressed: () {
+          BackgroundLocator.unRegisterLocationUpdate();
+          setState(() {
+            isRunning = false;
+          });
+        },
+      ),
+    );
     final clear = SizedBox(
-        width: double.maxFinite,
-        child: RaisedButton(
-          child: Text('Clear Log'),
-          onPressed: () {
-            FileManager.clearLogFile();
-            setState(() {
-              logStr = '';
-            });
-          },
-        ));
+      width: double.maxFinite,
+      child: RaisedButton(
+        child: Text('Clear Log'),
+        onPressed: () {
+          FileManager.clearLogFile();
+          setState(() {
+            logStr = '';
+          });
+        },
+      ),
+    );
+    String msgStatus = "-";
+    if (isRunning != null) {
+      if (isRunning) {
+        msgStatus = 'Is running';
+      } else {
+        msgStatus = 'Is not running';
+      }
+    }
+    final status = Text("Status: $msgStatus");
 
     final log = Text(
       logStr,
@@ -106,10 +160,11 @@ class _MyAppState extends State<MyApp> {
           width: double.maxFinite,
           padding: const EdgeInsets.all(22),
           child: SingleChildScrollView(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[start, stop, clear, log],
-          )),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[start, stop, clear, status, log],
+            ),
+          ),
         ),
       ),
     );
@@ -122,7 +177,8 @@ class _MyAppState extends State<MyApp> {
       case PermissionStatus.denied:
       case PermissionStatus.restricted:
         final permission = await LocationPermissions().requestPermissions(
-            permissionLevel: LocationPermissionLevel.locationAlways);
+          permissionLevel: LocationPermissionLevel.locationAlways,
+        );
         if (permission == PermissionStatus.granted) {
           _startLocator();
         } else {
@@ -136,12 +192,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _startLocator() {
-    BackgroundLocator.registerLocationUpdate(callback,
-        settings: LocationSettings(
-            notificationTitle: "Start Location Tracking example",
-            notificationMsg: "Track location in background example",
-            notificationIcon: "ic_location",
-            wakeLockTime: 20,
-            autoStop: false));
+    BackgroundLocator.registerLocationUpdate(
+      callback,
+      settings: LocationSettings(
+        notificationTitle: "Start Location Tracking example",
+        notificationMsg: "Track location in background exapmle",
+        wakeLockTime: 20,
+        autoStop: false,
+      ),
+    );
+    setState(() {
+      isRunning = true;
+    });
   }
 }

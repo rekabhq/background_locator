@@ -22,7 +22,6 @@ import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
 import rekab.app.background_locator.Keys.Companion.ARG_DISTANCE_FILTER
 import rekab.app.background_locator.Keys.Companion.ARG_INTERVAL
-import rekab.app.background_locator.Keys.Companion.ARG_LOCATION_PERMISSION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
@@ -34,6 +33,7 @@ import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERVICE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
+import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
 
@@ -66,7 +66,7 @@ class BackgroundLocatorPlugin()
                     context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_DENIED) {
 
-                val msg = settings[ARG_LOCATION_PERMISSION_MSG] as String
+                val msg = "'registerLocator' requires the ACCESS_FINE_LOCATION permission."
                 result?.error(msg, null, null)
             }
 
@@ -154,6 +154,17 @@ class BackgroundLocatorPlugin()
         }
 
         @JvmStatic
+        private fun isRegisterLocator(context: Context,
+                                  result: Result?) {
+            if (IsolateHolderService?.isRunning) {
+                result?.success(true)
+            } else {
+                result?.success(false)
+            }
+            return 
+        }
+
+        @JvmStatic
         private fun setCallbackDispatcherHandle(context: Context, handle: Long) {
             context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .edit()
@@ -192,6 +203,8 @@ class BackgroundLocatorPlugin()
             }
             METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
                     locatorClient)
+            METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(context!!,
+                    result)
             else -> result.notImplemented()
         }
     }

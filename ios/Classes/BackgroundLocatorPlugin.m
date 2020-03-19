@@ -22,6 +22,7 @@ NSString *METHOD_SERVICE_INITIALIZED = @"LocatorService.initialized";
 NSString *METHOD_PLUGIN_INITIALIZE_SERVICE = @"LocatorPlugin.initializeService";
 NSString *METHOD_PLUGIN_REGISTER_LOCATION_UPDATE = @"LocatorPlugin.registerLocationUpdate";
 NSString *METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE = @"LocatorPlugin.unRegisterLocationUpdate";
+NSString *METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE = @"LocatorPlugin.isRegisterLocationUpdate";
 NSString *ARG_LATITUDE = @"latitude";
 NSString *ARG_LONGITUDE = @"longitude";
 NSString *ARG_ACCURACY = @"accuracy";
@@ -35,7 +36,6 @@ NSString *ARG_SETTINGS = @"settings";
 NSString *ARG_CALLBACK_DISPATCHER = @"callbackDispatcher";
 NSString *ARG_INTERVAL = @"interval";
 NSString *ARG_DISTANCE_FILTER = @"distanceFilter";
-NSString *ARG_LOCATION_PERMISSION_MSG = @"requestPermissionMsg";
 
 #pragma mark FlutterPlugin Methods
 
@@ -78,6 +78,9 @@ NSString *ARG_LOCATION_PERMISSION_MSG = @"requestPermissionMsg";
     } else if ([METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE isEqualToString:call.method]) {
         [self removeLocator];
         result(@(YES));
+    } else if ([METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE isEqualToString:call.method]) {
+        BOOL val = [self isRegisterLocator];
+        result(@(val));
     } else {
         result(FlutterMethodNotImplemented);
     }
@@ -119,7 +122,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 #pragma mark LocatorPlugin Methods
-- (void) sendLocationEvent: (NSDictionary<NSString*,NSNumber*>*) location {
+- (void) sendLocationEvent: (NSDictionary<NSString*,NSNumber*>*)location {
     NSDictionary *map = @{
                      ARG_CALLBACK : @([self getCallbackHandle]),
                      ARG_LOCATION: location
@@ -168,7 +171,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [_registrar addMethodCallDelegate:self channel:_callbackChannel];
 }
 
-- (void)registerLocator:(int64_t) callback settings: (NSDictionary*) settings {
+- (void)registerLocator:(int64_t)callback settings: (NSDictionary*)settings {
     [self->_locationManager requestAlwaysAuthorization];
         
     long accuracyKey = [[settings objectForKey:ARG_ACCURACY] longValue];
@@ -185,6 +188,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void)removeLocator {
     [_locationManager stopUpdatingLocation];
+}
+
+- (BOOL)isRegisterLocator{
+    return initialized;
 }
 
 - (int64_t)getCallbackDispatcherHandle {
@@ -217,7 +224,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
      forKey:_kCallbackKey];
 }
 
-- (CLLocationAccuracy) getAccuracy:(long) key {
+- (CLLocationAccuracy) getAccuracy:(long)key {
     switch (key) {
         case 0:
             return kCLLocationAccuracyKilometer;
