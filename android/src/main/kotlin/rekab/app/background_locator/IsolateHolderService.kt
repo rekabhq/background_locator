@@ -95,9 +95,9 @@ class IsolateHolderService : Service() {
         } else if (intent.action == ACTION_START) {
             notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
             notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
-            var iconNameDefault = "ic_launcher"
+            val iconNameDefault = "ic_launcher"
             var iconName = intent.getStringExtra(ARG_NOTIFICATION_ICON)
-            if (iconName=="") {
+            if (iconName == null || iconName.isEmpty()) {
                 iconName = iconNameDefault
             }
             icon = resources.getIdentifier(iconName, "mipmap", packageName)
