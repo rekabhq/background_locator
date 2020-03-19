@@ -154,13 +154,10 @@ class BackgroundLocatorPlugin()
 
         @JvmStatic
         private fun isRegisterLocator(context: Context,
-                                  client: FusedLocationProviderClient,
                                   result: Result?) {
             if (IsolateHolderService?.isRunning) {
-                Log.d("BackgroundLocatorPlugin", "Check Locator service: running")
                 result?.success(true)
             } else {
-                Log.d("BackgroundLocatorPlugin", "Check Locator service: not running")
                 result?.success(false)
             }
             return 
@@ -206,7 +203,7 @@ class BackgroundLocatorPlugin()
             METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
                     locatorClient)
             METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(context!!,
-                    locatorClient, result)
+                    result)
             else -> result.notImplemented()
         }
     }
