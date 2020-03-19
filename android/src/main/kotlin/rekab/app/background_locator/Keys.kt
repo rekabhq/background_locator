@@ -57,6 +57,8 @@ class Keys {
         @JvmStatic
         val ARG_NOTIFICATION_MSG = "notificationMsg"
         @JvmStatic
+        val ARG_NOTIFICATION_ICON = "notificationIcon"
+        @JvmStatic
         val ARG_WAKE_LOCK_TIME = "wakeLockTime"
 
 

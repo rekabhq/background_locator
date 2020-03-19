@@ -44,7 +44,6 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
   }
 
-
   @override
   void dispose() {
     IsolateNameServer.removePortNameMapping('LocatorIsolate');
