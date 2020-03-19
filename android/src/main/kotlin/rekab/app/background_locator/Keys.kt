@@ -53,8 +53,6 @@ class Keys {
         @JvmStatic
         val ARG_DISTANCE_FILTER = "distanceFilter"
         @JvmStatic
-        val ARG_LOCATION_PERMISSION_MSG = "requestPermissionMsg"
-        @JvmStatic
         val ARG_NOTIFICATION_TITLE = "notificationTitle"
         @JvmStatic
         val ARG_NOTIFICATION_MSG = "notificationMsg"
