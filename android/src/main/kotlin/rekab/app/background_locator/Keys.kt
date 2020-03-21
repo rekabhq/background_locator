@@ -9,7 +9,8 @@ class Keys {
         val CALLBACK_DISPATCHER_HANDLE_KEY = "CALLBACK_DISPATCHER_HANDLE_KEY"
         @JvmStatic
         val CALLBACK_HANDLE_KEY = "CALLBACK_HANDLE_KEY"
-
+        @JvmStatic
+        val NOTIFICATION_CALLBACK_HANDLE_KEY = "NOTIFICATION_CALLBACK_HANDLE_KEY"
         @JvmStatic
         val CHANNEL_ID = "app.rekab/locator_plugin"
         @JvmStatic
@@ -60,7 +61,12 @@ class Keys {
         val ARG_NOTIFICATION_ICON = "notificationIcon"
         @JvmStatic
         val ARG_WAKE_LOCK_TIME = "wakeLockTime"
+        @JvmStatic
+        val ARG_NOTIFICATION_CALLBACK = "notificationCallback"
 
-
+        @JvmStatic
+        val BCM_SEND_LOCATION = "BCM_SEND_LOCATION"
+        @JvmStatic
+        val BCM_NOTIFICATION_CLICK = "BCM_NOTIFICATION_CLICK"
     }
 }

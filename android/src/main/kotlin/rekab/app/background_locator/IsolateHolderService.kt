@@ -29,11 +29,11 @@ class IsolateHolderService : Service() {
         private val WAKELOCK_TAG = "IsolateHolderService::WAKE_LOCK"
 
         @JvmStatic
-        private var backgroundFlutterView: FlutterNativeView? = null
+        var _backgroundFlutterView: FlutterNativeView? = null
 
         @JvmStatic
         fun setBackgroundFlutterView(view: FlutterNativeView?) {
-            backgroundFlutterView = view
+            _backgroundFlutterView = view
         }
 
         @JvmStatic

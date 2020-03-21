@@ -4,8 +4,8 @@ import 'dart:ui';
 import 'package:background_locator/auto_stop_handler.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/location_settings.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'callback_dispatcher.dart';
 import 'keys.dart';
@@ -24,7 +24,8 @@ class BackgroundLocator {
 
   static Future<void> registerLocationUpdate(
       void Function(LocationDto) callback,
-      {LocationSettings settings}) async {
+      {void Function() androidNotificationCallback,
+      LocationSettings settings}) async {
     final _settings = settings ?? LocationSettings();
     if (_settings.autoStop) {
       WidgetsBinding.instance.addObserver(AutoStopHandler());
@@ -33,6 +34,9 @@ class BackgroundLocator {
     final args = {
       Keys.ARG_CALLBACK:
           PluginUtilities.getCallbackHandle(callback).toRawHandle(),
+      Keys.ARG_NOTIFICATION_CALLBACK:
+          PluginUtilities.getCallbackHandle(androidNotificationCallback)
+              .toRawHandle(),
       Keys.ARG_SETTINGS: _settings.toMap()
     };
 
@@ -45,6 +49,7 @@ class BackgroundLocator {
   }
 
   static Future<bool> isRegisterLocationUpdate() async {
-    return await _channel.invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE);
+    return await _channel
+        .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE);
   }
 }
