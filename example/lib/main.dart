@@ -102,6 +102,10 @@ class _MyAppState extends State<MyApp> {
     send?.send(locationDto);
   }
 
+  static void notificationCallback() {
+    print('notificationCallback');
+  }
+
   @override
   Widget build(BuildContext context) {
     final start = SizedBox(
@@ -194,6 +198,7 @@ class _MyAppState extends State<MyApp> {
   void _startLocator() {
     BackgroundLocator.registerLocationUpdate(
       callback,
+      androidNotificationCallback: notificationCallback,
       settings: LocationSettings(
         notificationTitle: "Start Location Tracking example",
         notificationMsg: "Track location in background exapmle",

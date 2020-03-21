@@ -22,7 +22,9 @@ import rekab.app.background_locator.Keys.Companion.ARG_LONGITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_SPEED
 import rekab.app.background_locator.Keys.Companion.ARG_SPEED_ACCURACY
 import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
+import rekab.app.background_locator.Keys.Companion.BCM_SEND_LOCATION
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
+import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.METHOD_SERVICE_INITIALIZED
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 import java.util.*
@@ -114,7 +116,7 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                             ARG_SPEED_ACCURACY to speedAccuracy,
                             ARG_HEADING to location.bearing)
 
-            val callback = BackgroundLocatorPlugin.getCallbackHandle(context)
+            val callback = BackgroundLocatorPlugin.getCallbackHandle(context, CALLBACK_HANDLE_KEY)
 
             val result: HashMap<Any, Any> =
                     hashMapOf(ARG_CALLBACK to callback,
@@ -134,11 +136,10 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
         //https://github.com/flutter/plugins/pull/1641
         //https://github.com/flutter/flutter/issues/36059
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
-
         // new version of flutter can not invoke method from background thread
         Handler(mainLooper)
                 .post {
-                    backgroundChannel.invokeMethod("", result)
+                    backgroundChannel.invokeMethod(BCM_SEND_LOCATION, result)
                 }
     }
 }
