@@ -1,3 +1,6 @@
+## 1.0.1+2
+Fix crash on detach.
+
 ## 1.0.1+1
 Add isRegistered method.
 Bug fixes.
