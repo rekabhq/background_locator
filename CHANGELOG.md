@@ -1,3 +1,6 @@
+## 1.1.0+1
+Add callback for android notification.
+
 ## 1.0.1+2
 Fix crash on detach.
 
