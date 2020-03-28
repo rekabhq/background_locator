@@ -8,6 +8,7 @@ import androidx.core.app.JobIntentService
 import com.google.android.gms.location.LocationResult
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback;
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
 import io.flutter.view.FlutterNativeView
@@ -42,10 +43,17 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
         private var backgroundFlutterView: FlutterNativeView? = null
         @JvmStatic
         private val serviceStarted = AtomicBoolean(false)
+        @JvmStatic
+        private var pluginRegistrantCallback: PluginRegistrantCallback? = null;
 
         @JvmStatic
         fun enqueueWork(context: Context, work: Intent) {
             enqueueWork(context, LocatorService::class.java, JOB_ID, work)
+        }
+
+        @JvmStatic
+        fun setPluginRegistrant(callback: PluginRegistrantCallback) {
+            pluginRegistrantCallback = callback
         }
     }
 
@@ -77,6 +85,8 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                 backgroundFlutterView!!.runFromBundle(args)
                 IsolateHolderService.setBackgroundFlutterView(backgroundFlutterView)
             }
+
+            pluginRegistrantCallback?.registerWith(backgroundFlutterView!!.pluginRegistry)
         }
 
         backgroundChannel = MethodChannel(backgroundFlutterView, BACKGROUND_CHANNEL_ID)
