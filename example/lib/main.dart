@@ -25,29 +25,25 @@ class _MyAppState extends State<MyApp> {
   bool isRunning;
   LocationDto lastLocation;
   DateTime lastTimeLocation;
+  static final _isolateName = 'LocatorIsolate';
 
   @override
   void initState() {
     super.initState();
 
-    IsolateNameServer.registerPortWithName(port.sendPort, 'LocatorIsolate');
+    if (IsolateNameServer.lookupPortByName(_isolateName) != null) {
+      IsolateNameServer.removePortNameMapping(_isolateName);
+    }
+
+    IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
+
     port.listen(
       (dynamic data) async {
         await setLog(data);
         await updateUI(data);
       },
-      onError: (err) {
-        print("Error log in dart: $err");
-      },
-      cancelOnError: false,
     );
     initPlatformState();
-  }
-
-  @override
-  void dispose() {
-    IsolateNameServer.removePortNameMapping('LocatorIsolate');
-    super.dispose();
   }
 
   static double dp(double val, int places) {
@@ -98,7 +94,7 @@ class _MyAppState extends State<MyApp> {
 
   static void callback(LocationDto locationDto) async {
     print('location in dart: ${locationDto.toString()}');
-    final SendPort send = IsolateNameServer.lookupPortByName('LocatorIsolate');
+    final SendPort send = IsolateNameServer.lookupPortByName(_isolateName);
     send?.send(locationDto);
   }
 
