@@ -1,3 +1,6 @@
+## 1.1.1+1
+Fix Callback is not triggered in iOS.
+
 ## 1.1.0+1
 Add callback for android notification.
 
