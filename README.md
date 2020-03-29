@@ -123,3 +123,21 @@ static void callback(LocationDto locationDto) async {
 ```dart
 BackgroundLocator.unRegisterLocationUpdate();
 ```
+
+**LocationSettings** options:
+
+`accuracy`: The accuracy of location, Default is max accuracy NAVIGATION.
+
+`interval`: Interval of retrieving location update in second. Only applies for android. Default is 5 second.
+
+`distanceFilter`: distance in meter to trigger location update, Default is 0 meter.
+
+`notificationTitle`: Title of the notification. Only applies for android. Default is 'Start Location Tracking'.
+
+`notificationMsg`: Message of notification. Only applies for android. Default is 'Track location in background'.
+
+`notificationIcon`: Icon name for notification. Only applies for android. The icon should be in 'mipmap' Directory. Default is app icon.
+
+`wakeLockTime`: Time for living service in background in meter. Only applies in android. Default is 60 minute.
+
+`autoStop`: If true locator will stop as soon as app goes to background.
