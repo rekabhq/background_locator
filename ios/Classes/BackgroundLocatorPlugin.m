@@ -36,6 +36,8 @@ NSString *ARG_SETTINGS = @"settings";
 NSString *ARG_CALLBACK_DISPATCHER = @"callbackDispatcher";
 NSString *ARG_INTERVAL = @"interval";
 NSString *ARG_DISTANCE_FILTER = @"distanceFilter";
+NSString *BCM_SEND_LOCATION = @"BCM_SEND_LOCATION";
+
 
 #pragma mark FlutterPlugin Methods
 
@@ -127,7 +129,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                      ARG_CALLBACK : @([self getCallbackHandle]),
                      ARG_LOCATION: location
                      };
-    [_callbackChannel invokeMethod:@"" arguments:map];
+    [_callbackChannel invokeMethod:BCM_SEND_LOCATION arguments:map];
 }
 
 - (instancetype)init:(NSObject<FlutterPluginRegistrar> *)registrar {
