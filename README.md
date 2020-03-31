@@ -101,6 +101,8 @@ static void callback(LocationDto locationDto) async {
 }
 ```
 
+**Note**: The steps above are required because the plugins are registered in the main isolate, which is killed when the application is terminated.
+
 ### iOS
 
 1) Add the following lines to `AppDelegate` class:
