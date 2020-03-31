@@ -81,7 +81,14 @@ class Application : FlutterApplication(), PluginRegistrantCallback {
 }
 ```
 
-4) Then, call the plugins on the callback function instead of on the port listener:
+4) And change the application class on `AndroidManifest.xml` to `.Application`:
+```xml
+<application
+        android:name="io.flutter.app.FlutterApplication"	        
+        android:name=".Application"
+```
+
+5) Then, call the plugins on the callback function instead of on the port listener:
 ```dart
 import 'package:path_provider/path_provider.dart';
 
