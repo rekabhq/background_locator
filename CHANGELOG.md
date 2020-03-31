@@ -1,3 +1,6 @@
+## 1.1.2+1
+Fix accessing other plugins when app is terminated.
+
 ## 1.1.1+1
 Fix Callback is not triggered in iOS.
 

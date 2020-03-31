@@ -1,6 +1,6 @@
 name: background_locator
 description: A Flutter plugin for updating location in background.
-version: 1.1.1+1
+version: 1.1.2+1
 homepage: https://github.com/rekab-app/background_locator
 
 environment:
