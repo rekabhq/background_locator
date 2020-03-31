@@ -84,7 +84,6 @@ class Application : FlutterApplication(), PluginRegistrantCallback {
 4) And change the application class on `AndroidManifest.xml` to `.Application`:
 ```xml
 <application
-        android:name="io.flutter.app.FlutterApplication"	        
         android:name=".Application"
 ```
 
