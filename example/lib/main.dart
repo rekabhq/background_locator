@@ -39,7 +39,6 @@ class _MyAppState extends State<MyApp> {
 
     port.listen(
       (dynamic data) async {
-        await setLog(data);
         await updateUI(data);
       },
     );
@@ -65,7 +64,7 @@ class _MyAppState extends State<MyApp> {
         dp(locationDto.longitude, 4).toString();
   }
 
-  Future<void> setLog(LocationDto data) async {
+  static Future<void> setLog(LocationDto data) async {
     final date = DateTime.now();
     await FileManager.writeToLogFile(
         '${formatDateLog(date)} --> ${formatLog(data)}\n');
@@ -94,6 +93,7 @@ class _MyAppState extends State<MyApp> {
 
   static void callback(LocationDto locationDto) async {
     print('location in dart: ${locationDto.toString()}');
+    await setLog(locationDto);
     final SendPort send = IsolateNameServer.lookupPortByName(_isolateName);
     send?.send(locationDto);
   }

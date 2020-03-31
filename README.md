@@ -57,6 +57,52 @@ import 'package:background_locator/background_locator.dart';
             android:value="2" />
 ```
 
+3) If you need to call other plugins, even when the application is terminated, create the `Application.kt` file and add the necessary plugins to the `registerWith` function:
+```kotlin
+package rekab.app.background_locator_example
+
+import rekab.app.background_locator.LocatorService
+import io.flutter.app.FlutterApplication
+import io.flutter.plugin.common.PluginRegistry
+import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
+import io.flutter.plugins.pathprovider.PathProviderPlugin
+
+class Application : FlutterApplication(), PluginRegistrantCallback {
+    override fun onCreate() {
+        super.onCreate()
+        LocatorService.setPluginRegistrant(this)
+    }
+
+    override fun registerWith(registry: PluginRegistry?) {
+        if (!registry!!.hasPlugin("io.flutter.plugins.pathprovider")) {
+            PathProviderPlugin.registerWith(registry!!.registrarFor("io.flutter.plugins.pathprovider"))
+        }
+    }
+}
+```
+
+4) And change the application class on `AndroidManifest.xml` to `.Application`:
+```xml
+<application
+        android:name=".Application"
+```
+
+5) Then, call the plugins on the callback function instead of on the port listener:
+```dart
+import 'package:path_provider/path_provider.dart';
+
+static void callback(LocationDto locationDto) async {
+  print('location in dart: ${locationDto.toString()}');
+  final SendPort send = IsolateNameServer.lookupPortByName(_isolateName);
+  send?.send(locationDto);
+
+  final file = await _getTempLogFile();
+  await file.writeAsString(locationDto.toString(), mode: FileMode.append);
+}
+```
+
+**Note**: The steps above are required because the plugins are registered in the main isolate, which is killed when the application is terminated.
+
 ### iOS
 
 1) Add the following lines to `AppDelegate` class:
