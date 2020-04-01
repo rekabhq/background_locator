@@ -13,9 +13,10 @@ A Flutter plugin for updating location even if the app is killed
 > More info on Isolate : [Isolates and Event Loops - Flutter in Focus](https://www.youtube.com/watch?v=vl_AaCgudcY)
 
 
-### 📝 Example : 
+#### 📝 Example : 
 At every callback, append the location in a file,
 on app start, recover the position list from this file and put it on the map as a polyline
+
 
 ## Install 📥:
 ##### 1. Depend on it
@@ -41,6 +42,7 @@ Now in your Dart code, you can use:
 import 'package:background_locator/background_locator.dart';
 ```
 
+
 ## Setup ⚙️:
 
 ### 🤖 Android
@@ -60,6 +62,7 @@ import 'package:background_locator/background_locator.dart';
 - **WAKE_LOCK** to not sleep while getting the GPS 😴
 - **FOREGROUND_SERVICE** To let the plugins operate as a service ⚙️
 
+
 2) Add the following lines to your `AndroidManifest.xml` to give the plugins's services their liberty:
 ```xml
         <receiver android:name="rekab.app.background_locator.LocatorBroadcastReceiver"
@@ -76,6 +79,7 @@ import 'package:background_locator/background_locator.dart';
             android:name="flutterEmbedding"
             android:value="2" />
 ```
+
 
 3) To work with other plugins, even when the application is killed (using `path_provider` for example), create a new file inside `android/app/src/main/kotlin/com/example/YourFlutterApp/` named `LocationService.kt` and fill it with :
 ```kotlin
@@ -102,13 +106,18 @@ class LocationService : FlutterApplication(), PluginRegistrantCallback {
     }
 }
 ```
+
+
 4) Again, inside `AndroidManifest.xml` change `android:name` from `io.flutter.app.FlutterApplication` to `rekab.app.background_locator_example.LocationService` to register the step 3:
 ```xml
 <application
         android:name="rekab.app.background_locator_example.LocationService"
 ```
 
+
 **Great ! 👍** Its now your turn, inside your dart file create a callback function that the plugin will call in background
+
+
 ##### 📝 Example :
 
 ```dart
@@ -123,6 +132,7 @@ static void callback(LocationDto locationDto) async {
   await file.writeAsString(locationDto.toString(), mode: FileMode.append);
 }
 ```
+
 
 ### 🍏 iOS
 
@@ -148,7 +158,9 @@ func registerPlugins(registry: FlutterPluginRegistry) -> () {
 
 ```
 
+
 2) In app setting enable `Background Modes` and check `Location Updates`.
+
 
 3) In `Info.plist` add Key for using location service:
 
@@ -157,9 +169,11 @@ NSLocationAlwaysAndWhenInUseUsageDescription
 NSLocationWhenInUseUsageDescription
 ```
 
+
 ## How to use it 👨‍💻:
 
 > See the best practice here : [PUT EXAMPLE LINK](example)
+
 
 1) Initialize plugin:
 ```dart
@@ -188,6 +202,7 @@ Future<void> initPlatformState() async {
 }
 ```
 
+
 2) Create the callback function :
 ```dart
 static void callback(LocationDto locationDto) async {
@@ -196,6 +211,7 @@ static void callback(LocationDto locationDto) async {
     //the '?' check if send is null before executing it
   }
 ```
+
 
 3) Start the location service :
 > Before starting the plugin make sure to have the necessary permission
@@ -223,6 +239,7 @@ void startLocationService(){
 }
 ```
 
+
 3) Unregister the service when you are done:
 ```dart
 @override
@@ -232,6 +249,8 @@ void dispose() {
     super.dispose();
 }
 ```
+
+
 ### LocationSettings options ⚙️:
 
 **`accuracy`:** Accuracy of location, default : `LocationAccuracy.NAVIGATION`
