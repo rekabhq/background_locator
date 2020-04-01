@@ -3,6 +3,8 @@
 
 A Flutter plugin for updating location even if the app is killed
 
+![demo](https://raw.githubusercontent.com/RomanJos/background_locator/master/demo.gif)
+
 ## How it work 🙋
  - The plugins register an Isolate as [START_STICKY](https://developer.android.com/reference/android/app/Service.html#START_STICKY) so it can't be killed by Android 
 
