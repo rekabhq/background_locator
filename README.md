@@ -66,6 +66,9 @@ import 'package:background_locator/background_locator.dart';
 
 2) Add also the following lines to your `AndroidManifest.xml` to give the plugins's services their liberties:
 ```xml
+    <!-- If you want to get update when the app is in background
+        but not when it is killed you can add android:stopWithTask="true"
+        to these tree services -->
         <receiver android:name="rekab.app.background_locator.LocatorBroadcastReceiver"
             android:enabled="true"
             android:exported="true"/>
@@ -75,26 +78,7 @@ import 'package:background_locator/background_locator.dart';
         <service android:name="rekab.app.background_locator.IsolateHolderService"
             android:permission="android.permission.FOREGROUND_SERVICE"
             android:exported="true"/>
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2" />
-```
 
-If you want to get update when the app is in background but not when it is killed you can add `android:stopWithTask="true"` like this :
-
-```xml
-<receiver android:name="rekab.app.background_locator.LocatorBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:stopWithTask="true"/>
-        <service android:name="rekab.app.background_locator.LocatorService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true"
-            android:stopWithTask="true"/>
-        <service android:name="rekab.app.background_locator.IsolateHolderService"
-            android:permission="android.permission.FOREGROUND_SERVICE"
-            android:exported="true"
-            android:stopWithTask="true"/>
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
