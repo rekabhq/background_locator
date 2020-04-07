@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   bool isRunning;
   LocationDto lastLocation;
   DateTime lastTimeLocation;
-  static final _isolateName = 'LocatorIsolate';
+  static const String _isolateName = 'LocatorIsolate';
 
   @override
   void initState() {
@@ -200,6 +200,7 @@ class _MyAppState extends State<MyApp> {
         notificationMsg: "Track location in background exapmle",
         wakeLockTime: 20,
         autoStop: false,
+        interval: 1
       ),
     );
     setState(() {
