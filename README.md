@@ -69,6 +69,7 @@ import 'package:background_locator/background_locator.dart';
     <!-- If you want to get update when the app is in background
         but not when it is killed you can add android:stopWithTask="true"
         to these tree services -->
+    <!-- This receiver get its value from the next file -->
         <receiver android:name="rekab.app.background_locator.LocatorBroadcastReceiver"
             android:enabled="true"
             android:exported="true"/>
@@ -88,6 +89,8 @@ import 'package:background_locator/background_locator.dart';
 3) To work with other plugins, even when the application is killed, create a new file inside `android/app/src/main/kotlin/com/example/YourFlutterApp/` named `LocationService.kt` and fill it with this example using `path_provider`:
 
 ```kotlin
+//You can customize this and change accordingly inside android:name
+//of your AndroidManifest.xml
 package rekab.app.background_locator_example
 
 import io.flutter.app.FlutterApplication
@@ -97,6 +100,7 @@ import io.flutter.plugins.pathprovider.PathProviderPlugin
 import io.flutter.view.FlutterMain
 import rekab.app.background_locator.LocatorService
 
+//Same for "LocationService" you can customize it if you want
 class LocationService : FlutterApplication(), PluginRegistrantCallback {
     override fun onCreate() {
         super.onCreate()
