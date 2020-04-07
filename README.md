@@ -69,7 +69,7 @@ import 'package:background_locator/background_locator.dart';
     <!-- If you want to get update when the app is in background
         but not when it is killed you can add android:stopWithTask="true"
         to these tree services -->
-    <!-- This receiver get its value from the next file -->
+    <!-- This receiver's name get its value from the next file -->
         <receiver android:name="rekab.app.background_locator.LocatorBroadcastReceiver"
             android:enabled="true"
             android:exported="true"/>
@@ -89,8 +89,8 @@ import 'package:background_locator/background_locator.dart';
 3) To work with other plugins, even when the application is killed, create a new file inside `android/app/src/main/kotlin/com/example/YourFlutterApp/` named `LocationService.kt` and fill it with this example using `path_provider`:
 
 ```kotlin
-//You can customize this and change accordingly inside android:name
-//of your AndroidManifest.xml
+//You can customize this and change accordingly
+//inside the receiver's android:name in the Manifest above
 package rekab.app.background_locator_example
 
 import io.flutter.app.FlutterApplication
@@ -120,9 +120,15 @@ To get something else than path_provider, simply add it to your pubspeck.yaml an
 import io.flutter.plugins.firebase.cloudfirestore.CloudFirestorePlugin
 import io.flutter.plugins.sharedpreferences.CloudFirestorePlugin
 ```
-and copy paste the `if (!registry!!.hasPlugin(...` from above making sure to change `"io.flutter.plugins.pathprovider"` by `"io.flutter.plugins.firebase.cloudfirestore"` and/or `"io.flutter.plugins.sharedpreferences"`
+and copy paste 
+```kotlin
+if (!registry!!.hasPlugin("io.flutter.plugins.pathprovider")) {
+    PathProviderPlugin.registerWith(registry!!.registrarFor("io.flutter.plugins.pathprovider"))
+}
+```
+from above making sure to change `"io.flutter.plugins.pathprovider"` by `"io.flutter.plugins.firebase.cloudfirestore"` and/or `"io.flutter.plugins.sharedpreferences"`
 
-> Note: you need to remove the last part of the import (CloudFirestorePlugin, CloudFirestorePlugin) inside the if statement
+> Note: you need to remove the last part of the import (`CloudFirestorePlugin`, `SharedPreferencesPlugin`) inside the if statement
 
 it should now look like this (The part from `GeneratedPluginRegistrant.java` are commented):
 ```kotlin
