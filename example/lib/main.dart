@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:isolate';
-import 'dart:math';
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:location_permissions/location_permissions.dart';
 
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/location_settings.dart';
-import 'package:flutter/material.dart';
-import 'package:location_permissions/location_permissions.dart';
 
 import 'file_manager.dart';
+import 'my_callback_handler.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,17 +26,16 @@ class _MyAppState extends State<MyApp> {
   bool isRunning;
   LocationDto lastLocation;
   DateTime lastTimeLocation;
-  static const String _isolateName = 'LocatorIsolate';
 
   @override
   void initState() {
     super.initState();
 
-    if (IsolateNameServer.lookupPortByName(_isolateName) != null) {
-      IsolateNameServer.removePortNameMapping(_isolateName);
+    if (IsolateNameServer.lookupPortByName(MyCallbackHandler.isolateName) != null) {
+      IsolateNameServer.removePortNameMapping(MyCallbackHandler.isolateName);
     }
 
-    IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
+    IsolateNameServer.registerPortWithName(port.sendPort, MyCallbackHandler.isolateName);
 
     port.listen(
       (dynamic data) async {
@@ -45,29 +45,9 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
   }
 
-  static double dp(double val, int places) {
-    double mod = pow(10.0, places);
-    return ((val * mod).round().toDouble() / mod);
-  }
-
-  static String formatDateLog(DateTime date) {
-    return date.hour.toString() +
-        ":" +
-        date.minute.toString() +
-        ":" +
-        date.second.toString();
-  }
-
-  static String formatLog(LocationDto locationDto) {
-    return dp(locationDto.latitude, 4).toString() +
-        " " +
-        dp(locationDto.longitude, 4).toString();
-  }
-
-  static Future<void> setLog(LocationDto data) async {
-    final date = DateTime.now();
-    await FileManager.writeToLogFile(
-        '${formatDateLog(date)} --> ${formatLog(data)}\n');
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   Future<void> updateUI(LocationDto data) async {
@@ -91,17 +71,6 @@ class _MyAppState extends State<MyApp> {
     print('Running ${isRunning.toString()}');
   }
 
-  static void callback(LocationDto locationDto) async {
-    print('location in dart: ${locationDto.toString()}');
-    await setLog(locationDto);
-    final SendPort send = IsolateNameServer.lookupPortByName(_isolateName);
-    send?.send(locationDto);
-  }
-
-  static void notificationCallback() {
-    print('notificationCallback');
-  }
-
   @override
   Widget build(BuildContext context) {
     final start = SizedBox(
@@ -109,7 +78,7 @@ class _MyAppState extends State<MyApp> {
       child: RaisedButton(
         child: Text('Start'),
         onPressed: () {
-          _checkLocationPermission();
+          _onStart();
         },
       ),
     );
@@ -118,10 +87,7 @@ class _MyAppState extends State<MyApp> {
       child: RaisedButton(
         child: Text('Stop'),
         onPressed: () {
-          BackgroundLocator.unRegisterLocationUpdate();
-          setState(() {
-            isRunning = false;
-          });
+          onStop();
         },
       ),
     );
@@ -170,7 +136,22 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void _checkLocationPermission() async {
+  void onStop() {
+    BackgroundLocator.unRegisterLocationUpdate();
+    setState(() {
+      isRunning = false;
+    });
+  }
+
+  void _onStart() async {
+    if (await _checkLocationPermission()) {
+      _startLocator();
+    } else
+      {
+      // show error
+    }
+  }
+  Future<bool> _checkLocationPermission() async {
     final access = await LocationPermissions().checkPermissionStatus();
     switch (access) {
       case PermissionStatus.unknown:
@@ -180,21 +161,24 @@ class _MyAppState extends State<MyApp> {
           permissionLevel: LocationPermissionLevel.locationAlways,
         );
         if (permission == PermissionStatus.granted) {
-          _startLocator();
+          return true;
         } else {
-          // show error
+          return false;
         }
         break;
       case PermissionStatus.granted:
-        _startLocator();
+        return true;
+        break;
+      default:
+        return false;
         break;
     }
   }
 
   void _startLocator() {
     BackgroundLocator.registerLocationUpdate(
-      callback,
-      androidNotificationCallback: notificationCallback,
+      MyCallbackHandler.callback,
+      androidNotificationCallback: MyCallbackHandler.notificationCallback,
       settings: LocationSettings(
         notificationTitle: "Start Location Tracking example",
         notificationMsg: "Track location in background exapmle",
