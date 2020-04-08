@@ -25,29 +25,24 @@ class _MyAppState extends State<MyApp> {
   bool isRunning;
   LocationDto lastLocation;
   DateTime lastTimeLocation;
+  static const String _isolateName = 'LocatorIsolate';
 
   @override
   void initState() {
     super.initState();
 
-    IsolateNameServer.registerPortWithName(port.sendPort, 'LocatorIsolate');
+    if (IsolateNameServer.lookupPortByName(_isolateName) != null) {
+      IsolateNameServer.removePortNameMapping(_isolateName);
+    }
+
+    IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
+
     port.listen(
       (dynamic data) async {
-        await setLog(data);
         await updateUI(data);
       },
-      onError: (err) {
-        print("Error log in dart: $err");
-      },
-      cancelOnError: false,
     );
     initPlatformState();
-  }
-
-  @override
-  void dispose() {
-    IsolateNameServer.removePortNameMapping('LocatorIsolate');
-    super.dispose();
   }
 
   static double dp(double val, int places) {
@@ -69,7 +64,7 @@ class _MyAppState extends State<MyApp> {
         dp(locationDto.longitude, 4).toString();
   }
 
-  Future<void> setLog(LocationDto data) async {
+  static Future<void> setLog(LocationDto data) async {
     final date = DateTime.now();
     await FileManager.writeToLogFile(
         '${formatDateLog(date)} --> ${formatLog(data)}\n');
@@ -98,8 +93,13 @@ class _MyAppState extends State<MyApp> {
 
   static void callback(LocationDto locationDto) async {
     print('location in dart: ${locationDto.toString()}');
-    final SendPort send = IsolateNameServer.lookupPortByName('LocatorIsolate');
+    await setLog(locationDto);
+    final SendPort send = IsolateNameServer.lookupPortByName(_isolateName);
     send?.send(locationDto);
+  }
+
+  static void notificationCallback() {
+    print('notificationCallback');
   }
 
   @override
@@ -194,11 +194,13 @@ class _MyAppState extends State<MyApp> {
   void _startLocator() {
     BackgroundLocator.registerLocationUpdate(
       callback,
+      androidNotificationCallback: notificationCallback,
       settings: LocationSettings(
         notificationTitle: "Start Location Tracking example",
         notificationMsg: "Track location in background exapmle",
         wakeLockTime: 20,
         autoStop: false,
+        interval: 1
       ),
     );
     setState(() {

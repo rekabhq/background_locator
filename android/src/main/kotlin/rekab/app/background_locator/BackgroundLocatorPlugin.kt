@@ -1,46 +1,54 @@
 package rekab.app.background_locator
 
 import android.Manifest
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.PluginRegistry
 import rekab.app.background_locator.Keys.Companion.ARG_ACCURACY
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
 import rekab.app.background_locator.Keys.Companion.ARG_DISTANCE_FILTER
 import rekab.app.background_locator.Keys.Companion.ARG_INTERVAL
+import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
 import rekab.app.background_locator.Keys.Companion.ARG_SETTINGS
 import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERVICE
+import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
-import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
+import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
 
 class BackgroundLocatorPlugin()
-    : MethodCallHandler, FlutterPlugin {
+    : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {
     private lateinit var locatorClient: FusedLocationProviderClient
     private var context: Context? = null
+    private var activity: Activity? = null
 
     companion object {
         @JvmStatic
@@ -58,7 +66,10 @@ class BackgroundLocatorPlugin()
             }
 
             val callbackHandle = args[ARG_CALLBACK] as Long
-            setCallbackHandle(context, callbackHandle)
+            setCallbackHandle(context, CALLBACK_HANDLE_KEY, callbackHandle)
+
+            val notificationCallback = args[ARG_NOTIFICATION_CALLBACK] as? Long
+            setCallbackHandle(context, NOTIFICATION_CALLBACK_HANDLE_KEY, notificationCallback)
 
             val settings = args[ARG_SETTINGS] as Map<*, *>
 
@@ -81,7 +92,7 @@ class BackgroundLocatorPlugin()
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
             intent.putExtra(ARG_NOTIFICATION_TITLE, settings[ARG_NOTIFICATION_TITLE] as String)
-            intent.putExtra(ARG_NOTIFICATION_MSG, settings[ARG_NOTIFICATION_MSG] as String)          
+            intent.putExtra(ARG_NOTIFICATION_MSG, settings[ARG_NOTIFICATION_MSG] as String)
             intent.putExtra(ARG_NOTIFICATION_ICON, settings[ARG_NOTIFICATION_ICON] as String)
 
             if (settings.containsKey(ARG_WAKE_LOCK_TIME)) {
@@ -155,13 +166,13 @@ class BackgroundLocatorPlugin()
 
         @JvmStatic
         private fun isRegisterLocator(context: Context,
-                                  result: Result?) {
+                                      result: Result?) {
             if (IsolateHolderService?.isRunning) {
                 result?.success(true)
             } else {
                 result?.success(false)
             }
-            return 
+            return
         }
 
         @JvmStatic
@@ -173,17 +184,21 @@ class BackgroundLocatorPlugin()
         }
 
         @JvmStatic
-        fun setCallbackHandle(context: Context, handle: Long) {
+        fun setCallbackHandle(context: Context, key: String, handle: Long?) {
+            if (handle == null) {
+                return
+            }
+
             context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .edit()
-                    .putLong(CALLBACK_HANDLE_KEY, handle)
+                    .putLong(key, handle)
                     .apply()
         }
 
         @JvmStatic
-        fun getCallbackHandle(context: Context): Long {
+        fun getCallbackHandle(context: Context, key: String): Long {
             return context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .getLong(CALLBACK_HANDLE_KEY, 0)
+                    .getLong(key, 0)
         }
     }
 
@@ -214,9 +229,6 @@ class BackgroundLocatorPlugin()
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        removeLocator(context!!, locatorClient)
-        context = null
-        channel?.setMethodCallHandler(null)
     }
 
     private fun onAttachedToEngine(context: Context, messenger: BinaryMessenger) {
@@ -226,5 +238,34 @@ class BackgroundLocatorPlugin()
 
         channel = MethodChannel(messenger, CHANNEL_ID)
         channel?.setMethodCallHandler(plugin)
+    }
+
+    override fun onNewIntent(intent: Intent?): Boolean {
+        val notificationCallback = getCallbackHandle(activity!!, NOTIFICATION_CALLBACK_HANDLE_KEY)
+        if (notificationCallback > 0 && IsolateHolderService._backgroundFlutterView != null) {
+            val backgroundChannel = MethodChannel(IsolateHolderService._backgroundFlutterView,
+                    Keys.BACKGROUND_CHANNEL_ID)
+            Handler(activity?.mainLooper)
+                    .post {
+                        backgroundChannel.invokeMethod(Keys.BCM_NOTIFICATION_CLICK,
+                                hashMapOf(ARG_NOTIFICATION_CALLBACK to notificationCallback))
+                    }
+        }
+
+        return true
+    }
+
+    override fun onDetachedFromActivity() {
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        activity = binding.activity
+        binding.addOnNewIntentListener(this)
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
     }
 }

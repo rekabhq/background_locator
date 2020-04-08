@@ -8,6 +8,7 @@ import androidx.core.app.JobIntentService
 import com.google.android.gms.location.LocationResult
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback;
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
 import io.flutter.view.FlutterNativeView
@@ -22,7 +23,9 @@ import rekab.app.background_locator.Keys.Companion.ARG_LONGITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_SPEED
 import rekab.app.background_locator.Keys.Companion.ARG_SPEED_ACCURACY
 import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
+import rekab.app.background_locator.Keys.Companion.BCM_SEND_LOCATION
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
+import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.METHOD_SERVICE_INITIALIZED
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 import java.util.*
@@ -40,10 +43,17 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
         private var backgroundFlutterView: FlutterNativeView? = null
         @JvmStatic
         private val serviceStarted = AtomicBoolean(false)
+        @JvmStatic
+        private var pluginRegistrantCallback: PluginRegistrantCallback? = null;
 
         @JvmStatic
         fun enqueueWork(context: Context, work: Intent) {
             enqueueWork(context, LocatorService::class.java, JOB_ID, work)
+        }
+
+        @JvmStatic
+        fun setPluginRegistrant(callback: PluginRegistrantCallback) {
+            pluginRegistrantCallback = callback
         }
     }
 
@@ -75,6 +85,8 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                 backgroundFlutterView!!.runFromBundle(args)
                 IsolateHolderService.setBackgroundFlutterView(backgroundFlutterView)
             }
+
+            pluginRegistrantCallback?.registerWith(backgroundFlutterView!!.pluginRegistry)
         }
 
         backgroundChannel = MethodChannel(backgroundFlutterView, BACKGROUND_CHANNEL_ID)
@@ -114,7 +126,7 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                             ARG_SPEED_ACCURACY to speedAccuracy,
                             ARG_HEADING to location.bearing)
 
-            val callback = BackgroundLocatorPlugin.getCallbackHandle(context)
+            val callback = BackgroundLocatorPlugin.getCallbackHandle(context, CALLBACK_HANDLE_KEY)
 
             val result: HashMap<Any, Any> =
                     hashMapOf(ARG_CALLBACK to callback,
@@ -134,11 +146,10 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
         //https://github.com/flutter/plugins/pull/1641
         //https://github.com/flutter/flutter/issues/36059
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
-
         // new version of flutter can not invoke method from background thread
         Handler(mainLooper)
                 .post {
-                    backgroundChannel.invokeMethod("", result)
+                    backgroundChannel.invokeMethod(BCM_SEND_LOCATION, result)
                 }
     }
 }

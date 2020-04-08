@@ -21,6 +21,7 @@ class Keys {
   static const String ARG_SPEED_ACCURACY = 'speed_accuracy';
   static const String ARG_HEADING = 'heading';
   static const String ARG_CALLBACK = 'callback';
+  static const String ARG_NOTIFICATION_CALLBACK = 'notificationCallback';
   static const String ARG_LOCATION = 'location';
   static const String ARG_SETTINGS = 'settings';
   static const String ARG_CALLBACK_DISPATCHER = 'callbackDispatcher';
@@ -31,4 +32,7 @@ class Keys {
   static const String ARG_NOTIFICATION_ICON = 'notificationIcon';
   static const String ARG_WAKE_LOCK_TIME = 'wakeLockTime';
   static const String ARG_AUTO_STOP = 'autoStop';
+
+  static const String BCM_SEND_LOCATION = 'BCM_SEND_LOCATION';
+  static const String BCM_NOTIFICATION_CLICK = 'BCM_NOTIFICATION_CLICK';
 }

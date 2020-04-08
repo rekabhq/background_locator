@@ -1,3 +1,15 @@
+## 1.1.2+1
+Fix accessing other plugins when app is terminated.
+
+## 1.1.1+1
+Fix Callback is not triggered in iOS.
+
+## 1.1.0+1
+Add callback for android notification.
+
+## 1.0.1+2
+Fix crash on detach.
+
 ## 1.0.1+1
 Add isRegistered method.
 Bug fixes.
