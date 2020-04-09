@@ -10,7 +10,8 @@ import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/location_settings.dart';
 
 import 'file_manager.dart';
-import 'my_callback_handler.dart';
+import 'location_service_repository.dart';
+import 'location_callback_handler.dart';
 
 void main() => runApp(MyApp());
 
@@ -31,11 +32,15 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    if (IsolateNameServer.lookupPortByName(MyCallbackHandler.isolateName) != null) {
-      IsolateNameServer.removePortNameMapping(MyCallbackHandler.isolateName);
+    if (IsolateNameServer.lookupPortByName(
+            LocationServiceRepository.isolateName) !=
+        null) {
+      IsolateNameServer.removePortNameMapping(
+          LocationServiceRepository.isolateName);
     }
 
-    IsolateNameServer.registerPortWithName(port.sendPort, MyCallbackHandler.isolateName);
+    IsolateNameServer.registerPortWithName(
+        port.sendPort, LocationServiceRepository.isolateName);
 
     port.listen(
       (dynamic data) async {
@@ -53,8 +58,10 @@ class _MyAppState extends State<MyApp> {
   Future<void> updateUI(LocationDto data) async {
     final log = await FileManager.readLogFile();
     setState(() {
-      lastLocation = data;
-      lastTimeLocation = DateTime.now();
+      if (data!=null) {
+        lastLocation = data;
+        lastTimeLocation = DateTime.now();
+      }
       logStr = log;
     });
   }
@@ -113,6 +120,23 @@ class _MyAppState extends State<MyApp> {
     }
     final status = Text("Status: $msgStatus");
 
+    String lastRunTxt = "-";
+    if (isRunning != null) {
+      if (isRunning) {
+        if (lastTimeLocation == null || lastLocation == null) {
+          lastRunTxt = "?";
+        } else {
+          lastRunTxt =
+              LocationServiceRepository.formatDateLog(lastTimeLocation) +
+                  "-" +
+                  LocationServiceRepository.formatLog(lastLocation);
+        }
+      }
+    }
+    final lastRun = Text(
+      "Last run: $lastRunTxt",
+    );
+
     final log = Text(
       logStr,
     );
@@ -128,7 +152,7 @@ class _MyAppState extends State<MyApp> {
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[start, stop, clear, status, log],
+              children: <Widget>[start, stop, clear, status, lastRun, log],
             ),
           ),
         ),
@@ -140,17 +164,24 @@ class _MyAppState extends State<MyApp> {
     BackgroundLocator.unRegisterLocationUpdate();
     setState(() {
       isRunning = false;
+//      lastTimeLocation = null;
+//      lastLocation = null;
     });
   }
 
   void _onStart() async {
     if (await _checkLocationPermission()) {
       _startLocator();
-    } else
-      {
+      setState(() {
+        isRunning = true;
+        lastTimeLocation = null;
+        lastLocation = null;
+      });
+    } else {
       // show error
     }
   }
+
   Future<bool> _checkLocationPermission() async {
     final access = await LocationPermissions().checkPermissionStatus();
     switch (access) {
@@ -176,19 +207,23 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _startLocator() {
+    Map<String, dynamic > data = {'countInit': 1};
     BackgroundLocator.registerLocationUpdate(
-      MyCallbackHandler.callback,
-      androidNotificationCallback: MyCallbackHandler.notificationCallback,
+      LocationCallbackHandler.callback,
+      initCallback: LocationCallbackHandler.initCallback,
+      initDataCallback: data,
+/*
+        Comment initDataCallback, so service not set init variable,
+        variable stay with value of last run after unRegisterLocationUpdate
+ */
+      disposeCallback: LocationCallbackHandler.disposeCallback,
+      androidNotificationCallback: LocationCallbackHandler.notificationCallback,
       settings: LocationSettings(
-        notificationTitle: "Start Location Tracking example",
-        notificationMsg: "Track location in background exapmle",
-        wakeLockTime: 20,
-        autoStop: false,
-        interval: 1
-      ),
+          notificationTitle: "Start Location Tracking example",
+          notificationMsg: "Track location in background exapmle",
+          wakeLockTime: 20,
+          autoStop: false,
+          interval: 5),
     );
-    setState(() {
-      isRunning = true;
-    });
   }
 }

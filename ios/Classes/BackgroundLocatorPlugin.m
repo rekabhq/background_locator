@@ -31,12 +31,17 @@ NSString *ARG_SPEED = @"speed";
 NSString *ARG_SPEED_ACCURACY = @"speed_accuracy";
 NSString *ARG_HEADING = @"heading";
 NSString *ARG_CALLBACK = @"callback";
+NSString *ARG_INIT_CALLBACK = @"initCallback";
+NSString *ARG_INIT_DATA_CALLBACK = @"initDataCallback";
+NSString *ARG_DISPOSE_CALLBACK = @"disposeCallback";
 NSString *ARG_LOCATION = @"location";
 NSString *ARG_SETTINGS = @"settings";
 NSString *ARG_CALLBACK_DISPATCHER = @"callbackDispatcher";
 NSString *ARG_INTERVAL = @"interval";
 NSString *ARG_DISTANCE_FILTER = @"distanceFilter";
 NSString *BCM_SEND_LOCATION = @"BCM_SEND_LOCATION";
+NSString *BCM_INIT = @"BCM_INIT";
+NSString *BCM_DISPOSE = @"BCM_DISPOSE";
 
 
 #pragma mark FlutterPlugin Methods

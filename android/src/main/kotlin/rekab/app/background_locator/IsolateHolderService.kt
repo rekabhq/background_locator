@@ -9,12 +9,24 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.os.Handler
 import androidx.core.app.NotificationCompat
 import io.flutter.view.FlutterNativeView
+import io.flutter.plugin.common.MethodChannel
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
 import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
+import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
+import rekab.app.background_locator.Keys.Companion.INIT_CALLBACK_HANDLE_KEY
+import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
+import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
+import rekab.app.background_locator.Keys.Companion.BCM_INIT
+import rekab.app.background_locator.Keys.Companion.BCM_DISPOSE
+import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
+import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 
 class IsolateHolderService : Service() {
@@ -34,10 +46,36 @@ class IsolateHolderService : Service() {
         @JvmStatic
         fun setBackgroundFlutterView(view: FlutterNativeView?) {
             _backgroundFlutterView = view
+            sendInit()
         }
 
         @JvmStatic
         var isRunning = false
+
+        @JvmStatic
+        var isSendedInit = false
+
+        @JvmStatic
+        var instance: Context? = null
+
+        @JvmStatic
+        fun sendInit() {
+            if (_backgroundFlutterView != null && instance != null && isSendedInit==false) {
+                val context = instance
+                val initCallback = BackgroundLocatorPlugin.getCallbackHandle(context!!, INIT_CALLBACK_HANDLE_KEY)
+                if (initCallback > 0) {
+                    val initialDataMap = BackgroundLocatorPlugin.getDataCallback(context!!, INIT_DATA_CALLBACK_KEY)
+                    val backgroundChannel = MethodChannel(_backgroundFlutterView,
+                            BACKGROUND_CHANNEL_ID)
+                    Handler(context.getMainLooper())
+                            .post {
+                                backgroundChannel.invokeMethod(BCM_INIT,
+                                        hashMapOf(ARG_INIT_CALLBACK to initCallback, ARG_INIT_DATA_CALLBACK to initialDataMap))
+                            }
+                }
+                isSendedInit = true
+            }
+        }
     }
 
     var notificationTitle = "Start Location Tracking"
@@ -80,11 +118,33 @@ class IsolateHolderService : Service() {
                 acquire(wakeLockTime)
             }
         }
+        
+        instance = this
+        sendInit()
 
         // Starting Service as foreground with a notification prevent service from closing
         startForeground(1, notification)
 
         isRunning = true
+    }
+
+    private fun stop() {
+        instance = null
+        isRunning = false
+        isSendedInit = false
+        if (_backgroundFlutterView != null) {
+            val context = this
+            val disposeCallback = BackgroundLocatorPlugin.getCallbackHandle(context!!, DISPOSE_CALLBACK_HANDLE_KEY)
+            if (disposeCallback > 0 && _backgroundFlutterView != null) {
+                val backgroundChannel = MethodChannel(_backgroundFlutterView,
+                        BACKGROUND_CHANNEL_ID)
+                Handler(context.getMainLooper())
+                        .post {
+                            backgroundChannel.invokeMethod(BCM_DISPOSE,
+                                    hashMapOf(ARG_DISPOSE_CALLBACK to disposeCallback))
+                        }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -98,7 +158,7 @@ class IsolateHolderService : Service() {
             }
             stopForeground(true)
             stopSelf()
-            isRunning = false
+            stop()
         } else if (intent.action == ACTION_START) {
             notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
             notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
