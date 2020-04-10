@@ -14,7 +14,7 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
     <application
-        android:name=".Application"
+        android:name=".LocationService"
         android:label="background_locator_example"
         android:icon="@mipmap/ic_launcher"
         >
