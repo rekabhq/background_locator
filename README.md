@@ -69,7 +69,6 @@ import 'package:background_locator/background_locator.dart';
     <!-- If you want to get update when the app is in background
         but not when it is killed you can add android:stopWithTask="true"
         to these tree services -->
-    <!-- This receiver's name get its value from the next file -->
         <receiver android:name="rekab.app.background_locator.LocatorBroadcastReceiver"
             android:enabled="true"
             android:exported="true"/>
@@ -89,9 +88,7 @@ import 'package:background_locator/background_locator.dart';
 3) To work with other plugins, even when the application is killed, create a new file inside `android/app/src/main/kotlin/com/example/YourFlutterApp/` named `LocationService.kt` and fill it with this example using `path_provider`:
 
 ```kotlin
-//You can customize this and change accordingly
-//inside the receiver's android:name in the Manifest above
-package rekab.app.background_locator_example
+package your.app.name
 
 import io.flutter.app.FlutterApplication
 import io.flutter.plugin.common.PluginRegistry
@@ -100,7 +97,6 @@ import io.flutter.plugins.pathprovider.PathProviderPlugin
 import io.flutter.view.FlutterMain
 import rekab.app.background_locator.LocatorService
 
-//Same for "LocationService" you can customize it if you want
 class LocationService : FlutterApplication(), PluginRegistrantCallback {
     override fun onCreate() {
         super.onCreate()
@@ -132,7 +128,7 @@ from above making sure to change `"io.flutter.plugins.pathprovider"` by `"io.flu
 
 it should now look like this (The part from `GeneratedPluginRegistrant.java` are commented):
 ```kotlin
-package rekab.app.background_locator_example
+package your.app.name
 
 import io.flutter.app.FlutterApplication
 import io.flutter.plugin.common.PluginRegistry
@@ -164,10 +160,13 @@ class LocationService : FlutterApplication(), PluginRegistrantCallback {
 }
 ```
 
-4) Again, inside your `AndroidManifest.xml` change `android:name` from `io.flutter.app.FlutterApplication` to `rekab.app.background_locator_example.LocationService` to register the step 3:
+4) Again, inside your `AndroidManifest.xml` change `android:name` from `io.flutter.app.FlutterApplication` to `.LocationService` to register the step 3:
+
+> or `your.app.name.LocationService`
+
 ```xml
 <application
-        android:name="rekab.app.background_locator_example.LocationService"
+        android:name=".LocationService"
 ```
 
 
