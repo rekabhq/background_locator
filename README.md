@@ -85,9 +85,10 @@ import 'package:background_locator/background_locator.dart';
 ```
 
 
-3) To work with other plugins, even when the application is killed (using `path_provider` for example), create a new file inside `android/app/src/main/kotlin/com/example/YourFlutterApp/` named `LocationService.kt` and fill it with :
+3) To work with other plugins, even when the application is killed, create a new file inside `android/app/src/main/kotlin/com/example/YourFlutterApp/` named `LocationService.kt` and fill it with this example using `path_provider`:
+
 ```kotlin
-package rekab.app.background_locator_example
+package your.app.name
 
 import io.flutter.app.FlutterApplication
 import io.flutter.plugin.common.PluginRegistry
@@ -110,12 +111,62 @@ class LocationService : FlutterApplication(), PluginRegistrantCallback {
     }
 }
 ```
+To get something else than path_provider, simply add it to your pubspeck.yaml and head to `android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java` you will see all the android part of your plugins, copy what you want to use like `io.flutter.plugins.firebase.cloudfirestore` for [cloud_firestore](https://pub.dev/packages/cloud_firestore), `io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin` for [shared_preferences](https://pub.dev/packages/shared_preferences) and so on, back to `LocationService.kt` import them at the top of the file like :
+```kotlin
+import io.flutter.plugins.firebase.cloudfirestore.CloudFirestorePlugin
+import io.flutter.plugins.sharedpreferences.CloudFirestorePlugin
+```
+and copy paste 
+```kotlin
+if (!registry!!.hasPlugin("io.flutter.plugins.pathprovider")) {
+    PathProviderPlugin.registerWith(registry!!.registrarFor("io.flutter.plugins.pathprovider"))
+}
+```
+from above making sure to change `"io.flutter.plugins.pathprovider"` by `"io.flutter.plugins.firebase.cloudfirestore"` and/or `"io.flutter.plugins.sharedpreferences"`
 
+> Note: you need to remove the last part of the import (`CloudFirestorePlugin`, `SharedPreferencesPlugin`) inside the if statement
 
-4) Again, inside your `AndroidManifest.xml` change `android:name` from `io.flutter.app.FlutterApplication` to `rekab.app.background_locator_example.LocationService` to register the step 3:
+it should now look like this (The part from `GeneratedPluginRegistrant.java` are commented):
+```kotlin
+package your.app.name
+
+import io.flutter.app.FlutterApplication
+import io.flutter.plugin.common.PluginRegistry
+import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
+import io.flutter.plugins.firebase.cloudfirestore.CloudFirestorePlugin
+import io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin
+import io.flutter.view.FlutterMain
+import rekab.app.background_locator.LocatorService
+
+class LocationService : FlutterApplication(), PluginRegistrantCallback {
+    override fun onCreate() {
+        super.onCreate()
+        LocatorService.setPluginRegistrant(this)
+        FlutterMain.startInitialization(this)
+    }
+
+    override fun registerWith(registry: PluginRegistry?) {
+        
+        // io.flutter.plugins.firebase.cloudfirestore.CloudFirestorePlugin.registerWith(shimPluginRegistry.registrarFor("io.flutter.plugins.firebase.cloudfirestore.CloudFirestorePlugin"));
+        if (!registry!!.hasPlugin("io.flutter.plugins.firebase.cloudfirestore")) {
+            CloudFirestorePlugin.registerWith(registry!!.registrarFor("io.flutter.plugins.firebase.cloudfirestore"))
+        }
+
+        // flutterEngine.getPlugins().add(new io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin());
+        if (!registry!!.hasPlugin("io.flutter.plugins.sharedpreferences")) {
+            SharedPreferencesPlugin.registerWith(registry!!.registrarFor("io.flutter.plugins.sharedpreferences"))
+        }
+    }
+}
+```
+
+4) Again, inside your `AndroidManifest.xml` change `android:name` from `io.flutter.app.FlutterApplication` to `.LocationService` to register the step 3:
+
+> or `your.app.name.LocationService`
+
 ```xml
 <application
-        android:name="rekab.app.background_locator_example.LocationService"
+        android:name=".LocationService"
 ```
 
 
