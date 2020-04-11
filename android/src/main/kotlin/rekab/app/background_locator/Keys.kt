@@ -42,6 +42,8 @@ class Keys {
         @JvmStatic
         val ARG_HEADING = "heading"
         @JvmStatic
+        val ARG_TIME = "time"
+        @JvmStatic
         val ARG_CALLBACK = "callback"
         @JvmStatic
         val ARG_LOCATION = "location"

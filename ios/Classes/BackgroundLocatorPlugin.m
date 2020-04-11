@@ -30,6 +30,7 @@ NSString *ARG_ALTITUDE = @"altitude";
 NSString *ARG_SPEED = @"speed";
 NSString *ARG_SPEED_ACCURACY = @"speed_accuracy";
 NSString *ARG_HEADING = @"heading";
+NSString *ARG_TIME = @"time";
 NSString *ARG_CALLBACK = @"callback";
 NSString *ARG_LOCATION = @"location";
 NSString *ARG_SETTINGS = @"settings";
@@ -106,6 +107,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
     for (int i = 0; i < locations.count; i++) {
         CLLocation *location = [locations objectAtIndex:i];
+        NSTimeInterval timeInSeconds = [location.timestamp timeIntervalSince1970];
         NSDictionary<NSString*,NSNumber*>* locationMap = @{
                                                            ARG_LATITUDE: @(location.coordinate.latitude),
                                                            ARG_LONGITUDE: @(location.coordinate.longitude),
@@ -114,6 +116,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                                                            ARG_SPEED: @(location.speed),
                                                            ARG_SPEED_ACCURACY: @(0.0),
                                                            ARG_HEADING: @(location.course),
+                                                           ARG_TIME: @(((double) timeInSeconds) * 1000.0)  // in milliseconds since the epoch
                                                            };
         if (initialized) {
             [self sendLocationEvent:locationMap];

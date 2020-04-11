@@ -8,9 +8,10 @@ class LocationDto {
   final double speed;
   final double speedAccuracy;
   final double heading;
+  final double time;
 
   LocationDto._(this.latitude, this.longitude, this.accuracy, this.altitude,
-      this.speed, this.speedAccuracy, this.heading);
+      this.speed, this.speedAccuracy, this.heading, this.time);
 
   factory LocationDto.fromJson(Map<dynamic, dynamic> json) {
     return LocationDto._(
@@ -20,11 +21,25 @@ class LocationDto {
         json[Keys.ARG_ALTITUDE],
         json[Keys.ARG_SPEED],
         json[Keys.ARG_SPEED_ACCURACY],
-        json[Keys.ARG_HEADING]);
+        json[Keys.ARG_HEADING],
+        json[Keys.ARG_TIME]);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      Keys.ARG_LATITUDE: this.latitude,
+      Keys.ARG_LONGITUDE: this.longitude,
+      Keys.ARG_ACCURACY: this.accuracy,
+      Keys.ARG_ALTITUDE: this.altitude,
+      Keys.ARG_SPEED: this.speed,
+      Keys.ARG_SPEED_ACCURACY: this.speedAccuracy,
+      Keys.ARG_HEADING: this.heading,
+      Keys.ARG_TIME: this.time,
+    };
   }
 
   @override
   String toString() {
-    return 'LocationDto{latitude: $latitude, longitude: $longitude, accuracy: $accuracy, altitude: $altitude, speed: $speed, speedAccuracy: $speedAccuracy, heading: $heading}';
+    return 'LocationDto{latitude: $latitude, longitude: $longitude, accuracy: $accuracy, altitude: $altitude, speed: $speed, speedAccuracy: $speedAccuracy, heading: $heading, time: $time}';
   }
 }
