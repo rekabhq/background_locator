@@ -1,3 +1,6 @@
+## 1.1.2+2
+Fix optional android notification callback.
+
 ## 1.1.2+1
 Fix accessing other plugins when app is terminated.
 
