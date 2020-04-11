@@ -16,3 +16,9 @@ Refer to [wiki](https://github.com/rekab-app/background_locator/wiki) page for i
 
 ##  License
 This project is licensed under the GPL3 License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Contributor
+Thanks to all who contributed on this plugin to fix bugs and adding new feature, including:
+* [Gerardo Ibarra](https://github.com/gpibarra)
+* [RomanJos](https://github.com/RomanJos)
+* [Marcelo Henrique Neppel](https://github.com/marceloneppel)
