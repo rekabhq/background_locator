@@ -20,9 +20,11 @@ jobs:
     
     - name: Install dependencies
       run: flutter pub get
-    - name: Go to example directory
-      run: cd example
     - name: Build debug akp
-      run: flutter build apk --debug
+      run: |
+        cd example
+        flutter build apk --debug
     - name: Build debug ios app
-      run: flutter build ios --debug --no-codesign
+      run: |
+        cd example
+        flutter build ios --debug --no-codesign
