@@ -1,5 +1,5 @@
 
-# background_locator ![](https://github.com/mehdok/flutter_ci_test/workflows/build/badge.svg) [![GitHub release](https://img.shields.io/github/v/tag/mehdok/flutter_ci_test.svg?sort=semver)] [![pub package](https://img.shields.io/pub/v/background_locator.svg)](https://pub.dartlang.org/packages/background_locator)
+# background_locator ![](https://github.com/mehdok/flutter_ci_test/workflows/build/badge.svg) [![pub package](https://img.shields.io/pub/v/background_locator.svg)](https://pub.dartlang.org/packages/background_locator)
 
 A Flutter plugin for getting location updates even when the app is killed.
 
