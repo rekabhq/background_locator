@@ -200,7 +200,7 @@ class _MyAppState extends State<MyApp> {
         notificationMsg: "Track location in background exapmle",
         wakeLockTime: 20,
         autoStop: false,
-        interval: 1
+        interval: 5
       ),
     );
     setState(() {
