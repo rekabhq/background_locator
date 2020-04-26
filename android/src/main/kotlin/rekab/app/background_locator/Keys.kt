@@ -70,5 +70,8 @@ class Keys {
         val BCM_SEND_LOCATION = "BCM_SEND_LOCATION"
         @JvmStatic
         val BCM_NOTIFICATION_CLICK = "BCM_NOTIFICATION_CLICK"
+
+        @JvmStatic
+        val NOTIFICATION_ACTION = "com.rekab.background_locator.notification"
     }
 }

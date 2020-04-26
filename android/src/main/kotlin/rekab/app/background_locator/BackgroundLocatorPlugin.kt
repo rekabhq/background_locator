@@ -40,6 +40,7 @@ import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERV
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
+import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
@@ -263,6 +264,11 @@ class BackgroundLocatorPlugin()
     }
 
     override fun onNewIntent(intent: Intent?): Boolean {
+        if(intent?.action != NOTIFICATION_ACTION) {
+            // this is not our notification
+            return false
+        }
+
         val notificationCallback = getCallbackHandle(activity!!, NOTIFICATION_CALLBACK_HANDLE_KEY)
         if (notificationCallback > 0 && IsolateHolderService._backgroundFlutterView != null) {
             val backgroundChannel = MethodChannel(IsolateHolderService._backgroundFlutterView,
