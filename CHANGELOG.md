@@ -1,3 +1,7 @@
+## 1.1.3+1
+Add possibility to restart locator service after reboot;
+Fix triggering android notification callback with wrong notification;
+
 ## 1.1.2+2
 Fix optional android notification callback.
 
