@@ -13,6 +13,7 @@ Refer to [wiki](https://github.com/rekab-app/background_locator/wiki) page for i
 * [Use other plugins in callback](https://github.com/rekab-app/background_locator/wiki/Use-other-plugins-in-callback)
 * [Stop on app terminate](https://github.com/rekab-app/background_locator/wiki/Stop-on-app-terminate)
 * [LocationSettings options](https://github.com/rekab-app/background_locator/wiki/LocationSettings-options)
+* [Restart service on device reboot (Android only)](https://github.com/rekab-app/background_locator/wiki/Restart-service-on-device-reboot)
 
 ##  License
 This project is licensed under the GPL3 License - see the [LICENSE.md](LICENSE.md) file for details
