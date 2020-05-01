@@ -16,7 +16,7 @@ Refer to [wiki](https://github.com/rekab-app/background_locator/wiki) page for i
 * [Restart service on device reboot (Android only)](https://github.com/rekab-app/background_locator/wiki/Restart-service-on-device-reboot)
 
 ##  License
-This project is licensed under the GPL3 License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Contributor
 Thanks to all who contributed on this plugin to fix bugs and adding new feature, including:
