@@ -61,7 +61,8 @@ class _MyAppState extends State<MyApp> {
   static String formatLog(LocationDto locationDto) {
     return dp(locationDto.latitude, 4).toString() +
         " " +
-        dp(locationDto.longitude, 4).toString();
+        dp(locationDto.longitude, 4).toString() +
+        "; isMocked: ${locationDto.isMocked}";
   }
 
   static Future<void> setLog(LocationDto data) async {
@@ -196,12 +197,11 @@ class _MyAppState extends State<MyApp> {
       callback,
       androidNotificationCallback: notificationCallback,
       settings: LocationSettings(
-        notificationTitle: "Start Location Tracking example",
-        notificationMsg: "Track location in background exapmle",
-        wakeLockTime: 20,
-        autoStop: false,
-        interval: 5
-      ),
+          notificationTitle: "Start Location Tracking example",
+          notificationMsg: "Track location in background exapmle",
+          wakeLockTime: 20,
+          autoStop: false,
+          interval: 5),
     );
     setState(() {
       isRunning = true;

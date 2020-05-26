@@ -13,6 +13,7 @@ class Keys {
   static const String METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE =
       'LocatorPlugin.isRegisterLocationUpdate';
 
+  static const String ARG_IS_MOCKED = 'is_mocked';
   static const String ARG_LATITUDE = 'latitude';
   static const String ARG_LONGITUDE = 'longitude';
   static const String ARG_ACCURACY = 'accuracy';
