@@ -28,6 +28,8 @@ class Keys {
         val METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE = "LocatorPlugin.isRegisterLocationUpdate"
 
         @JvmStatic
+        val ARG_IS_MOCKED = "is_mocked"
+        @JvmStatic
         val ARG_LATITUDE = "latitude"
         @JvmStatic
         val ARG_LONGITUDE = "longitude"
