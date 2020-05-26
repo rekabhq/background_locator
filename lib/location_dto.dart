@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'keys.dart';
 
 class LocationDto {
@@ -15,6 +17,8 @@ class LocationDto {
       this.speed, this.speedAccuracy, this.heading, this.time, this.isMocked);
 
   factory LocationDto.fromJson(Map<dynamic, dynamic> json) {
+    bool isLocationMocked =
+        Platform.isAndroid ? json[Keys.ARG_IS_MOCKED] : false;
     return LocationDto._(
         json[Keys.ARG_LATITUDE],
         json[Keys.ARG_LONGITUDE],
@@ -24,7 +28,7 @@ class LocationDto {
         json[Keys.ARG_SPEED_ACCURACY],
         json[Keys.ARG_HEADING],
         json[Keys.ARG_TIME],
-        json[Keys.ARG_IS_MOCKED]);
+        isLocationMocked);
   }
 
   Map<String, dynamic> toJson() {
