@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import io.flutter.view.FlutterNativeView
+import rekab.app.background_locator.Keys.Companion.ARG_CHANNEL_NAME
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
@@ -41,6 +42,7 @@ class IsolateHolderService : Service() {
         var isRunning = false
     }
 
+    var channelName = "Flutter Locator Plugin";
     var notificationTitle = "Start Location Tracking"
     var notificationMsg = "Track location in background"
     var icon = 0
@@ -57,7 +59,7 @@ class IsolateHolderService : Service() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Notification channel is available in Android O and up
-            val channel = NotificationChannel(CHANNEL_ID, "Flutter Locator Plugin",
+            val channel = NotificationChannel(CHANNEL_ID, channelName,
                     NotificationManager.IMPORTANCE_LOW)
 
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
@@ -105,6 +107,7 @@ class IsolateHolderService : Service() {
         } else if (intent.action == ACTION_START) {
             notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
             notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
+            channelName = intent.getStringExtra(ARG_CHANNEL_NAME)
             val iconNameDefault = "ic_launcher"
             var iconName = intent.getStringExtra(ARG_NOTIFICATION_ICON)
             if (iconName == null || iconName.isEmpty()) {
