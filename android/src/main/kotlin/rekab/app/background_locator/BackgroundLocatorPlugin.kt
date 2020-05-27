@@ -25,6 +25,7 @@ import io.flutter.plugin.common.PluginRegistry
 import rekab.app.background_locator.Keys.Companion.ARG_ACCURACY
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
+import rekab.app.background_locator.Keys.Companion.ARG_CHANNEL_NAME
 import rekab.app.background_locator.Keys.Companion.ARG_DISTANCE_FILTER
 import rekab.app.background_locator.Keys.Companion.ARG_INTERVAL
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CALLBACK
@@ -92,6 +93,7 @@ class BackgroundLocatorPlugin()
         private fun startIsolateService(context: Context, settings: Map<*, *>) {
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
+            intent.putExtra(ARG_CHANNEL_NAME, settings[ARG_CHANNEL_NAME] as String)
             intent.putExtra(ARG_NOTIFICATION_TITLE, settings[ARG_NOTIFICATION_TITLE] as String)
             intent.putExtra(ARG_NOTIFICATION_MSG, settings[ARG_NOTIFICATION_MSG] as String)
             intent.putExtra(ARG_NOTIFICATION_ICON, settings[ARG_NOTIFICATION_ICON] as String)

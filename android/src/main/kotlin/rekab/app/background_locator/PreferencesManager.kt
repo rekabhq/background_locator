@@ -38,6 +38,11 @@ class PreferencesManager() {
             val settings = map[Keys.ARG_SETTINGS] as Map<*, *>
 
             sharedPreferences.edit()
+                    .putString(Keys.ARG_CHANNEL_NAME,
+                            settings[Keys.ARG_CHANNEL_NAME] as String)
+                    .apply()
+
+            sharedPreferences.edit()
                     .putString(Keys.ARG_NOTIFICATION_TITLE,
                             settings[Keys.ARG_NOTIFICATION_TITLE] as String)
                     .apply()
@@ -91,6 +96,9 @@ class PreferencesManager() {
             }
 
             val settings = HashMap<String, Any?>()
+
+            settings[Keys.ARG_CHANNEL_NAME] =
+                    sharedPreferences.getString(Keys.ARG_CHANNEL_NAME, "")
 
             settings[Keys.ARG_NOTIFICATION_TITLE] =
                     sharedPreferences.getString(Keys.ARG_NOTIFICATION_TITLE, "")
