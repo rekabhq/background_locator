@@ -20,6 +20,7 @@ class Keys {
   static const String ARG_SPEED = 'speed';
   static const String ARG_SPEED_ACCURACY = 'speed_accuracy';
   static const String ARG_HEADING = 'heading';
+  static const String ARG_TIME = 'time';
   static const String ARG_CALLBACK = 'callback';
   static const String ARG_NOTIFICATION_CALLBACK = 'notificationCallback';
   static const String ARG_LOCATION = 'location';

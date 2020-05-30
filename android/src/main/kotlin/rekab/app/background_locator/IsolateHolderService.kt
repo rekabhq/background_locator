@@ -16,6 +16,7 @@ import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
 import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
+import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
 
 class IsolateHolderService : Service() {
     companion object {
@@ -64,6 +65,8 @@ class IsolateHolderService : Service() {
         }
 
         val intent = Intent(this, getMainActivityClass(this))
+        intent.action = NOTIFICATION_ACTION
+
         val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
