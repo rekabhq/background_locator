@@ -219,11 +219,12 @@ class _MyAppState extends State<MyApp> {
       disposeCallback: LocationCallbackHandler.disposeCallback,
       androidNotificationCallback: LocationCallbackHandler.notificationCallback,
       settings: LocationSettings(
-          notificationTitle: "Start Location Tracking example",
-          notificationMsg: "Track location in background exapmle",
-          wakeLockTime: 20,
-          autoStop: false,
-          interval: 5),
+        notificationTitle: "Start Location Tracking example",
+        notificationMsg: "Track location in background example",
+        wakeLockTime: 20,
+        autoStop: false,
+        interval: 5
+      ),
     );
   }
 }

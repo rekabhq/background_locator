@@ -48,6 +48,8 @@ class Keys {
         @JvmStatic
         val ARG_HEADING = "heading"
         @JvmStatic
+        val ARG_TIME = "time"
+        @JvmStatic
         val ARG_CALLBACK = "callback"
         @JvmStatic
         val ARG_NOTIFICATION_CALLBACK = "notificationCallback"
@@ -84,5 +86,8 @@ class Keys {
         val BCM_INIT = "BCM_INIT"
         @JvmStatic
         val BCM_DISPOSE = "BCM_DISPOSE"
+
+        @JvmStatic
+        val NOTIFICATION_ACTION = "com.rekab.background_locator.notification"
     }
 }

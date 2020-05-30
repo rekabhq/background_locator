@@ -55,6 +55,12 @@ class BackgroundLocator {
     }    
     args[Keys.ARG_INIT_DATA_CALLBACK] = initDataCallback;
 
+    if (androidNotificationCallback != null) {
+      args[Keys.ARG_NOTIFICATION_CALLBACK] =
+          PluginUtilities.getCallbackHandle(androidNotificationCallback)
+              .toRawHandle();
+    }
+
     await _channel.invokeMethod(
         Keys.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE, args);
   }

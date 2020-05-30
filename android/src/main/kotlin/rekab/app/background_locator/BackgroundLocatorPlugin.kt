@@ -51,6 +51,8 @@ import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERV
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
+import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
+import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
 
@@ -248,17 +250,38 @@ class BackgroundLocatorPlugin()
             return data
         }
 
+        @JvmStatic
+        fun registerAfterBoot(context: Context) {
+            val settings = PreferencesManager.getSettings(context)
+
+            val plugin = BackgroundLocatorPlugin()
+            plugin.context = context
+            plugin.locatorClient = LocationServices.getFusedLocationProviderClient(context)
+
+            initializeService(context, settings)
+            registerLocator(context,
+                    plugin.locatorClient,
+                    settings, null)
+        }
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             METHOD_PLUGIN_INITIALIZE_SERVICE -> {
                 val args: Map<Any, Any> = call.arguments()
+
+                // save callback dispatcher to use it when device reboots
+                PreferencesManager.saveCallbackDispatcher(context!!, args)
+
                 initializeService(context!!, args)
                 result.success(true)
             }
             METHOD_PLUGIN_REGISTER_LOCATION_UPDATE -> {
                 val args: Map<Any, Any> = call.arguments()
+
+                // save setting to use it when device reboots
+                PreferencesManager.saveSettings(context!!, args)
+
                 registerLocator(context!!,
                         locatorClient,
                         args,
@@ -289,6 +312,11 @@ class BackgroundLocatorPlugin()
     }
 
     override fun onNewIntent(intent: Intent?): Boolean {
+        if(intent?.action != NOTIFICATION_ACTION) {
+            // this is not our notification
+            return false
+        }
+
         val notificationCallback = getCallbackHandle(activity!!, NOTIFICATION_CALLBACK_HANDLE_KEY)
         if (notificationCallback > 0 && IsolateHolderService._backgroundFlutterView != null) {
             val backgroundChannel = MethodChannel(IsolateHolderService._backgroundFlutterView,
