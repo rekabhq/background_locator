@@ -40,7 +40,6 @@ import rekab.app.background_locator.Keys.Companion.ARG_SETTINGS
 import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.BCM_NOTIFICATION_CLICK
 import rekab.app.background_locator.Keys.Companion.INIT_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
