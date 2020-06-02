@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:background_locator/auto_stop_handler.dart';
-import 'package:background_locator/location_dto.dart';
-import 'package:background_locator/location_settings.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'auto_stop_handler.dart';
+import 'location_dto.dart';
+import 'location_settings.dart';
 import 'callback_dispatcher.dart';
 import 'keys.dart';
 
@@ -24,18 +25,35 @@ class BackgroundLocator {
 
   static Future<void> registerLocationUpdate(
       void Function(LocationDto) callback,
-      {void Function() androidNotificationCallback,
+      {void Function(Map<String, dynamic>) initCallback,
+      Map<String, dynamic> initDataCallback = const {},
+      void Function() disposeCallback,
+      void Function() androidNotificationCallback,
       LocationSettings settings}) async {
     final _settings = settings ?? LocationSettings();
     if (_settings.autoStop) {
       WidgetsBinding.instance.addObserver(AutoStopHandler());
     }
 
-    final args = {
+    final args = {      
       Keys.ARG_CALLBACK:
           PluginUtilities.getCallbackHandle(callback).toRawHandle(),
       Keys.ARG_SETTINGS: _settings.toMap()
     };
+    if (androidNotificationCallback!=null) {
+        args[Keys.ARG_NOTIFICATION_CALLBACK] = PluginUtilities.getCallbackHandle(androidNotificationCallback)
+            .toRawHandle();
+    }
+
+    if (initCallback!=null) {
+        args[Keys.ARG_INIT_CALLBACK] = PluginUtilities.getCallbackHandle(initCallback)
+            .toRawHandle();
+    }
+    if (disposeCallback!=null) {
+        args[Keys.ARG_DISPOSE_CALLBACK] = PluginUtilities.getCallbackHandle(disposeCallback)
+            .toRawHandle();
+    }    
+    args[Keys.ARG_INIT_DATA_CALLBACK] = initDataCallback;
 
     if (androidNotificationCallback != null) {
       args[Keys.ARG_NOTIFICATION_CALLBACK] =

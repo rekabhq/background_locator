@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'dart:isolate';
-import 'dart:math';
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:location_permissions/location_permissions.dart';
 
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/location_settings.dart';
-import 'package:flutter/material.dart';
-import 'package:location_permissions/location_permissions.dart';
 
 import 'file_manager.dart';
+import 'location_service_repository.dart';
+import 'location_callback_handler.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,17 +27,20 @@ class _MyAppState extends State<MyApp> {
   bool isRunning;
   LocationDto lastLocation;
   DateTime lastTimeLocation;
-  static const String _isolateName = 'LocatorIsolate';
 
   @override
   void initState() {
     super.initState();
 
-    if (IsolateNameServer.lookupPortByName(_isolateName) != null) {
-      IsolateNameServer.removePortNameMapping(_isolateName);
+    if (IsolateNameServer.lookupPortByName(
+            LocationServiceRepository.isolateName) !=
+        null) {
+      IsolateNameServer.removePortNameMapping(
+          LocationServiceRepository.isolateName);
     }
 
-    IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
+    IsolateNameServer.registerPortWithName(
+        port.sendPort, LocationServiceRepository.isolateName);
 
     port.listen(
       (dynamic data) async {
@@ -45,36 +50,18 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
   }
 
-  static double dp(double val, int places) {
-    double mod = pow(10.0, places);
-    return ((val * mod).round().toDouble() / mod);
-  }
-
-  static String formatDateLog(DateTime date) {
-    return date.hour.toString() +
-        ":" +
-        date.minute.toString() +
-        ":" +
-        date.second.toString();
-  }
-
-  static String formatLog(LocationDto locationDto) {
-    return dp(locationDto.latitude, 4).toString() +
-        " " +
-        dp(locationDto.longitude, 4).toString();
-  }
-
-  static Future<void> setLog(LocationDto data) async {
-    final date = DateTime.now();
-    await FileManager.writeToLogFile(
-        '${formatDateLog(date)} --> ${formatLog(data)}\n');
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   Future<void> updateUI(LocationDto data) async {
     final log = await FileManager.readLogFile();
     setState(() {
-      lastLocation = data;
-      lastTimeLocation = DateTime.now();
+      if (data!=null) {
+        lastLocation = data;
+        lastTimeLocation = DateTime.now();
+      }
       logStr = log;
     });
   }
@@ -91,17 +78,6 @@ class _MyAppState extends State<MyApp> {
     print('Running ${isRunning.toString()}');
   }
 
-  static void callback(LocationDto locationDto) async {
-    print('location in dart: ${locationDto.toString()}');
-    await setLog(locationDto);
-    final SendPort send = IsolateNameServer.lookupPortByName(_isolateName);
-    send?.send(locationDto);
-  }
-
-  static void notificationCallback() {
-    print('notificationCallback');
-  }
-
   @override
   Widget build(BuildContext context) {
     final start = SizedBox(
@@ -109,7 +85,7 @@ class _MyAppState extends State<MyApp> {
       child: RaisedButton(
         child: Text('Start'),
         onPressed: () {
-          _checkLocationPermission();
+          _onStart();
         },
       ),
     );
@@ -118,10 +94,7 @@ class _MyAppState extends State<MyApp> {
       child: RaisedButton(
         child: Text('Stop'),
         onPressed: () {
-          BackgroundLocator.unRegisterLocationUpdate();
-          setState(() {
-            isRunning = false;
-          });
+          onStop();
         },
       ),
     );
@@ -147,6 +120,23 @@ class _MyAppState extends State<MyApp> {
     }
     final status = Text("Status: $msgStatus");
 
+    String lastRunTxt = "-";
+    if (isRunning != null) {
+      if (isRunning) {
+        if (lastTimeLocation == null || lastLocation == null) {
+          lastRunTxt = "?";
+        } else {
+          lastRunTxt =
+              LocationServiceRepository.formatDateLog(lastTimeLocation) +
+                  "-" +
+                  LocationServiceRepository.formatLog(lastLocation);
+        }
+      }
+    }
+    final lastRun = Text(
+      "Last run: $lastRunTxt",
+    );
+
     final log = Text(
       logStr,
     );
@@ -162,7 +152,7 @@ class _MyAppState extends State<MyApp> {
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[start, stop, clear, status, log],
+              children: <Widget>[start, stop, clear, status, lastRun, log],
             ),
           ),
         ),
@@ -170,7 +160,29 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void _checkLocationPermission() async {
+  void onStop() {
+    BackgroundLocator.unRegisterLocationUpdate();
+    setState(() {
+      isRunning = false;
+//      lastTimeLocation = null;
+//      lastLocation = null;
+    });
+  }
+
+  void _onStart() async {
+    if (await _checkLocationPermission()) {
+      _startLocator();
+      setState(() {
+        isRunning = true;
+        lastTimeLocation = null;
+        lastLocation = null;
+      });
+    } else {
+      // show error
+    }
+  }
+
+  Future<bool> _checkLocationPermission() async {
     final access = await LocationPermissions().checkPermissionStatus();
     switch (access) {
       case PermissionStatus.unknown:
@@ -180,31 +192,39 @@ class _MyAppState extends State<MyApp> {
           permissionLevel: LocationPermissionLevel.locationAlways,
         );
         if (permission == PermissionStatus.granted) {
-          _startLocator();
+          return true;
         } else {
-          // show error
+          return false;
         }
         break;
       case PermissionStatus.granted:
-        _startLocator();
+        return true;
+        break;
+      default:
+        return false;
         break;
     }
   }
 
   void _startLocator() {
+    Map<String, dynamic > data = {'countInit': 1};
     BackgroundLocator.registerLocationUpdate(
-      callback,
-      androidNotificationCallback: notificationCallback,
+      LocationCallbackHandler.callback,
+      initCallback: LocationCallbackHandler.initCallback,
+      initDataCallback: data,
+/*
+        Comment initDataCallback, so service not set init variable,
+        variable stay with value of last run after unRegisterLocationUpdate
+ */
+      disposeCallback: LocationCallbackHandler.disposeCallback,
+      androidNotificationCallback: LocationCallbackHandler.notificationCallback,
       settings: LocationSettings(
         notificationTitle: "Start Location Tracking example",
-        notificationMsg: "Track location in background exapmle",
+        notificationMsg: "Track location in background example",
         wakeLockTime: 20,
         autoStop: false,
         interval: 5
       ),
     );
-    setState(() {
-      isRunning = true;
-    });
   }
 }
