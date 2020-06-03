@@ -25,7 +25,6 @@ import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
 import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.BCM_INIT
 import rekab.app.background_locator.Keys.Companion.BCM_DISPOSE
-import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
@@ -42,11 +41,11 @@ class IsolateHolderService : Service() {
         private val WAKELOCK_TAG = "IsolateHolderService::WAKE_LOCK"
 
         @JvmStatic
-        var _backgroundFlutterView: FlutterNativeView? = null
+        var backgroundFlutterView: FlutterNativeView? = null
 
         @JvmStatic
-        fun setBackgroundFlutterView(view: FlutterNativeView?) {
-            _backgroundFlutterView = view
+        fun setBackgroundFlutterViewManually(view: FlutterNativeView?) {
+            backgroundFlutterView = view
             sendInit()
         }
 
@@ -61,14 +60,14 @@ class IsolateHolderService : Service() {
 
         @JvmStatic
         fun sendInit() {
-            if (_backgroundFlutterView != null && instance != null && isSendedInit==false) {
+            if (backgroundFlutterView != null && instance != null && !isSendedInit) {
                 val context = instance
                 val initCallback = BackgroundLocatorPlugin.getCallbackHandle(context!!, INIT_CALLBACK_HANDLE_KEY)
                 if (initCallback > 0) {
-                    val initialDataMap = BackgroundLocatorPlugin.getDataCallback(context!!, INIT_DATA_CALLBACK_KEY)
-                    val backgroundChannel = MethodChannel(_backgroundFlutterView,
+                    val initialDataMap = BackgroundLocatorPlugin.getDataCallback(context, INIT_DATA_CALLBACK_KEY)
+                    val backgroundChannel = MethodChannel(backgroundFlutterView,
                             BACKGROUND_CHANNEL_ID)
-                    Handler(context.getMainLooper())
+                    Handler(context.mainLooper)
                             .post {
                                 backgroundChannel.invokeMethod(BCM_INIT,
                                         hashMapOf(ARG_INIT_CALLBACK to initCallback, ARG_INIT_DATA_CALLBACK to initialDataMap))
@@ -79,10 +78,10 @@ class IsolateHolderService : Service() {
         }
     }
 
-    var notificationTitle = "Start Location Tracking"
-    var notificationMsg = "Track location in background"
-    var icon = 0
-    var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
+    private var notificationTitle = "Start Location Tracking"
+    private var notificationMsg = "Track location in background"
+    private var icon = 0
+    private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -121,7 +120,7 @@ class IsolateHolderService : Service() {
                 acquire(wakeLockTime)
             }
         }
-        
+
         instance = this
         sendInit()
 
@@ -135,13 +134,13 @@ class IsolateHolderService : Service() {
         instance = null
         isRunning = false
         isSendedInit = false
-        if (_backgroundFlutterView != null) {
+        if (backgroundFlutterView != null) {
             val context = this
-            val disposeCallback = BackgroundLocatorPlugin.getCallbackHandle(context!!, DISPOSE_CALLBACK_HANDLE_KEY)
-            if (disposeCallback > 0 && _backgroundFlutterView != null) {
-                val backgroundChannel = MethodChannel(_backgroundFlutterView,
+            val disposeCallback = BackgroundLocatorPlugin.getCallbackHandle(context, DISPOSE_CALLBACK_HANDLE_KEY)
+            if (disposeCallback > 0 && backgroundFlutterView != null) {
+                val backgroundChannel = MethodChannel(backgroundFlutterView,
                         BACKGROUND_CHANNEL_ID)
-                Handler(context.getMainLooper())
+                Handler(context.mainLooper)
                         .post {
                             backgroundChannel.invokeMethod(BCM_DISPOSE,
                                     hashMapOf(ARG_DISPOSE_CALLBACK to disposeCallback))
@@ -150,37 +149,51 @@ class IsolateHolderService : Service() {
         }
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent == null) {
+            return super.onStartCommand(intent, flags, startId)
+        }
+
         if (intent.action == ACTION_SHUTDOWN) {
-            (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
-                    if (isHeld) {
-                        release()
-                    }
+            shutdownHolderService()
+        } else if (intent.action == ACTION_START) {
+            startHolderService(intent)
+        }
+
+        return START_STICKY
+    }
+
+    private fun startHolderService(intent: Intent) {
+        notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
+        notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
+        val iconNameDefault = "ic_launcher"
+        var iconName = intent.getStringExtra(ARG_NOTIFICATION_ICON)
+        if (iconName == null || iconName.isEmpty()) {
+            iconName = iconNameDefault
+        }
+        icon = resources.getIdentifier(iconName, "mipmap", packageName)
+        wakeLockTime = intent.getIntExtra(ARG_WAKE_LOCK_TIME, 60) * 60 * 1000L
+        start()
+    }
+
+    private fun shutdownHolderService() {
+        (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+            newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
+                if (isHeld) {
+                    release()
                 }
             }
-            stopForeground(true)
-            stopSelf()
-            stop()
-        } else if (intent.action == ACTION_START) {
-            notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
-            notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
-            val iconNameDefault = "ic_launcher"
-            var iconName = intent.getStringExtra(ARG_NOTIFICATION_ICON)
-            if (iconName == null || iconName.isEmpty()) {
-                iconName = iconNameDefault
-            }
-            icon = resources.getIdentifier(iconName, "mipmap", packageName)
-            wakeLockTime = intent.getIntExtra(ARG_WAKE_LOCK_TIME, 60) * 60 * 1000L
-            start()
         }
-        return START_STICKY;
+        stopForeground(true)
+        stopSelf()
+        stop()
     }
 
     private fun getMainActivityClass(context: Context): Class<*>? {
         val packageName = context.packageName
         val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)
-        val className = launchIntent.component.className
+        val className = launchIntent?.component?.className ?: return null
+
         return try {
             Class.forName(className)
         } catch (e: ClassNotFoundException) {

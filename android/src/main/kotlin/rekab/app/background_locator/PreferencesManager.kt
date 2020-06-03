@@ -1,9 +1,8 @@
 package rekab.app.background_locator
 
 import android.content.Context
-import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 
-class PreferencesManager() {
+class PreferencesManager {
     companion object {
         private const val PREF_NAME = "background_locator"
 
@@ -67,10 +66,10 @@ class PreferencesManager() {
                             (settings[Keys.ARG_DISTANCE_FILTER] as Double).toFloat())
                     .apply()
 
-            if (settings.containsKey(ARG_WAKE_LOCK_TIME)) {
+            if (settings.containsKey(Keys.ARG_WAKE_LOCK_TIME)) {
                 sharedPreferences.edit()
                         .putInt(Keys.ARG_WAKE_LOCK_TIME,
-                                settings[ARG_WAKE_LOCK_TIME] as Int)
+                                settings[Keys.ARG_WAKE_LOCK_TIME] as Int)
                         .apply()
             }
         }
@@ -110,8 +109,8 @@ class PreferencesManager() {
             settings[Keys.ARG_DISTANCE_FILTER] =
                     sharedPreferences.getFloat(Keys.ARG_DISTANCE_FILTER, 0f).toDouble()
 
-            if (sharedPreferences.contains(ARG_WAKE_LOCK_TIME)) {
-                settings[ARG_WAKE_LOCK_TIME] = sharedPreferences.getInt(ARG_WAKE_LOCK_TIME, 0)
+            if (sharedPreferences.contains(Keys.ARG_WAKE_LOCK_TIME)) {
+                settings[Keys.ARG_WAKE_LOCK_TIME] = sharedPreferences.getInt(Keys.ARG_WAKE_LOCK_TIME, 0)
             }
 
             result[Keys.ARG_SETTINGS] = settings
