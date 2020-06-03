@@ -55,7 +55,7 @@ import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
 
-class BackgroundLocatorPlugin()
+class BackgroundLocatorPlugin
     : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {
     private lateinit var locatorClient: FusedLocationProviderClient
     private var context: Context? = null
@@ -184,9 +184,8 @@ class BackgroundLocatorPlugin()
         }
 
         @JvmStatic
-        private fun isRegisterLocator(context: Context,
-                                      result: Result?) {
-            if (IsolateHolderService?.isRunning) {
+        private fun isRegisterLocator(result: Result?) {
+            if (IsolateHolderService.isRunning) {
                 result?.success(true)
             } else {
                 result?.success(false)
@@ -244,9 +243,8 @@ class BackgroundLocatorPlugin()
         fun getDataCallback(context: Context, key: String): Map<*,*> {
             val initialDataStr = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .getString(key, null)
-            val type = object : TypeToken<Map<*, *>>() {}.type 
-            val data:Map<*, *> = Gson().fromJson(initialDataStr, type)
-            return data
+            val type = object : TypeToken<Map<*, *>>() {}.type
+            return Gson().fromJson(initialDataStr, type)
         }
 
         @JvmStatic
@@ -288,8 +286,7 @@ class BackgroundLocatorPlugin()
             }
             METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
                     locatorClient)
-            METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(context!!,
-                    result)
+            METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
             else -> result.notImplemented()
         }
     }
@@ -317,8 +314,8 @@ class BackgroundLocatorPlugin()
         }
 
         val notificationCallback = getCallbackHandle(activity!!, NOTIFICATION_CALLBACK_HANDLE_KEY)
-        if (notificationCallback > 0 && IsolateHolderService._backgroundFlutterView != null) {
-            val backgroundChannel = MethodChannel(IsolateHolderService._backgroundFlutterView,
+        if (notificationCallback > 0 && IsolateHolderService.backgroundFlutterView != null) {
+            val backgroundChannel = MethodChannel(IsolateHolderService.backgroundFlutterView,
                     BACKGROUND_CHANNEL_ID)
             Handler(activity?.mainLooper)
                     .post {
