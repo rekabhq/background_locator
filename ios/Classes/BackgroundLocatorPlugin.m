@@ -116,8 +116,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 #pragma mark LocationManagerDelegate Methods
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
-    for (int i = 0; i < locations.count; i++) {
-        CLLocation *location = [locations objectAtIndex:i];
+    CLLocation *location = [locations firstObject];
+    if (location != nil) {
         NSTimeInterval timeInSeconds = [location.timestamp timeIntervalSince1970];
         NSDictionary<NSString*,NSNumber*>* locationMap = @{
                                                            ARG_LATITUDE: @(location.coordinate.latitude),
