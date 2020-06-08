@@ -218,7 +218,7 @@ class _MyAppState extends State<MyApp> {
       disposeCallback: LocationCallbackHandler.disposeCallback,
       androidNotificationCallback: LocationCallbackHandler.notificationCallback,
       settings: LocationSettings(
-          channelName: "Location tracking service",
+          notificationChannelName: "Location tracking service",
           notificationTitle: "Start Location Tracking example",
           notificationMsg: "Track location in background example",
           wakeLockTime: 20,
