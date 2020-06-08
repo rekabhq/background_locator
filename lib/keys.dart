@@ -32,7 +32,7 @@ class Keys {
   static const String ARG_CALLBACK_DISPATCHER = 'callbackDispatcher';
   static const String ARG_INTERVAL = 'interval';
   static const String ARG_DISTANCE_FILTER = 'distanceFilter';
-  static const String ARG_CHANNEL_NAME = 'channelName';
+  static const String ARG_NOTIFICATION_CHANNEL_NAME = 'notificationChannelName';
   static const String ARG_NOTIFICATION_TITLE = 'notificationTitle';
   static const String ARG_NOTIFICATION_MSG = 'notificationMsg';
   static const String ARG_NOTIFICATION_ICON = 'notificationIcon';

@@ -55,7 +55,7 @@ class LocationSettings {
       Keys.ARG_ACCURACY: accuracy.value,
       Keys.ARG_INTERVAL: interval,
       Keys.ARG_DISTANCE_FILTER: distanceFilter,
-      Keys.ARG_CHANNEL_NAME: notificationChannelName,
+      Keys.ARG_NOTIFICATION_CHANNEL_NAME: notificationChannelName,
       Keys.ARG_NOTIFICATION_TITLE: notificationTitle,
       Keys.ARG_NOTIFICATION_MSG: notificationMsg,
       Keys.ARG_NOTIFICATION_ICON: notificationIcon,
