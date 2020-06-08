@@ -1,3 +1,7 @@
+## 1.1.5+1
+Fix crash in onStartCommand caused by null intent on Android;
+Fix getting several unwanted position on iOS;
+
 ## 1.1.3+1
 Add possibility to restart locator service after reboot;
 Fix triggering android notification callback with wrong notification;

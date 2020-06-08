@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -24,6 +26,9 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import rekab.app.background_locator.Keys.Companion.ARG_ACCURACY
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
 import rekab.app.background_locator.Keys.Companion.ARG_CHANNEL_NAME
 import rekab.app.background_locator.Keys.Companion.ARG_DISTANCE_FILTER
@@ -36,6 +41,11 @@ import rekab.app.background_locator.Keys.Companion.ARG_SETTINGS
 import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
+import rekab.app.background_locator.Keys.Companion.BCM_NOTIFICATION_CLICK
+import rekab.app.background_locator.Keys.Companion.INIT_CALLBACK_HANDLE_KEY
+import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
+import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
+import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERVICE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
@@ -46,7 +56,7 @@ import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
 
-class BackgroundLocatorPlugin()
+class BackgroundLocatorPlugin
     : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {
     private lateinit var locatorClient: FusedLocationProviderClient
     private var context: Context? = null
@@ -73,6 +83,12 @@ class BackgroundLocatorPlugin()
             val notificationCallback = args[ARG_NOTIFICATION_CALLBACK] as? Long
             setCallbackHandle(context, NOTIFICATION_CALLBACK_HANDLE_KEY, notificationCallback)
 
+            val initCallback = args[ARG_INIT_CALLBACK] as? Long
+            setCallbackHandle(context, INIT_CALLBACK_HANDLE_KEY, initCallback)
+
+            val disposeCallback = args[ARG_DISPOSE_CALLBACK] as? Long
+            setCallbackHandle(context, DISPOSE_CALLBACK_HANDLE_KEY, disposeCallback)
+
             val settings = args[ARG_SETTINGS] as Map<*, *>
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
@@ -83,6 +99,8 @@ class BackgroundLocatorPlugin()
                 result?.error(msg, null, null)
             }
 
+            val initialDataMap = args[ARG_INIT_DATA_CALLBACK] as Map<*, *>
+            setDataCallback(context, INIT_DATA_CALLBACK_KEY, initialDataMap)
             startIsolateService(context, settings)
 
             client.requestLocationUpdates(getLocationRequest(settings),
@@ -168,9 +186,8 @@ class BackgroundLocatorPlugin()
         }
 
         @JvmStatic
-        private fun isRegisterLocator(context: Context,
-                                      result: Result?) {
-            if (IsolateHolderService?.isRunning) {
+        private fun isRegisterLocator(result: Result?) {
+            if (IsolateHolderService.isRunning) {
                 result?.success(true)
             } else {
                 result?.success(false)
@@ -189,6 +206,10 @@ class BackgroundLocatorPlugin()
         @JvmStatic
         fun setCallbackHandle(context: Context, key: String, handle: Long?) {
             if (handle == null) {
+                context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                        .edit()
+                        .remove(key)
+                        .apply()
                 return
             }
 
@@ -199,9 +220,33 @@ class BackgroundLocatorPlugin()
         }
 
         @JvmStatic
+        fun setDataCallback(context: Context, key: String, data: Map<*, *>?) {
+            if (data == null) {
+                context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                        .edit()
+                        .remove(key)
+                        .apply()
+                return
+            }
+            val dataStr = Gson().toJson(data)
+            context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(key, dataStr)
+                    .apply()
+        }
+
+        @JvmStatic
         fun getCallbackHandle(context: Context, key: String): Long {
             return context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .getLong(key, 0)
+        }
+
+        @JvmStatic
+        fun getDataCallback(context: Context, key: String): Map<*, *> {
+            val initialDataStr = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                    .getString(key, null)
+            val type = object : TypeToken<Map<*, *>>() {}.type
+            return Gson().fromJson(initialDataStr, type)
         }
 
         @JvmStatic
@@ -243,8 +288,7 @@ class BackgroundLocatorPlugin()
             }
             METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
                     locatorClient)
-            METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(context!!,
-                    result)
+            METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
             else -> result.notImplemented()
         }
     }
@@ -266,18 +310,18 @@ class BackgroundLocatorPlugin()
     }
 
     override fun onNewIntent(intent: Intent?): Boolean {
-        if(intent?.action != NOTIFICATION_ACTION) {
+        if (intent?.action != NOTIFICATION_ACTION) {
             // this is not our notification
             return false
         }
 
         val notificationCallback = getCallbackHandle(activity!!, NOTIFICATION_CALLBACK_HANDLE_KEY)
-        if (notificationCallback > 0 && IsolateHolderService._backgroundFlutterView != null) {
-            val backgroundChannel = MethodChannel(IsolateHolderService._backgroundFlutterView,
-                    Keys.BACKGROUND_CHANNEL_ID)
+        if (notificationCallback > 0 && IsolateHolderService.backgroundFlutterView != null) {
+            val backgroundChannel = MethodChannel(IsolateHolderService.backgroundFlutterView,
+                    BACKGROUND_CHANNEL_ID)
             Handler(activity?.mainLooper)
                     .post {
-                        backgroundChannel.invokeMethod(Keys.BCM_NOTIFICATION_CLICK,
+                        backgroundChannel.invokeMethod(BCM_NOTIFICATION_CLICK,
                                 hashMapOf(ARG_NOTIFICATION_CALLBACK to notificationCallback))
                     }
         }
