@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'keys.dart';
 
 class LocationAccuracy {
@@ -20,6 +22,7 @@ class LocationSettings {
   final String notificationTitle;
   final String notificationMsg;
   final String notificationIcon;
+  final Color notificationIconColor;
   final int wakeLockTime; //minutes
   final bool autoStop;
 
@@ -33,7 +36,10 @@ class LocationSettings {
   ///
   /// [notificationMsg] Message of notification. Only applies for android. Default is 'Track location in background'.
   ///
-  /// [notificationIcon] Icon name for notification. Only applies for android. The icon should be in 'mipmap' Directory. Default is app icon.
+  /// [notificationIcon] Icon name for notification. Only applies for android. The icon should be in 'mipmap' Directory.
+  /// Default is app icon. Icon must comply to android rules to be displayed (transparent background and black/white shape)
+  ///
+  /// [notificationIconColor] Icon color for notification from notification drawer. Only applies for android. Default color is grey.
   ///
   /// [wakeLockTime] Time for living service in background in meter. Only applies in android. Default is 60 minute.
   ///
@@ -45,6 +51,7 @@ class LocationSettings {
       this.notificationTitle = 'Start Location Tracking',
       this.notificationMsg = 'Track location in background',
       this.notificationIcon = '',
+      this.notificationIconColor,
       this.wakeLockTime = 60,
       this.autoStop = false});
 
@@ -56,6 +63,7 @@ class LocationSettings {
       Keys.ARG_NOTIFICATION_TITLE: notificationTitle,
       Keys.ARG_NOTIFICATION_MSG: notificationMsg,
       Keys.ARG_NOTIFICATION_ICON: notificationIcon,
+      Keys.ARG_NOTIFICATION_ICON_COLOR: notificationIconColor.value,
       Keys.ARG_WAKE_LOCK_TIME: wakeLockTime,
       Keys.ARG_AUTO_STOP: autoStop,
     };
