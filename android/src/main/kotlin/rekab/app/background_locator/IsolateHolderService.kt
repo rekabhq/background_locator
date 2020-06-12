@@ -7,26 +7,27 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
 import android.os.PowerManager
-import android.os.Handler
 import androidx.core.app.NotificationCompat
-import io.flutter.view.FlutterNativeView
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.view.FlutterNativeView
+import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
+import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON_COLOR
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
 import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
-import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
+import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
+import rekab.app.background_locator.Keys.Companion.BCM_DISPOSE
+import rekab.app.background_locator.Keys.Companion.BCM_INIT
+import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
+import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.INIT_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
-import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.BCM_INIT
-import rekab.app.background_locator.Keys.Companion.BCM_DISPOSE
-import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
-import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
 
 class IsolateHolderService : Service() {
@@ -80,6 +81,7 @@ class IsolateHolderService : Service() {
 
     private var notificationTitle = "Start Location Tracking"
     private var notificationMsg = "Track location in background"
+    private var notificationIconColor = 0
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
 
@@ -110,6 +112,7 @@ class IsolateHolderService : Service() {
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationMsg)
                 .setSmallIcon(icon)
+                .setColor(notificationIconColor)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent)
                 .build()
@@ -172,6 +175,7 @@ class IsolateHolderService : Service() {
             iconName = iconNameDefault
         }
         icon = resources.getIdentifier(iconName, "mipmap", packageName)
+        notificationIconColor = intent.getLongExtra(ARG_NOTIFICATION_ICON_COLOR, 0).toInt()
         wakeLockTime = intent.getIntExtra(ARG_WAKE_LOCK_TIME, 60) * 60 * 1000L
         start()
     }

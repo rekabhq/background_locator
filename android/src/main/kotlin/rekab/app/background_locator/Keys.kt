@@ -67,23 +67,34 @@ class Keys {
         val ARG_CALLBACK_DISPATCHER = "callbackDispatcher"
         @JvmStatic
         val ARG_INTERVAL = "interval"
+
         @JvmStatic
         val ARG_DISTANCE_FILTER = "distanceFilter"
+
         @JvmStatic
         val ARG_NOTIFICATION_TITLE = "notificationTitle"
+
         @JvmStatic
         val ARG_NOTIFICATION_MSG = "notificationMsg"
+
         @JvmStatic
         val ARG_NOTIFICATION_ICON = "notificationIcon"
+
+        @JvmStatic
+        val ARG_NOTIFICATION_ICON_COLOR = "notificationIconColor"
+
         @JvmStatic
         val ARG_WAKE_LOCK_TIME = "wakeLockTime"
 
         @JvmStatic
         val BCM_SEND_LOCATION = "BCM_SEND_LOCATION"
+
         @JvmStatic
         val BCM_NOTIFICATION_CLICK = "BCM_NOTIFICATION_CLICK"
+
         @JvmStatic
         val BCM_INIT = "BCM_INIT"
+
         @JvmStatic
         val BCM_DISPOSE = "BCM_DISPOSE"
 
