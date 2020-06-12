@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 import 'keys.dart';
 
 class LocationAccuracy {
@@ -51,7 +53,7 @@ class LocationSettings {
       this.notificationTitle = 'Start Location Tracking',
       this.notificationMsg = 'Track location in background',
       this.notificationIcon = '',
-      this.notificationIconColor,
+      this.notificationIconColor = Colors.grey,
       this.wakeLockTime = 60,
       this.autoStop = false});
 
@@ -63,7 +65,7 @@ class LocationSettings {
       Keys.ARG_NOTIFICATION_TITLE: notificationTitle,
       Keys.ARG_NOTIFICATION_MSG: notificationMsg,
       Keys.ARG_NOTIFICATION_ICON: notificationIcon,
-      Keys.ARG_NOTIFICATION_ICON_COLOR: notificationIconColor.value,
+      Keys.ARG_NOTIFICATION_ICON_COLOR: notificationIconColor?.value,
       Keys.ARG_WAKE_LOCK_TIME: wakeLockTime,
       Keys.ARG_AUTO_STOP: autoStop,
     };
