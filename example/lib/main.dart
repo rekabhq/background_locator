@@ -2,16 +2,15 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
-import 'package:location_permissions/location_permissions.dart';
-
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/location_settings.dart';
+import 'package:flutter/material.dart';
+import 'package:location_permissions/location_permissions.dart';
 
 import 'file_manager.dart';
-import 'location_service_repository.dart';
 import 'location_callback_handler.dart';
+import 'location_service_repository.dart';
 
 void main() => runApp(MyApp());
 
@@ -58,7 +57,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> updateUI(LocationDto data) async {
     final log = await FileManager.readLogFile();
     setState(() {
-      if (data!=null) {
+      if (data != null) {
         lastLocation = data;
         lastTimeLocation = DateTime.now();
       }
@@ -207,7 +206,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _startLocator() {
-    Map<String, dynamic > data = {'countInit': 1};
+    Map<String, dynamic> data = {'countInit': 1};
     BackgroundLocator.registerLocationUpdate(
       LocationCallbackHandler.callback,
       initCallback: LocationCallbackHandler.initCallback,
@@ -219,12 +218,12 @@ class _MyAppState extends State<MyApp> {
       disposeCallback: LocationCallbackHandler.disposeCallback,
       androidNotificationCallback: LocationCallbackHandler.notificationCallback,
       settings: LocationSettings(
-        notificationTitle: "Start Location Tracking example",
-        notificationMsg: "Track location in background example",
-        wakeLockTime: 20,
-        autoStop: false,
-        interval: 5
-      ),
+          notificationChannelName: "Location tracking service",
+          notificationTitle: "Start Location Tracking example",
+          notificationMsg: "Track location in background example",
+          wakeLockTime: 20,
+          autoStop: false,
+          interval: 5),
     );
   }
 }

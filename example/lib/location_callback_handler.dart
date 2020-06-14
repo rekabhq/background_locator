@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:background_locator/location_dto.dart';
+
 import 'location_service_repository.dart';
 
 class LocationCallbackHandler {
