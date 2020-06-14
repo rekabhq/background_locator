@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:math';
 import 'dart:ui';
-import 'file_manager.dart';
+
 import 'package:background_locator/location_dto.dart';
 
-import 'dart:async';
+import 'file_manager.dart';
 
 class LocationServiceRepository {
   static LocationServiceRepository _instance = LocationServiceRepository._();
@@ -66,7 +67,7 @@ class LocationServiceRepository {
   static Future<void> setLogPosition(int count, LocationDto data) async {
     final date = DateTime.now();
     await FileManager.writeToLogFile(
-        '$count : ${formatDateLog(date)} --> ${formatLog(data)}\n');
+        '$count : ${formatDateLog(date)} --> ${formatLog(data)} --- isMocked: ${data.isMocked}\n');
   }
 
   static double dp(double val, int places) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'background_locator.dart';
 
 class AutoStopHandler extends WidgetsBindingObserver {

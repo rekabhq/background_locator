@@ -13,6 +13,7 @@ import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.FlutterNativeView
+import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CHANNEL_NAME
 import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
@@ -79,6 +80,7 @@ class IsolateHolderService : Service() {
         }
     }
 
+    private var notificationChannelName = "Flutter Locator Plugin";
     private var notificationTitle = "Start Location Tracking"
     private var notificationMsg = "Track location in background"
     private var notificationIconColor = 0
@@ -96,7 +98,7 @@ class IsolateHolderService : Service() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Notification channel is available in Android O and up
-            val channel = NotificationChannel(CHANNEL_ID, "Flutter Locator Plugin",
+            val channel = NotificationChannel(CHANNEL_ID, notificationChannelName,
                     NotificationManager.IMPORTANCE_LOW)
 
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
@@ -167,6 +169,7 @@ class IsolateHolderService : Service() {
     }
 
     private fun startHolderService(intent: Intent) {
+        notificationChannelName = intent.getStringExtra(ARG_NOTIFICATION_CHANNEL_NAME)
         notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
         notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
         val iconNameDefault = "ic_launcher"
