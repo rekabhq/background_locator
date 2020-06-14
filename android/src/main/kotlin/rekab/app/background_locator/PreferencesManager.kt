@@ -57,6 +57,11 @@ class PreferencesManager {
                     .apply()
 
             sharedPreferences.edit()
+                    .putLong(Keys.ARG_NOTIFICATION_ICON_COLOR,
+                            settings[Keys.ARG_NOTIFICATION_ICON_COLOR] as Long)
+                    .apply()
+
+            sharedPreferences.edit()
                     .putInt(Keys.ARG_INTERVAL,
                             settings[Keys.ARG_INTERVAL] as Int)
                     .apply()
@@ -107,6 +112,9 @@ class PreferencesManager {
 
             settings[Keys.ARG_NOTIFICATION_ICON] =
                     sharedPreferences.getString(Keys.ARG_NOTIFICATION_ICON, "")
+
+            settings[Keys.ARG_NOTIFICATION_ICON_COLOR] =
+                    sharedPreferences.getLong(Keys.ARG_NOTIFICATION_ICON_COLOR, 0)
 
             settings[Keys.ARG_INTERVAL] =
                     sharedPreferences.getInt(Keys.ARG_INTERVAL, 0)
