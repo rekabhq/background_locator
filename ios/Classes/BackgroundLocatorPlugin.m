@@ -177,11 +177,15 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 - (void)removeLocator {
-    [_locationManager stopUpdatingLocation];
-    NSDictionary *map = @{
-                     kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
-                     };
-    [_callbackChannel invokeMethod:kBCMDispose arguments:map];
+    @synchronized (self) {
+        if(initialized){
+            [_locationManager stopUpdatingLocation];
+            NSDictionary *map = @{
+                             kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
+                             };
+            [_callbackChannel invokeMethod:kBCMDispose arguments:map];
+        }
+    }
 }
 
 - (BOOL)isRegisterLocator{
