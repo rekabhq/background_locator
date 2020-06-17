@@ -143,7 +143,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // with the runner in order for them to work on the background isolate. `registerPlugins` is
     // a callback set from AppDelegate.m in the main application. This callback should register
     // all relevant plugins (excluding those which require UI).
-    registerPlugins(_headlessRunner);
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        registerPlugins(_headlessRunner);
+    });
     [_registrar addMethodCallDelegate:self channel:_callbackChannel];
 }
 
