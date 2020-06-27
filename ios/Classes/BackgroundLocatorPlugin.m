@@ -29,7 +29,8 @@ static BackgroundLocatorPlugin *instance = nil;
     registerPlugins = callback;
 }
 
-- (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
+- (void)handleMethodCall:(FlutterMethodCall *)call
+                  result:(FlutterResult)result {
     NSDictionary *arguments = call.arguments;
     if ([kMethodPluginInitializeService isEqualToString:call.method]) {
         int64_t callbackDispatcher = [[arguments objectForKey:kArgCallbackDispatcher] longLongValue];
@@ -38,12 +39,6 @@ static BackgroundLocatorPlugin *instance = nil;
     } else if ([kMethodServiceInitialized isEqualToString:call.method]) {
         @synchronized(self) {
             initialized = YES;
-
-            while ([_eventQueue count] > 0) {
-                NSDictionary<NSString*,NSNumber*>* event = _eventQueue[0];
-                [_eventQueue removeObjectAtIndex:0];
-                [self sendLocationEvent:event];
-            }
         }
         result(nil);
     } else if ([kMethodPluginRegisterLocationUpdate isEqualToString:call.method]) {
@@ -81,7 +76,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 #pragma mark LocationManagerDelegate Methods
-- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
+- (void)locationManager:(CLLocationManager *)manager
+     didUpdateLocations:(NSArray<CLLocation *> *)locations {
     CLLocation *location = [locations firstObject];
     if (location != nil) {
         NSTimeInterval timeInSeconds = [location.timestamp timeIntervalSince1970];
@@ -97,8 +93,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                                                            };
         if (initialized) {
             [self sendLocationEvent:locationMap];
-        } else {
-            [_eventQueue addObject:locationMap];
         }
     }
 }
@@ -149,16 +143,23 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // with the runner in order for them to work on the background isolate. `registerPlugins` is
     // a callback set from AppDelegate.m in the main application. This callback should register
     // all relevant plugins (excluding those which require UI).
-    registerPlugins(_headlessRunner);
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        registerPlugins(_headlessRunner);
+    });
     [_registrar addMethodCallDelegate:self channel:_callbackChannel];
 }
 
-- (void)registerLocator:(int64_t)callback initCallback:(int64_t)initCallback initialDataDictionary:(NSDictionary*)initialDataDictionary disposeCallback:(int64_t)disposeCallback settings: (NSDictionary*)settings {
+- (void)registerLocator:(int64_t)callback
+           initCallback:(int64_t)initCallback
+  initialDataDictionary:(NSDictionary*)initialDataDictionary
+        disposeCallback:(int64_t)disposeCallback
+               settings: (NSDictionary*)settings {
     [self->_locationManager requestAlwaysAuthorization];
         
     long accuracyKey = [[settings objectForKey:kArgAccuracy] longValue];
     CLLocationAccuracy accuracy = [self getAccuracy:accuracyKey];
-    double distanceFilter = [[settings objectForKey:kArgDistanceFilter] doubleValue];
+    double distanceFilter= [[settings objectForKey:kArgDistanceFilter] doubleValue];
 
     _locationManager.desiredAccuracy = accuracy;
     _locationManager.distanceFilter = distanceFilter;
@@ -176,11 +177,15 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 - (void)removeLocator {
-    [_locationManager stopUpdatingLocation];
-    NSDictionary *map = @{
-                     kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
-                     };
-    [_callbackChannel invokeMethod:kBCMDispose arguments:map];
+    @synchronized (self) {
+        if(initialized){
+            [_locationManager stopUpdatingLocation];
+            NSDictionary *map = @{
+                             kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
+                             };
+            [_callbackChannel invokeMethod:kBCMDispose arguments:map];
+        }
+    }
 }
 
 - (BOOL)isRegisterLocator{
@@ -211,7 +216,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     return [handle longLongValue];
 }
 
-- (void)setCallbackHandle:(int64_t)handle key:(NSString *)key {
+- (void)setCallbackHandle:(int64_t)handle
+                      key:(NSString *)key {
     //TODO
     [[NSUserDefaults standardUserDefaults]
      setObject:[NSNumber numberWithLongLong:handle]
