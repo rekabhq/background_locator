@@ -1,11 +1,11 @@
 name: background_locator
 description: A Flutter plugin to request the location even if the app is killed. Sending the location to a dart function in background, also provide a meter filter
-version: 1.1.3+1
+version: 1.1.7+1
 homepage: https://github.com/rekab-app/background_locator
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
-
+  flutter: ">=1.12.0 <2.0.0"
 dependencies:
   flutter:
     sdk: flutter
@@ -16,5 +16,9 @@ dev_dependencies:
 
 flutter:
   plugin:
-    androidPackage: rekab.app.background_locator
-    pluginClass: BackgroundLocatorPlugin
+    platforms:
+      android:
+        package: rekab.app.background_locator
+        pluginClass: BackgroundLocatorPlugin
+      ios:
+        pluginClass: BackgroundLocatorPlugin

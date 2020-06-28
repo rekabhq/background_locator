@@ -1,9 +1,8 @@
 package rekab.app.background_locator
 
 import android.content.Context
-import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 
-class PreferencesManager() {
+class PreferencesManager {
     companion object {
         private const val PREF_NAME = "background_locator"
 
@@ -38,6 +37,11 @@ class PreferencesManager() {
             val settings = map[Keys.ARG_SETTINGS] as Map<*, *>
 
             sharedPreferences.edit()
+                    .putString(Keys.ARG_NOTIFICATION_CHANNEL_NAME,
+                            settings[Keys.ARG_NOTIFICATION_CHANNEL_NAME] as String)
+                    .apply()
+
+            sharedPreferences.edit()
                     .putString(Keys.ARG_NOTIFICATION_TITLE,
                             settings[Keys.ARG_NOTIFICATION_TITLE] as String)
                     .apply()
@@ -50,6 +54,11 @@ class PreferencesManager() {
             sharedPreferences.edit()
                     .putString(Keys.ARG_NOTIFICATION_ICON,
                             settings[Keys.ARG_NOTIFICATION_ICON] as String)
+                    .apply()
+
+            sharedPreferences.edit()
+                    .putLong(Keys.ARG_NOTIFICATION_ICON_COLOR,
+                            settings[Keys.ARG_NOTIFICATION_ICON_COLOR] as Long)
                     .apply()
 
             sharedPreferences.edit()
@@ -67,10 +76,10 @@ class PreferencesManager() {
                             (settings[Keys.ARG_DISTANCE_FILTER] as Double).toFloat())
                     .apply()
 
-            if (settings.containsKey(ARG_WAKE_LOCK_TIME)) {
+            if (settings.containsKey(Keys.ARG_WAKE_LOCK_TIME)) {
                 sharedPreferences.edit()
                         .putInt(Keys.ARG_WAKE_LOCK_TIME,
-                                settings[ARG_WAKE_LOCK_TIME] as Int)
+                                settings[Keys.ARG_WAKE_LOCK_TIME] as Int)
                         .apply()
             }
         }
@@ -92,6 +101,9 @@ class PreferencesManager() {
 
             val settings = HashMap<String, Any?>()
 
+            settings[Keys.ARG_NOTIFICATION_CHANNEL_NAME] =
+                    sharedPreferences.getString(Keys.ARG_NOTIFICATION_CHANNEL_NAME, "")
+
             settings[Keys.ARG_NOTIFICATION_TITLE] =
                     sharedPreferences.getString(Keys.ARG_NOTIFICATION_TITLE, "")
 
@@ -100,6 +112,9 @@ class PreferencesManager() {
 
             settings[Keys.ARG_NOTIFICATION_ICON] =
                     sharedPreferences.getString(Keys.ARG_NOTIFICATION_ICON, "")
+
+            settings[Keys.ARG_NOTIFICATION_ICON_COLOR] =
+                    sharedPreferences.getLong(Keys.ARG_NOTIFICATION_ICON_COLOR, 0)
 
             settings[Keys.ARG_INTERVAL] =
                     sharedPreferences.getInt(Keys.ARG_INTERVAL, 0)
@@ -110,8 +125,8 @@ class PreferencesManager() {
             settings[Keys.ARG_DISTANCE_FILTER] =
                     sharedPreferences.getFloat(Keys.ARG_DISTANCE_FILTER, 0f).toDouble()
 
-            if (sharedPreferences.contains(ARG_WAKE_LOCK_TIME)) {
-                settings[ARG_WAKE_LOCK_TIME] = sharedPreferences.getInt(ARG_WAKE_LOCK_TIME, 0)
+            if (sharedPreferences.contains(Keys.ARG_WAKE_LOCK_TIME)) {
+                settings[Keys.ARG_WAKE_LOCK_TIME] = sharedPreferences.getInt(Keys.ARG_WAKE_LOCK_TIME, 0)
             }
 
             result[Keys.ARG_SETTINGS] = settings

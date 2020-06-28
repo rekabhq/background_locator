@@ -2,13 +2,15 @@ package rekab.app.background_locator
 
 import android.content.Context
 import android.content.Intent
+import android.location.LocationManager
 import android.os.Build
 import android.os.Handler
+import android.util.Log
 import androidx.core.app.JobIntentService
 import com.google.android.gms.location.LocationResult
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback;
+import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
 import io.flutter.view.FlutterNativeView
@@ -17,6 +19,7 @@ import rekab.app.background_locator.Keys.Companion.ARG_ACCURACY
 import rekab.app.background_locator.Keys.Companion.ARG_ALTITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_HEADING
+import rekab.app.background_locator.Keys.Companion.ARG_IS_MOCKED
 import rekab.app.background_locator.Keys.Companion.ARG_TIME
 import rekab.app.background_locator.Keys.Companion.ARG_LATITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_LOCATION
@@ -40,12 +43,15 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
     companion object {
         @JvmStatic
         private val JOB_ID = UUID.randomUUID().mostSignificantBits.toInt()
+
         @JvmStatic
         private var backgroundFlutterView: FlutterNativeView? = null
+
         @JvmStatic
         private val serviceStarted = AtomicBoolean(false)
+
         @JvmStatic
-        private var pluginRegistrantCallback: PluginRegistrantCallback? = null;
+        private var pluginRegistrantCallback: PluginRegistrantCallback? = null
 
         @JvmStatic
         fun enqueueWork(context: Context, work: Intent) {
@@ -79,12 +85,12 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                 backgroundFlutterView = FlutterNativeView(context, true)
 
                 val args = FlutterRunArguments()
-                args.bundlePath = FlutterMain.findAppBundlePath(context)
+                args.bundlePath = FlutterMain.findAppBundlePath()
                 args.entrypoint = callbackInfo.callbackName
                 args.libraryPath = callbackInfo.callbackLibraryPath
 
                 backgroundFlutterView!!.runFromBundle(args)
-                IsolateHolderService.setBackgroundFlutterView(backgroundFlutterView)
+                IsolateHolderService.setBackgroundFlutterViewManually(backgroundFlutterView)
             }
 
             pluginRegistrantCallback?.registerWith(backgroundFlutterView!!.pluginRegistry)
@@ -118,8 +124,14 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 speedAccuracy = location.speedAccuracyMetersPerSecond
             }
+            var isMocked = false;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                isMocked = location.isFromMockProvider;
+            }
             val locationMap: HashMap<Any, Any> =
-                    hashMapOf(ARG_LATITUDE to location.latitude,
+                    hashMapOf(
+                            ARG_IS_MOCKED to isMocked,
+                            ARG_LATITUDE to location.latitude,
                             ARG_LONGITUDE to location.longitude,
                             ARG_ACCURACY to location.accuracy,
                             ARG_ALTITUDE to location.altitude,
