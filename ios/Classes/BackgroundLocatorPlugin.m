@@ -1,5 +1,7 @@
 #import "BackgroundLocatorPlugin.h"
 #import "Globals.h"
+#import "Utils/Util.h"
+#import "Preferences/PreferencesManager.h"
 
 @implementation BackgroundLocatorPlugin {
     NSMutableArray<NSDictionary<NSString*,NSNumber*>*> *_eventQueue;
@@ -44,7 +46,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Check to see if we're being launched due to a location event.
     if (launchOptions[UIApplicationLaunchOptionsLocationKey] != nil) {
         // Restart the headless service.
-        [self startLocatorService:[self getCallbackDispatcherHandle]];
+        [self startLocatorService:[PreferencesManager getCallbackDispatcherHandle]];
         observingRegions = YES;
     } else {
         if(observingRegions == YES) {
@@ -72,17 +74,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void) prepareLocationMap:(CLLocation*) location {
     _lastLocation = location;
-    NSTimeInterval timeInSeconds = [location.timestamp timeIntervalSince1970];
-    NSDictionary<NSString*,NSNumber*>* locationMap = @{
-                                                       kArgLatitude: @(location.coordinate.latitude),
-                                                       kArgLongitude: @(location.coordinate.longitude),
-                                                       kArgAccuracy: @(location.horizontalAccuracy),
-                                                       kArgAltitude: @(location.altitude),
-                                                       kArgSpeed: @(location.speed),
-                                                       kArgSpeedAccuracy: @(0.0),
-                                                       kArgHeading: @(location.course),
-                                                       kArgTime: @(((double) timeInSeconds) * 1000.0)  // in milliseconds since the epoch
-                                                       };
+    NSDictionary<NSString*,NSNumber*>* locationMap = [Util getLocationMap:location];
+    
     if (initialized) {
         [self sendLocationEvent:locationMap];
     } else {
@@ -111,7 +104,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #pragma mark LocatorPlugin Methods
 - (void) sendLocationEvent: (NSDictionary<NSString*,NSNumber*>*)location {
     NSDictionary *map = @{
-                     kArgCallback : @([self getCallbackHandle:kCallbackKey]),
+                     kArgCallback : @([PreferencesManager getCallbackHandle:kCallbackKey]),
                      kArgLocation: location
                      };
     [_callbackChannel invokeMethod:kBCMSendLocation arguments:map];
@@ -144,60 +137,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     }
 }
 
-
-- (int64_t)getCallbackDispatcherHandle {
-    id handle = [[NSUserDefaults standardUserDefaults]
-                 objectForKey: kCallbackDispatcherKey];
-    if (handle == nil) {
-        return 0;
-    }
-    return [handle longLongValue];
-}
-
-- (void)setCallbackDispatcherHandle:(int64_t)handle {
-    [[NSUserDefaults standardUserDefaults]
-     setObject:[NSNumber numberWithLongLong:handle]
-     forKey:kCallbackDispatcherKey];
-}
-
-- (int64_t)getCallbackHandle:(NSString *)key  {
-    id handle = [[NSUserDefaults standardUserDefaults]
-                 objectForKey: key];
-    if (handle == nil) {
-        return 0;
-    }
-    return [handle longLongValue];
-}
-
-- (void)setCallbackHandle:(int64_t)handle
-                      key:(NSString *)key {
-    //TODO
-    [[NSUserDefaults standardUserDefaults]
-     setObject:[NSNumber numberWithLongLong:handle]
-     forKey: key];
-}
-
-- (CLLocationAccuracy) getAccuracy:(long)key {
-    switch (key) {
-        case 0:
-            return kCLLocationAccuracyKilometer;
-        case 1:
-            return kCLLocationAccuracyHundredMeters;
-        case 2:
-            return kCLLocationAccuracyNearestTenMeters;
-        case 3:
-            return kCLLocationAccuracyBest;
-        case 4:
-            return kCLLocationAccuracyBestForNavigation;
-        default:
-            return kCLLocationAccuracyBestForNavigation;
-    }
-}
-
 #pragma mark MethodCallHelperDelegate
 
 - (void)startLocatorService:(int64_t)handle {
-    [self setCallbackDispatcherHandle:handle];
+    [PreferencesManager setCallbackDispatcherHandle:handle];
     FlutterCallbackInformation *info = [FlutterCallbackCache lookupCallbackInformation:handle];
     NSAssert(info != nil, @"failed to find callback");
     
@@ -231,17 +174,17 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [self->_locationManager requestAlwaysAuthorization];
         
     long accuracyKey = [[settings objectForKey:kArgAccuracy] longValue];
-    CLLocationAccuracy accuracy = [self getAccuracy:accuracyKey];
+    CLLocationAccuracy accuracy = [Util getAccuracy:accuracyKey];
     double distanceFilter= [[settings objectForKey:kArgDistanceFilter] doubleValue];
 
     _locationManager.desiredAccuracy = accuracy;
     _locationManager.distanceFilter = distanceFilter;
 
-    [self setCallbackHandle:callback key:kCallbackKey];
-    [self setCallbackHandle:initCallback key:kInitCallbackKey];
-    [self setCallbackHandle:disposeCallback key:kDisposeCallbackKey];
+    [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
+    [PreferencesManager setCallbackHandle:initCallback key:kInitCallbackKey];
+    [PreferencesManager setCallbackHandle:disposeCallback key:kDisposeCallbackKey];
     NSDictionary *map = @{
-                     kArgInitCallback : @([self getCallbackHandle:kInitCallbackKey]),
+                     kArgInitCallback : @([PreferencesManager getCallbackHandle:kInitCallbackKey]),
                      kArgInitDataCallback: initialDataDictionary
                      };
     [_callbackChannel invokeMethod:kBCMInit arguments:map];
@@ -256,7 +199,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                 [_locationManager stopMonitoringForRegion:region];
             }
             NSDictionary *map = @{
-                             kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
+                             kArgDisposeCallback : @([PreferencesManager getCallbackHandle:kDisposeCallbackKey])
                              };
             [_callbackChannel invokeMethod:kBCMDispose arguments:map];
         }
