@@ -33,34 +33,8 @@ static BackgroundLocatorPlugin *instance = nil;
 
 - (void)handleMethodCall:(FlutterMethodCall *)call
                   result:(FlutterResult)result {
-    NSDictionary *arguments = call.arguments;
-    if ([kMethodPluginInitializeService isEqualToString:call.method]) {
-        int64_t callbackDispatcher = [[arguments objectForKey:kArgCallbackDispatcher] longLongValue];
-        [self startLocatorService: callbackDispatcher];
-        result(@(YES));
-    } else if ([kMethodServiceInitialized isEqualToString:call.method]) {
-        @synchronized(self) {
-            initialized = YES;
-        }
-        result(nil);
-    } else if ([kMethodPluginRegisterLocationUpdate isEqualToString:call.method]) {
-        int64_t callbackHandle = [[arguments objectForKey:kArgCallback] longLongValue];
-        int64_t initCallbackHandle = [[arguments objectForKey:kArgInitCallback] longLongValue];
-        NSDictionary *initialDataDictionary = [arguments objectForKey:kArgInitDataCallback];
-        int64_t disposeCallbackHandle = [[arguments objectForKey:kArgDisposeCallback] longLongValue];
-        NSDictionary *settings = [arguments objectForKey:kArgSettings];
-
-        [self registerLocator:callbackHandle initCallback:initCallbackHandle initialDataDictionary:initialDataDictionary disposeCallback:disposeCallbackHandle settings:settings];
-        result(@(YES));
-    } else if ([kMethodPluginUnRegisterLocationUpdate isEqualToString:call.method]) {
-        [self removeLocator];
-        result(@(YES));
-    } else if ([kMethodPluginIsRegisteredLocationUpdate isEqualToString:call.method]) {
-        BOOL val = [self isRegisterLocator];
-        result(@(val));
-    } else {
-        result(FlutterMethodNotImplemented);
-    }
+    MethodCallHelper *callHelper = [[MethodCallHelper alloc] init];
+    [callHelper handleMethodCall:call result:result delegate:self];
 }
 
 //https://medium.com/@calvinlin_96474/ios-11-continuous-background-location-update-by-swift-4-12ce3ac603e3
@@ -170,70 +144,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     }
 }
 
-- (void)startLocatorService:(int64_t)handle {
-    [self setCallbackDispatcherHandle:handle];
-    FlutterCallbackInformation *info = [FlutterCallbackCache lookupCallbackInformation:handle];
-    NSAssert(info != nil, @"failed to find callback");
-    
-    NSString *entrypoint = info.callbackName;
-    NSString *uri = info.callbackLibraryPath;
-    [_headlessRunner runWithEntrypoint:entrypoint libraryURI:uri];
-    NSAssert(registerPlugins != nil, @"failed to set registerPlugins");
-    
-    // Once our headless runner has been started, we need to register the application's plugins
-    // with the runner in order for them to work on the background isolate. `registerPlugins` is
-    // a callback set from AppDelegate.m in the main application. This callback should register
-    // all relevant plugins (excluding those which require UI).
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        registerPlugins(_headlessRunner);
-    });
-    [_registrar addMethodCallDelegate:self channel:_callbackChannel];
-}
-
-- (void)registerLocator:(int64_t)callback
-           initCallback:(int64_t)initCallback
-  initialDataDictionary:(NSDictionary*)initialDataDictionary
-        disposeCallback:(int64_t)disposeCallback
-               settings: (NSDictionary*)settings {
-    [self->_locationManager requestAlwaysAuthorization];
-        
-    long accuracyKey = [[settings objectForKey:kArgAccuracy] longValue];
-    CLLocationAccuracy accuracy = [self getAccuracy:accuracyKey];
-    double distanceFilter= [[settings objectForKey:kArgDistanceFilter] doubleValue];
-
-    _locationManager.desiredAccuracy = accuracy;
-    _locationManager.distanceFilter = distanceFilter;
-
-    [self setCallbackHandle:callback key:kCallbackKey];
-    [self setCallbackHandle:initCallback key:kInitCallbackKey];
-    [self setCallbackHandle:disposeCallback key:kDisposeCallbackKey];
-    NSDictionary *map = @{
-                     kArgInitCallback : @([self getCallbackHandle:kInitCallbackKey]),
-                     kArgInitDataCallback: initialDataDictionary
-                     };
-    [_callbackChannel invokeMethod:kBCMInit arguments:map];
-    [_locationManager startUpdatingLocation];
-}
-
-- (void)removeLocator {
-    @synchronized (self) {
-        if(initialized){
-            [_locationManager stopUpdatingLocation];
-            for (CLRegion* region in [_locationManager monitoredRegions]) {
-                [_locationManager stopMonitoringForRegion:region];
-            }
-            NSDictionary *map = @{
-                             kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
-                             };
-            [_callbackChannel invokeMethod:kBCMDispose arguments:map];
-        }
-    }
-}
-
-- (BOOL)isRegisterLocator{
-    return initialized;
-}
 
 - (int64_t)getCallbackDispatcherHandle {
     id handle = [[NSUserDefaults standardUserDefaults]
@@ -282,6 +192,79 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
         default:
             return kCLLocationAccuracyBestForNavigation;
     }
+}
+
+#pragma mark MethodCallHelperDelegate
+
+- (void)startLocatorService:(int64_t)handle {
+    [self setCallbackDispatcherHandle:handle];
+    FlutterCallbackInformation *info = [FlutterCallbackCache lookupCallbackInformation:handle];
+    NSAssert(info != nil, @"failed to find callback");
+    
+    NSString *entrypoint = info.callbackName;
+    NSString *uri = info.callbackLibraryPath;
+    [_headlessRunner runWithEntrypoint:entrypoint libraryURI:uri];
+    NSAssert(registerPlugins != nil, @"failed to set registerPlugins");
+    
+    // Once our hremoveLocatoreadless runner has been started, we need to register the application's plugins
+    // with the runner in order for them to work on the background isolate. `registerPlugins` is
+    // a callback set from AppDelegate.m in the main application. This callback should register
+    // all relevant plugins (excluding those which require UI).
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        registerPlugins(_headlessRunner);
+    });
+    [_registrar addMethodCallDelegate:self channel:_callbackChannel];
+}
+
+- (void) setInitialized {
+    @synchronized(self) {
+        initialized = YES;
+    }
+}
+
+- (void)registerLocator:(int64_t)callback
+           initCallback:(int64_t)initCallback
+  initialDataDictionary:(NSDictionary*)initialDataDictionary
+        disposeCallback:(int64_t)disposeCallback
+               settings: (NSDictionary*)settings {
+    [self->_locationManager requestAlwaysAuthorization];
+        
+    long accuracyKey = [[settings objectForKey:kArgAccuracy] longValue];
+    CLLocationAccuracy accuracy = [self getAccuracy:accuracyKey];
+    double distanceFilter= [[settings objectForKey:kArgDistanceFilter] doubleValue];
+
+    _locationManager.desiredAccuracy = accuracy;
+    _locationManager.distanceFilter = distanceFilter;
+
+    [self setCallbackHandle:callback key:kCallbackKey];
+    [self setCallbackHandle:initCallback key:kInitCallbackKey];
+    [self setCallbackHandle:disposeCallback key:kDisposeCallbackKey];
+    NSDictionary *map = @{
+                     kArgInitCallback : @([self getCallbackHandle:kInitCallbackKey]),
+                     kArgInitDataCallback: initialDataDictionary
+                     };
+    [_callbackChannel invokeMethod:kBCMInit arguments:map];
+    [_locationManager startUpdatingLocation];
+}
+
+- (void)removeLocator {
+    @synchronized (self) {
+        if(initialized){
+            [_locationManager stopUpdatingLocation];
+            for (CLRegion* region in [_locationManager monitoredRegions]) {
+                [_locationManager stopMonitoringForRegion:region];
+            }
+            NSDictionary *map = @{
+                             kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
+                             };
+            [_callbackChannel invokeMethod:kBCMDispose arguments:map];
+        }
+    }
+}
+
+- (BOOL)isLocatorRegistered{
+    return initialized;
 }
 
 @end
