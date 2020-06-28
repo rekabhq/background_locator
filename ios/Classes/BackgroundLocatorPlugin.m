@@ -4,7 +4,6 @@
 #import "Preferences/PreferencesManager.h"
 
 @implementation BackgroundLocatorPlugin {
-    NSMutableArray<NSDictionary<NSString*,NSNumber*>*> *_eventQueue;
     FlutterEngine *_headlessRunner;
     FlutterMethodChannel *_callbackChannel;
     FlutterMethodChannel *_mainChannel;
@@ -78,8 +77,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     if (initialized) {
         [self sendLocationEvent:locationMap];
-    } else {
-        [_eventQueue addObject:locationMap];
     }
 }
 
@@ -112,7 +109,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (instancetype)init:(NSObject<FlutterPluginRegistrar> *)registrar {
     self = [super init];
-    _eventQueue = [[NSMutableArray alloc] init];
     
     _headlessRunner = [[FlutterEngine alloc] initWithName:@"LocatorIsolate" project:nil allowHeadlessExecution:YES];
     _registrar = registrar;
