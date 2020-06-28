@@ -1,8 +1,9 @@
 #import "BackgroundLocatorPlugin.h"
 #import "Globals.h"
+#import "Utils/Util.h"
+#import "Preferences/PreferencesManager.h"
 
 @implementation BackgroundLocatorPlugin {
-    NSMutableArray<NSDictionary<NSString*,NSNumber*>*> *_eventQueue;
     FlutterEngine *_headlessRunner;
     FlutterMethodChannel *_callbackChannel;
     FlutterMethodChannel *_mainChannel;
@@ -33,34 +34,8 @@ static BackgroundLocatorPlugin *instance = nil;
 
 - (void)handleMethodCall:(FlutterMethodCall *)call
                   result:(FlutterResult)result {
-    NSDictionary *arguments = call.arguments;
-    if ([kMethodPluginInitializeService isEqualToString:call.method]) {
-        int64_t callbackDispatcher = [[arguments objectForKey:kArgCallbackDispatcher] longLongValue];
-        [self startLocatorService: callbackDispatcher];
-        result(@(YES));
-    } else if ([kMethodServiceInitialized isEqualToString:call.method]) {
-        @synchronized(self) {
-            initialized = YES;
-        }
-        result(nil);
-    } else if ([kMethodPluginRegisterLocationUpdate isEqualToString:call.method]) {
-        int64_t callbackHandle = [[arguments objectForKey:kArgCallback] longLongValue];
-        int64_t initCallbackHandle = [[arguments objectForKey:kArgInitCallback] longLongValue];
-        NSDictionary *initialDataDictionary = [arguments objectForKey:kArgInitDataCallback];
-        int64_t disposeCallbackHandle = [[arguments objectForKey:kArgDisposeCallback] longLongValue];
-        NSDictionary *settings = [arguments objectForKey:kArgSettings];
-
-        [self registerLocator:callbackHandle initCallback:initCallbackHandle initialDataDictionary:initialDataDictionary disposeCallback:disposeCallbackHandle settings:settings];
-        result(@(YES));
-    } else if ([kMethodPluginUnRegisterLocationUpdate isEqualToString:call.method]) {
-        [self removeLocator];
-        result(@(YES));
-    } else if ([kMethodPluginIsRegisteredLocationUpdate isEqualToString:call.method]) {
-        BOOL val = [self isRegisterLocator];
-        result(@(val));
-    } else {
-        result(FlutterMethodNotImplemented);
-    }
+    MethodCallHelper *callHelper = [[MethodCallHelper alloc] init];
+    [callHelper handleMethodCall:call result:result delegate:self];
 }
 
 //https://medium.com/@calvinlin_96474/ios-11-continuous-background-location-update-by-swift-4-12ce3ac603e3
@@ -70,7 +45,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Check to see if we're being launched due to a location event.
     if (launchOptions[UIApplicationLaunchOptionsLocationKey] != nil) {
         // Restart the headless service.
-        [self startLocatorService:[self getCallbackDispatcherHandle]];
+        [self startLocatorService:[PreferencesManager getCallbackDispatcherHandle]];
         observingRegions = YES;
     } else {
         if(observingRegions == YES) {
@@ -90,7 +65,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 - (void) observeRegionForLocation:(CLLocation *)location {
-    CLRegion* region = [[CLCircularRegion alloc] initWithCenter:location.coordinate radius:0 identifier:@"region"];
+    double distanceFilter = [PreferencesManager getDistanceFilter];
+    CLRegion* region = [[CLCircularRegion alloc] initWithCenter:location.coordinate
+                                                         radius:distanceFilter
+                                                     identifier:@"region"];
     region.notifyOnEntry = false;
     region.notifyOnExit = true;
     [_locationManager startMonitoringForRegion:region];
@@ -98,21 +76,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void) prepareLocationMap:(CLLocation*) location {
     _lastLocation = location;
-    NSTimeInterval timeInSeconds = [location.timestamp timeIntervalSince1970];
-    NSDictionary<NSString*,NSNumber*>* locationMap = @{
-                                                       kArgLatitude: @(location.coordinate.latitude),
-                                                       kArgLongitude: @(location.coordinate.longitude),
-                                                       kArgAccuracy: @(location.horizontalAccuracy),
-                                                       kArgAltitude: @(location.altitude),
-                                                       kArgSpeed: @(location.speed),
-                                                       kArgSpeedAccuracy: @(0.0),
-                                                       kArgHeading: @(location.course),
-                                                       kArgTime: @(((double) timeInSeconds) * 1000.0)  // in milliseconds since the epoch
-                                                       };
+    NSDictionary<NSString*,NSNumber*>* locationMap = [Util getLocationMap:location];
+    
     if (initialized) {
         [self sendLocationEvent:locationMap];
-    } else {
-        [_eventQueue addObject:locationMap];
     }
 }
 
@@ -137,7 +104,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #pragma mark LocatorPlugin Methods
 - (void) sendLocationEvent: (NSDictionary<NSString*,NSNumber*>*)location {
     NSDictionary *map = @{
-                     kArgCallback : @([self getCallbackHandle:kCallbackKey]),
+                     kArgCallback : @([PreferencesManager getCallbackHandle:kCallbackKey]),
                      kArgLocation: location
                      };
     [_callbackChannel invokeMethod:kBCMSendLocation arguments:map];
@@ -145,7 +112,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (instancetype)init:(NSObject<FlutterPluginRegistrar> *)registrar {
     self = [super init];
-    _eventQueue = [[NSMutableArray alloc] init];
     
     _headlessRunner = [[FlutterEngine alloc] initWithName:@"LocatorIsolate" project:nil allowHeadlessExecution:YES];
     _registrar = registrar;
@@ -170,8 +136,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     }
 }
 
+#pragma mark MethodCallHelperDelegate
+
 - (void)startLocatorService:(int64_t)handle {
-    [self setCallbackDispatcherHandle:handle];
+    [PreferencesManager setCallbackDispatcherHandle:handle];
     FlutterCallbackInformation *info = [FlutterCallbackCache lookupCallbackInformation:handle];
     NSAssert(info != nil, @"failed to find callback");
     
@@ -180,7 +148,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [_headlessRunner runWithEntrypoint:entrypoint libraryURI:uri];
     NSAssert(registerPlugins != nil, @"failed to set registerPlugins");
     
-    // Once our headless runner has been started, we need to register the application's plugins
+    // Once our hremoveLocatoreadless runner has been started, we need to register the application's plugins
     // with the runner in order for them to work on the background isolate. `registerPlugins` is
     // a callback set from AppDelegate.m in the main application. This callback should register
     // all relevant plugins (excluding those which require UI).
@@ -191,6 +159,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [_registrar addMethodCallDelegate:self channel:_callbackChannel];
 }
 
+- (void) setInitialized {
+    @synchronized(self) {
+        initialized = YES;
+    }
+}
+
 - (void)registerLocator:(int64_t)callback
            initCallback:(int64_t)initCallback
   initialDataDictionary:(NSDictionary*)initialDataDictionary
@@ -199,17 +173,18 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [self->_locationManager requestAlwaysAuthorization];
         
     long accuracyKey = [[settings objectForKey:kArgAccuracy] longValue];
-    CLLocationAccuracy accuracy = [self getAccuracy:accuracyKey];
+    CLLocationAccuracy accuracy = [Util getAccuracy:accuracyKey];
     double distanceFilter= [[settings objectForKey:kArgDistanceFilter] doubleValue];
 
     _locationManager.desiredAccuracy = accuracy;
     _locationManager.distanceFilter = distanceFilter;
+    [PreferencesManager saveDistanceFilter:distanceFilter];
 
-    [self setCallbackHandle:callback key:kCallbackKey];
-    [self setCallbackHandle:initCallback key:kInitCallbackKey];
-    [self setCallbackHandle:disposeCallback key:kDisposeCallbackKey];
+    [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
+    [PreferencesManager setCallbackHandle:initCallback key:kInitCallbackKey];
+    [PreferencesManager setCallbackHandle:disposeCallback key:kDisposeCallbackKey];
     NSDictionary *map = @{
-                     kArgInitCallback : @([self getCallbackHandle:kInitCallbackKey]),
+                     kArgInitCallback : @([PreferencesManager getCallbackHandle:kInitCallbackKey]),
                      kArgInitDataCallback: initialDataDictionary
                      };
     [_callbackChannel invokeMethod:kBCMInit arguments:map];
@@ -224,64 +199,15 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                 [_locationManager stopMonitoringForRegion:region];
             }
             NSDictionary *map = @{
-                             kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
+                             kArgDisposeCallback : @([PreferencesManager getCallbackHandle:kDisposeCallbackKey])
                              };
             [_callbackChannel invokeMethod:kBCMDispose arguments:map];
         }
     }
 }
 
-- (BOOL)isRegisterLocator{
+- (BOOL)isLocatorRegistered{
     return initialized;
-}
-
-- (int64_t)getCallbackDispatcherHandle {
-    id handle = [[NSUserDefaults standardUserDefaults]
-                 objectForKey: kCallbackDispatcherKey];
-    if (handle == nil) {
-        return 0;
-    }
-    return [handle longLongValue];
-}
-
-- (void)setCallbackDispatcherHandle:(int64_t)handle {
-    [[NSUserDefaults standardUserDefaults]
-     setObject:[NSNumber numberWithLongLong:handle]
-     forKey:kCallbackDispatcherKey];
-}
-
-- (int64_t)getCallbackHandle:(NSString *)key  {
-    id handle = [[NSUserDefaults standardUserDefaults]
-                 objectForKey: key];
-    if (handle == nil) {
-        return 0;
-    }
-    return [handle longLongValue];
-}
-
-- (void)setCallbackHandle:(int64_t)handle
-                      key:(NSString *)key {
-    //TODO
-    [[NSUserDefaults standardUserDefaults]
-     setObject:[NSNumber numberWithLongLong:handle]
-     forKey: key];
-}
-
-- (CLLocationAccuracy) getAccuracy:(long)key {
-    switch (key) {
-        case 0:
-            return kCLLocationAccuracyKilometer;
-        case 1:
-            return kCLLocationAccuracyHundredMeters;
-        case 2:
-            return kCLLocationAccuracyNearestTenMeters;
-        case 3:
-            return kCLLocationAccuracyBest;
-        case 4:
-            return kCLLocationAccuracyBestForNavigation;
-        default:
-            return kCLLocationAccuracyBestForNavigation;
-    }
 }
 
 @end
