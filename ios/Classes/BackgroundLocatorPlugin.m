@@ -8,10 +8,12 @@
     FlutterMethodChannel *_mainChannel;
     NSObject<FlutterPluginRegistrar> *_registrar;
     CLLocationManager *_locationManager;
+    CLLocation* _lastLocation;
 }
 
 static FlutterPluginRegistrantCallback registerPlugins = nil;
 static BOOL initialized = NO;
+static BOOL observingRegions = NO;
 static BackgroundLocatorPlugin *instance = nil;
 
 #pragma mark FlutterPlugin Methods
@@ -69,32 +71,67 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     if (launchOptions[UIApplicationLaunchOptionsLocationKey] != nil) {
         // Restart the headless service.
         [self startLocatorService:[self getCallbackDispatcherHandle]];
+        observingRegions = YES;
+    } else {
+        if(observingRegions == YES) {
+            [self prepareLocationManager];
+            [self removeLocator];
+            observingRegions = NO;
+            [_locationManager startUpdatingLocation];
+        }
     }
     
     // Note: if we return NO, this vetos the launch of the application.
     return YES;
 }
 
+-(void)applicationWillTerminate:(UIApplication *)application {
+    [self observeRegionForLocation:_lastLocation];
+}
+
+- (void) observeRegionForLocation:(CLLocation *)location {
+    CLRegion* region = [[CLCircularRegion alloc] initWithCenter:location.coordinate radius:0 identifier:@"region"];
+    region.notifyOnEntry = false;
+    region.notifyOnExit = true;
+    [_locationManager startMonitoringForRegion:region];
+}
+
+- (void) prepareLocationMap:(CLLocation*) location {
+    _lastLocation = location;
+    NSTimeInterval timeInSeconds = [location.timestamp timeIntervalSince1970];
+    NSDictionary<NSString*,NSNumber*>* locationMap = @{
+                                                       kArgLatitude: @(location.coordinate.latitude),
+                                                       kArgLongitude: @(location.coordinate.longitude),
+                                                       kArgAccuracy: @(location.horizontalAccuracy),
+                                                       kArgAltitude: @(location.altitude),
+                                                       kArgSpeed: @(location.speed),
+                                                       kArgSpeedAccuracy: @(0.0),
+                                                       kArgHeading: @(location.course),
+                                                       kArgTime: @(((double) timeInSeconds) * 1000.0)  // in milliseconds since the epoch
+                                                       };
+    if (initialized) {
+        [self sendLocationEvent:locationMap];
+    } else {
+        [_eventQueue addObject:locationMap];
+    }
+}
+
 #pragma mark LocationManagerDelegate Methods
 - (void)locationManager:(CLLocationManager *)manager
      didUpdateLocations:(NSArray<CLLocation *> *)locations {
-    CLLocation *location = [locations firstObject];
-    if (location != nil) {
-        NSTimeInterval timeInSeconds = [location.timestamp timeIntervalSince1970];
-        NSDictionary<NSString*,NSNumber*>* locationMap = @{
-                                                           kArgLatitude: @(location.coordinate.latitude),
-                                                           kArgLongitude: @(location.coordinate.longitude),
-                                                           kArgAccuracy: @(location.horizontalAccuracy),
-                                                           kArgAltitude: @(location.altitude),
-                                                           kArgSpeed: @(location.speed),
-                                                           kArgSpeedAccuracy: @(0.0),
-                                                           kArgHeading: @(location.course),
-                                                           kArgTime: @(((double) timeInSeconds) * 1000.0)  // in milliseconds since the epoch
-                                                           };
-        if (initialized) {
-            [self sendLocationEvent:locationMap];
+    if (locations.count > 0) {
+        CLLocation* location = [locations objectAtIndex:0];
+        [self prepareLocationMap: location];
+        if(observingRegions) {
+            [self observeRegionForLocation: location];
+            [_locationManager stopUpdatingLocation];
         }
     }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region {
+    [_locationManager stopMonitoringForRegion:region];
+    [_locationManager startUpdatingLocation];
 }
 
 #pragma mark LocatorPlugin Methods
@@ -109,15 +146,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 - (instancetype)init:(NSObject<FlutterPluginRegistrar> *)registrar {
     self = [super init];
     _eventQueue = [[NSMutableArray alloc] init];
-    _locationManager = [[CLLocationManager alloc] init];
-    [_locationManager setDelegate:self];
-    _locationManager.pausesLocationUpdatesAutomatically = NO;
-    if (@available(iOS 9.0, *)) {
-        _locationManager.allowsBackgroundLocationUpdates = YES;
-    }
     
     _headlessRunner = [[FlutterEngine alloc] initWithName:@"LocatorIsolate" project:nil allowHeadlessExecution:YES];
     _registrar = registrar;
+    [self prepareLocationManager];
     
     _mainChannel = [FlutterMethodChannel methodChannelWithName:kChannelId
                                                binaryMessenger:[registrar messenger]];
@@ -127,6 +159,15 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [FlutterMethodChannel methodChannelWithName:kBackgroundChannelId
                                 binaryMessenger:[_headlessRunner binaryMessenger] ];
     return self;
+}
+
+- (void) prepareLocationManager {
+    _locationManager = [[CLLocationManager alloc] init];
+    [_locationManager setDelegate:self];
+    _locationManager.pausesLocationUpdatesAutomatically = NO;
+    if (@available(iOS 9.0, *)) {
+        _locationManager.allowsBackgroundLocationUpdates = YES;
+    }
 }
 
 - (void)startLocatorService:(int64_t)handle {
@@ -173,13 +214,15 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                      };
     [_callbackChannel invokeMethod:kBCMInit arguments:map];
     [_locationManager startUpdatingLocation];
-    [_locationManager startMonitoringSignificantLocationChanges];
 }
 
 - (void)removeLocator {
     @synchronized (self) {
         if(initialized){
             [_locationManager stopUpdatingLocation];
+            for (CLRegion* region in [_locationManager monitoredRegions]) {
+                [_locationManager stopMonitoringForRegion:region];
+            }
             NSDictionary *map = @{
                              kArgDisposeCallback : @([self getCallbackHandle:kDisposeCallbackKey])
                              };
