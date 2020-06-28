@@ -1,3 +1,8 @@
+## 1.1.10+1
+* Add region monitoring for iOS to get location info while app is terminated;
+* Minor iOS bug fix;
+* Add a way to use 3rd party plugins while app is terminated in iOS;
+
 ## 1.1.7+1
 * Add notification icon color;
 * Add isMocked property on location model;
