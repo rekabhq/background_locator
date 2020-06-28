@@ -16,6 +16,7 @@ FOUNDATION_EXPORT NSString *const kCallbackKey;
 FOUNDATION_EXPORT NSString *const kInitCallbackKey;
 FOUNDATION_EXPORT NSString *const kInitDataCallbackKey;
 FOUNDATION_EXPORT NSString *const kDisposeCallbackKey;
+FOUNDATION_EXPORT NSString *const kDistanceFilterKey;
 
 FOUNDATION_EXPORT NSString *const kChannelId;
 FOUNDATION_EXPORT NSString *const kBackgroundChannelId;

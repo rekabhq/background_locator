@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)setCallbackDispatcherHandle:(int64_t)handle;
 + (int64_t)getCallbackHandle:(NSString *)key;
 + (void)setCallbackHandle:(int64_t)handle key:(NSString *)key;
++ (void)saveDistanceFilter:(double) distance;
++ (double)getDistanceFilter;
 
 @end
 

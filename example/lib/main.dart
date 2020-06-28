@@ -223,6 +223,7 @@ class _MyAppState extends State<MyApp> {
           notificationMsg: "Track location in background example",
           wakeLockTime: 20,
           autoStop: false,
+          distanceFilter: 10,
           interval: 5),
     );
   }

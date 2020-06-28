@@ -65,7 +65,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 - (void) observeRegionForLocation:(CLLocation *)location {
-    CLRegion* region = [[CLCircularRegion alloc] initWithCenter:location.coordinate radius:0 identifier:@"region"];
+    double distanceFilter = [PreferencesManager getDistanceFilter];
+    CLRegion* region = [[CLCircularRegion alloc] initWithCenter:location.coordinate
+                                                         radius:distanceFilter
+                                                     identifier:@"region"];
     region.notifyOnEntry = false;
     region.notifyOnExit = true;
     [_locationManager startMonitoringForRegion:region];
@@ -175,6 +178,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     _locationManager.desiredAccuracy = accuracy;
     _locationManager.distanceFilter = distanceFilter;
+    [PreferencesManager saveDistanceFilter:distanceFilter];
 
     [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
     [PreferencesManager setCallbackHandle:initCallback key:kInitCallbackKey];

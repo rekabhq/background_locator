@@ -40,4 +40,12 @@
      forKey: key];
 }
 
++ (void)saveDistanceFilter:(double)distance {
+    [[NSUserDefaults standardUserDefaults] setDouble:distance forKey:kDistanceFilterKey];
+}
+
++ (double)getDistanceFilter {
+    return [[NSUserDefaults standardUserDefaults] doubleForKey:kDistanceFilterKey];
+}
+
 @end
