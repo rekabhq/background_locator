@@ -140,7 +140,7 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                             ARG_HEADING to location.bearing,
                             ARG_TIME to location.time.toDouble())
 
-            val callback = BackgroundLocatorPlugin.getCallbackHandle(context, CALLBACK_HANDLE_KEY)
+            val callback = BackgroundLocatorPlugin.getCallbackHandle(context, CALLBACK_HANDLE_KEY) as Long
 
             val result: HashMap<Any, Any> =
                     hashMapOf(ARG_CALLBACK to callback,

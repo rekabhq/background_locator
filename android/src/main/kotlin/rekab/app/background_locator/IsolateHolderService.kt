@@ -65,7 +65,7 @@ class IsolateHolderService : Service() {
             if (backgroundFlutterView != null && instance != null && !isSendedInit) {
                 val context = instance
                 val initCallback = BackgroundLocatorPlugin.getCallbackHandle(context!!, INIT_CALLBACK_HANDLE_KEY)
-                if (initCallback > 0) {
+                if (initCallback != null) {
                     val initialDataMap = BackgroundLocatorPlugin.getDataCallback(context, INIT_DATA_CALLBACK_KEY)
                     val backgroundChannel = MethodChannel(backgroundFlutterView,
                             BACKGROUND_CHANNEL_ID)
@@ -142,7 +142,7 @@ class IsolateHolderService : Service() {
         if (backgroundFlutterView != null) {
             val context = this
             val disposeCallback = BackgroundLocatorPlugin.getCallbackHandle(context, DISPOSE_CALLBACK_HANDLE_KEY)
-            if (disposeCallback > 0 && backgroundFlutterView != null) {
+            if (disposeCallback != null && backgroundFlutterView != null) {
                 val backgroundChannel = MethodChannel(backgroundFlutterView,
                         BACKGROUND_CHANNEL_ID)
                 Handler(context.mainLooper)
