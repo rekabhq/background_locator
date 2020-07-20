@@ -238,9 +238,10 @@ class BackgroundLocatorPlugin
         }
 
         @JvmStatic
-        fun getCallbackHandle(context: Context, key: String): Long {
-            return context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .getLong(key, 0)
+        fun getCallbackHandle(context: Context, key: String): Long? {
+            val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+            if (sharedPreferences.contains(key)) return sharedPreferences.getLong(key, 0L)
+            return null
         }
 
         @JvmStatic
@@ -318,7 +319,7 @@ class BackgroundLocatorPlugin
         }
 
         val notificationCallback = getCallbackHandle(activity!!, NOTIFICATION_CALLBACK_HANDLE_KEY)
-        if (notificationCallback > 0 && IsolateHolderService.backgroundFlutterView != null) {
+        if (notificationCallback != null && IsolateHolderService.backgroundFlutterView != null) {
             val backgroundChannel = MethodChannel(IsolateHolderService.backgroundFlutterView,
                     BACKGROUND_CHANNEL_ID)
             Handler(activity?.mainLooper)
