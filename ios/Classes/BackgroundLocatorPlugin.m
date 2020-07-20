@@ -189,6 +189,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                      };
     [_callbackChannel invokeMethod:kBCMInit arguments:map];
     [_locationManager startUpdatingLocation];
+//    [_locationManager startMonitoringSignificantLocationChanges];
 }
 
 - (void)removeLocator {

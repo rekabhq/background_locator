@@ -1,3 +1,6 @@
+## 1.1.11+1
+* Fix getCallbackHandle bug which caused some callbacks not getting executed;
+
 ## 1.1.10+1
 * Add region monitoring for iOS to get location info while app is terminated;
 * Minor iOS bug fix;
