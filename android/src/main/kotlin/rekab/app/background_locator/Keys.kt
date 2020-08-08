@@ -80,6 +80,8 @@ class Keys {
         @JvmStatic
         val ARG_NOTIFICATION_MSG = "notificationMsg"
         @JvmStatic
+        val ARG_NOTIFICATION_BIG_MSG = "notificationBigMsg"
+        @JvmStatic
         val ARG_NOTIFICATION_ICON = "notificationIcon"
 
         @JvmStatic
