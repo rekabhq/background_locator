@@ -35,6 +35,7 @@ class Keys {
   static const String ARG_NOTIFICATION_CHANNEL_NAME = 'notificationChannelName';
   static const String ARG_NOTIFICATION_TITLE = 'notificationTitle';
   static const String ARG_NOTIFICATION_MSG = 'notificationMsg';
+  static const String ARG_NOTIFICATION_BIG_MSG = 'notificationBigMsg';
   static const String ARG_NOTIFICATION_ICON = 'notificationIcon';
   static const String ARG_NOTIFICATION_ICON_COLOR = 'notificationIconColor';
   static const String ARG_WAKE_LOCK_TIME = 'wakeLockTime';

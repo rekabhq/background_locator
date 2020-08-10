@@ -17,6 +17,7 @@ import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CHANNEL_NAME
 import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_BIG_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON_COLOR
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
@@ -83,6 +84,7 @@ class IsolateHolderService : Service() {
     private var notificationChannelName = "Flutter Locator Plugin";
     private var notificationTitle = "Start Location Tracking"
     private var notificationMsg = "Track location in background"
+    private var notificationBigMsg = "Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running."
     private var notificationIconColor = 0
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
@@ -113,6 +115,8 @@ class IsolateHolderService : Service() {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationMsg)
+                .setStyle(NotificationCompat.BigTextStyle()
+                        .bigText(notificationBigMsg))
                 .setSmallIcon(icon)
                 .setColor(notificationIconColor)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -172,6 +176,7 @@ class IsolateHolderService : Service() {
         notificationChannelName = intent.getStringExtra(ARG_NOTIFICATION_CHANNEL_NAME)
         notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
         notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
+        notificationBigMsg = intent.getStringExtra(ARG_NOTIFICATION_BIG_MSG)
         val iconNameDefault = "ic_launcher"
         var iconName = intent.getStringExtra(ARG_NOTIFICATION_ICON)
         if (iconName == null || iconName.isEmpty()) {
