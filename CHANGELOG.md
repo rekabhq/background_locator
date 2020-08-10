@@ -1,3 +1,6 @@
+## 1.1.12+1
+* Added support for big text in Android notification;
+
 ## 1.1.11+1
 * Fix getCallbackHandle bug which caused some callbacks not getting executed;
 
