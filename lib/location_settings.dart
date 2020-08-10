@@ -24,6 +24,7 @@ class LocationSettings {
   final String notificationChannelName;
   final String notificationTitle;
   final String notificationMsg;
+  final String notificationBigMsg;
   final String notificationIcon;
   final Color notificationIconColor;
   final int wakeLockTime; //minutes
@@ -39,12 +40,14 @@ class LocationSettings {
   ///
   /// [notificationMsg] Message of notification. Only applies for android. Default is 'Track location in background'.
   ///
+  /// [notificationBigMsg] Message to be displayed in the expanded content area of the notification. Only applies for android. Default is 'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.'.
+  ///
   /// [notificationIcon] Icon name for notification. Only applies for android. The icon should be in 'mipmap' Directory.
   /// Default is app icon. Icon must comply to android rules to be displayed (transparent background and black/white shape)
   ///
   /// [notificationIconColor] Icon color for notification from notification drawer. Only applies for android. Default color is grey.
   ///
-  /// [wakeLockTime] Time for living service in background in meter. Only applies in android. Default is 60 minute.
+  /// [wakeLockTime] Time for living service in background in minutes. Only applies in android. Default is 60 minute.
   ///
   /// [autoStop] If true locator will stop as soon as app goes to background.
   LocationSettings(
@@ -54,6 +57,7 @@ class LocationSettings {
       this.notificationChannelName = 'Location tracking',
       this.notificationTitle = 'Start Location Tracking',
       this.notificationMsg = 'Track location in background',
+      this.notificationBigMsg = 'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
       this.notificationIcon = '',
       this.notificationIconColor = Colors.grey,
       this.wakeLockTime = 60,
@@ -67,6 +71,7 @@ class LocationSettings {
       Keys.ARG_NOTIFICATION_CHANNEL_NAME: notificationChannelName,
       Keys.ARG_NOTIFICATION_TITLE: notificationTitle,
       Keys.ARG_NOTIFICATION_MSG: notificationMsg,
+      Keys.ARG_NOTIFICATION_BIG_MSG: notificationBigMsg,
       Keys.ARG_NOTIFICATION_ICON: notificationIcon,
       Keys.ARG_NOTIFICATION_ICON_COLOR: notificationIconColor?.value,
       Keys.ARG_WAKE_LOCK_TIME: wakeLockTime,

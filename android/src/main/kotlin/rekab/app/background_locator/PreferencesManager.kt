@@ -52,6 +52,11 @@ class PreferencesManager {
                     .apply()
 
             sharedPreferences.edit()
+                    .putString(Keys.ARG_NOTIFICATION_BIG_MSG,
+                            settings[Keys.ARG_NOTIFICATION_BIG_MSG] as String)
+                    .apply()
+
+            sharedPreferences.edit()
                     .putString(Keys.ARG_NOTIFICATION_ICON,
                             settings[Keys.ARG_NOTIFICATION_ICON] as String)
                     .apply()
@@ -109,6 +114,9 @@ class PreferencesManager {
 
             settings[Keys.ARG_NOTIFICATION_MSG] =
                     sharedPreferences.getString(Keys.ARG_NOTIFICATION_MSG, "")
+
+            settings[Keys.ARG_NOTIFICATION_BIG_MSG] =
+                    sharedPreferences.getString(Keys.ARG_NOTIFICATION_BIG_MSG, "")
 
             settings[Keys.ARG_NOTIFICATION_ICON] =
                     sharedPreferences.getString(Keys.ARG_NOTIFICATION_ICON, "")

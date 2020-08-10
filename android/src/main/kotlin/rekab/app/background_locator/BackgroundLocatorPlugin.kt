@@ -33,6 +33,7 @@ import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CHANNEL_NAME
 import rekab.app.background_locator.Keys.Companion.ARG_DISTANCE_FILTER
 import rekab.app.background_locator.Keys.Companion.ARG_INTERVAL
+import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_BIG_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON_COLOR
@@ -115,6 +116,7 @@ class BackgroundLocatorPlugin
             intent.putExtra(ARG_NOTIFICATION_CHANNEL_NAME, settings[ARG_NOTIFICATION_CHANNEL_NAME] as String)
             intent.putExtra(ARG_NOTIFICATION_TITLE, settings[ARG_NOTIFICATION_TITLE] as String)
             intent.putExtra(ARG_NOTIFICATION_MSG, settings[ARG_NOTIFICATION_MSG] as String)
+            intent.putExtra(ARG_NOTIFICATION_BIG_MSG, settings[ARG_NOTIFICATION_BIG_MSG] as String)
             intent.putExtra(ARG_NOTIFICATION_ICON, settings[ARG_NOTIFICATION_ICON] as String)
             intent.putExtra(ARG_NOTIFICATION_ICON_COLOR, settings[ARG_NOTIFICATION_ICON_COLOR] as Long)
 
