@@ -27,14 +27,18 @@
         NSDictionary *initialDataDictionary = [arguments objectForKey:kArgInitDataCallback];
         int64_t disposeCallbackHandle = [[arguments objectForKey:kArgDisposeCallback] longLongValue];
         NSDictionary *settings = [arguments objectForKey:kArgSettings];
-
+        [delegate setServiceRunning:true];
         [delegate registerLocator:callbackHandle initCallback:initCallbackHandle initialDataDictionary:initialDataDictionary disposeCallback:disposeCallbackHandle settings:settings];
         result(@(YES));
     } else if ([kMethodPluginUnRegisterLocationUpdate isEqualToString:call.method]) {
         [delegate removeLocator];
+        [delegate setServiceRunning:false];
         result(@(YES));
     } else if ([kMethodPluginIsRegisteredLocationUpdate isEqualToString:call.method]) {
         BOOL val = [delegate isLocatorRegistered];
+        result(@(val));
+    }else if ([kMethodPluginIsServiceRunning isEqualToString:call.method]) {
+        BOOL val = [delegate isServiceRunning];
         result(@(val));
     } else {
         result(FlutterMethodNotImplemented);

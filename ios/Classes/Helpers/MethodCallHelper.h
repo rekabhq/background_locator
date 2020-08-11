@@ -18,6 +18,9 @@
                settings:(NSDictionary *_Nonnull)settings;
 - (void) removeLocator;
 - (BOOL) isLocatorRegistered;
+- (BOOL) isServiceRunning;
+- (void) setServiceRunning:(BOOL)value;
+
 @end
 
 NS_ASSUME_NONNULL_BEGIN

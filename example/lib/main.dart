@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
     await BackgroundLocator.initialize();
     logStr = await FileManager.readLogFile();
     print('Initialization done');
-    final _isRunning = await BackgroundLocator.isRegisterLocationUpdate();
+    final _isRunning = await BackgroundLocator.isServiceRunning();
     setState(() {
       isRunning = _isRunning;
     });
@@ -159,10 +159,12 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void onStop() {
+  void onStop() async {
     BackgroundLocator.unRegisterLocationUpdate();
+    final _isRunning = await BackgroundLocator.isServiceRunning();
+
     setState(() {
-      isRunning = false;
+      isRunning = _isRunning;
 //      lastTimeLocation = null;
 //      lastLocation = null;
     });
@@ -171,8 +173,10 @@ class _MyAppState extends State<MyApp> {
   void _onStart() async {
     if (await _checkLocationPermission()) {
       _startLocator();
+      final _isRunning = await BackgroundLocator.isServiceRunning();
+
       setState(() {
-        isRunning = true;
+        isRunning = _isRunning;
         lastTimeLocation = null;
         lastLocation = null;
       });
