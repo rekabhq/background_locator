@@ -27,7 +27,7 @@ func registerPlugins(registry: FlutterPluginRegistry) {
     func registerOtherPlugins() {
         if !hasPlugin("io.flutter.plugins.pathprovider") {
             FLTPathProviderPlugin
-                .register(with: registrar(forPlugin: "io.flutter.plugins.pathprovider"))
+                .register(with: registrar(forPlugin: "io.flutter.plugins.pathprovider")!)
         }
     }
 }
