@@ -51,6 +51,7 @@ import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERVICE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
+import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_SERVICE_RUNNING
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
@@ -66,6 +67,9 @@ class BackgroundLocatorPlugin
 
     companion object {
         @JvmStatic
+        private var isLocationServiceRunning: Boolean = false
+
+        @JvmStatic
         private var channel: MethodChannel? = null
 
         @JvmStatic
@@ -75,9 +79,12 @@ class BackgroundLocatorPlugin
                                     result: Result?) {
             if (IsolateHolderService.isRunning) {
                 // The service is running already
+                isLocationServiceRunning = true
+
                 Log.d("BackgroundLocatorPlugin", "Locator service is already running")
                 return
             }
+            isLocationServiceRunning = true
 
             val callbackHandle = args[ARG_CALLBACK] as Long
             setCallbackHandle(context, CALLBACK_HANDLE_KEY, callbackHandle)
@@ -179,6 +186,7 @@ class BackgroundLocatorPlugin
         @JvmStatic
         private fun removeLocator(context: Context,
                                   client: FusedLocationProviderClient) {
+            isLocationServiceRunning = false
             if (!IsolateHolderService.isRunning) {
                 // The service is not running
                 Log.d("BackgroundLocatorPlugin", "Locator service is not running, nothing to stop")
@@ -192,6 +200,16 @@ class BackgroundLocatorPlugin
         @JvmStatic
         private fun isRegisterLocator(result: Result?) {
             if (IsolateHolderService.isRunning) {
+                result?.success(true)
+            } else {
+                result?.success(false)
+            }
+            return
+        }
+
+        @JvmStatic
+        private fun isServiceRunning(result: Result?) {
+            if (isLocationServiceRunning) {
                 result?.success(true)
             } else {
                 result?.success(false)
@@ -286,6 +304,7 @@ class BackgroundLocatorPlugin
                 // save setting to use it when device reboots
                 PreferencesManager.saveSettings(context!!, args)
 
+
                 registerLocator(context!!,
                         locatorClient,
                         args,
@@ -294,6 +313,7 @@ class BackgroundLocatorPlugin
             METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
                     locatorClient)
             METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
+            METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(result)
             else -> result.notImplemented()
         }
     }
