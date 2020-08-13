@@ -1,3 +1,6 @@
+## 1.1.13+1
+* add isServiceRunning method;
+
 ## 1.1.12+1
 * Added support for big text in Android notification;
 
