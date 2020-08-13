@@ -25,10 +25,10 @@ class BackgroundLocator {
   static Future<void> registerLocationUpdate(
       void Function(LocationDto) callback,
       {void Function(Map<String, dynamic>) initCallback,
-        Map<String, dynamic> initDataCallback = const {},
-        void Function() disposeCallback,
-        void Function() androidNotificationCallback,
-        LocationSettings settings}) async {
+      Map<String, dynamic> initDataCallback = const {},
+      void Function() disposeCallback,
+      void Function() androidNotificationCallback,
+      LocationSettings settings}) async {
     final _settings = settings ?? LocationSettings();
     if (_settings.autoStop) {
       WidgetsBinding.instance.addObserver(AutoStopHandler());
@@ -36,7 +36,7 @@ class BackgroundLocator {
 
     final args = {
       Keys.ARG_CALLBACK:
-      PluginUtilities.getCallbackHandle(callback).toRawHandle(),
+          PluginUtilities.getCallbackHandle(callback).toRawHandle(),
       Keys.ARG_SETTINGS: _settings.toMap()
     };
     if (androidNotificationCallback != null) {
@@ -47,13 +47,11 @@ class BackgroundLocator {
 
     if (initCallback != null) {
       args[Keys.ARG_INIT_CALLBACK] =
-          PluginUtilities.getCallbackHandle(initCallback)
-              .toRawHandle();
+          PluginUtilities.getCallbackHandle(initCallback).toRawHandle();
     }
     if (disposeCallback != null) {
       args[Keys.ARG_DISPOSE_CALLBACK] =
-          PluginUtilities.getCallbackHandle(disposeCallback)
-              .toRawHandle();
+          PluginUtilities.getCallbackHandle(disposeCallback).toRawHandle();
     }
     args[Keys.ARG_INIT_DATA_CALLBACK] = initDataCallback;
 
@@ -74,5 +72,10 @@ class BackgroundLocator {
   static Future<bool> isRegisterLocationUpdate() async {
     return await _channel
         .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE);
+  }
+
+  static Future<bool> isServiceRunning() async {
+    return await _channel
+        .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING);
   }
 }

@@ -24,6 +24,7 @@ NSString *const kMethodPluginInitializeService = @"LocatorPlugin.initializeServi
 NSString *const kMethodPluginRegisterLocationUpdate = @"LocatorPlugin.registerLocationUpdate";
 NSString *const kMethodPluginUnRegisterLocationUpdate = @"LocatorPlugin.unRegisterLocationUpdate";
 NSString *const kMethodPluginIsRegisteredLocationUpdate = @"LocatorPlugin.isRegisterLocationUpdate";
+NSString *const kMethodPluginIsServiceRunning = @"LocatorPlugin.isServiceRunning";
 
 NSString *const kArgLatitude = @"latitude";
 NSString *const kArgLongitude = @"longitude";

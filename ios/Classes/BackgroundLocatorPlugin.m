@@ -16,6 +16,7 @@ static FlutterPluginRegistrantCallback registerPlugins = nil;
 static BOOL initialized = NO;
 static BOOL observingRegions = NO;
 static BackgroundLocatorPlugin *instance = nil;
+static BOOL isLocationServiceRunning = NO;
 
 #pragma mark FlutterPlugin Methods
 
@@ -147,8 +148,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     NSString *uri = info.callbackLibraryPath;
     [_headlessRunner runWithEntrypoint:entrypoint libraryURI:uri];
     NSAssert(registerPlugins != nil, @"failed to set registerPlugins");
-    
-    // Once our hremoveLocatoreadless runner has been started, we need to register the application's plugins
+
+    // Once our headless runner has been started, we need to register the application's plugins
     // with the runner in order for them to work on the background isolate. `registerPlugins` is
     // a callback set from AppDelegate.m in the main application. This callback should register
     // all relevant plugins (excluding those which require UI).
@@ -209,6 +210,16 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (BOOL)isLocatorRegistered{
     return initialized;
+}
+
+- (void) setServiceRunning:(BOOL) value {
+    @synchronized(self) {
+        isLocationServiceRunning = value;
+    }
+}
+
+- (BOOL)isServiceRunning{
+    return isLocationServiceRunning;
 }
 
 @end
