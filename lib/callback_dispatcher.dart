@@ -25,18 +25,24 @@ void callbackDispatcher() {
       final Function notificationCallback =
           PluginUtilities.getCallbackFromHandle(CallbackHandle.fromRawHandle(
               args[Keys.ARG_NOTIFICATION_CALLBACK]));
-      notificationCallback();
+      if (notificationCallback != null) {
+        notificationCallback();
+      }
     } else if (Keys.BCM_INIT == call.method) {
       final Map<dynamic, dynamic> args = call.arguments;
       final Function initCallback = PluginUtilities.getCallbackFromHandle(
           CallbackHandle.fromRawHandle(args[Keys.ARG_INIT_CALLBACK]));
       Map<dynamic, dynamic> data = args[Keys.ARG_INIT_DATA_CALLBACK];
-      initCallback(data);
+      if (initCallback != null) {
+        initCallback(data);
+      }
     } else if (Keys.BCM_DISPOSE == call.method) {
       final Map<dynamic, dynamic> args = call.arguments;
       final Function disposeCallback = PluginUtilities.getCallbackFromHandle(
           CallbackHandle.fromRawHandle(args[Keys.ARG_DISPOSE_CALLBACK]));
-      disposeCallback();
+      if (disposeCallback != null) {
+        disposeCallback();
+      }
     }
   });
   _backgroundChannel.invokeMethod(Keys.METHOD_SERVICE_INITIALIZED);
