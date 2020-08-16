@@ -3,18 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'keys.dart';
+import 'settings/locator_settings.dart';
 
-class LocationAccuracy {
-  const LocationAccuracy._internal(this.value);
 
-  final int value;
-
-  static const POWERSAVE = LocationAccuracy._internal(0);
-  static const LOW = LocationAccuracy._internal(1);
-  static const BALANCED = LocationAccuracy._internal(2);
-  static const HIGH = LocationAccuracy._internal(3);
-  static const NAVIGATION = LocationAccuracy._internal(4);
-}
 
 class LocationSettings {
   /// [accuracy], The accuracy of location, Default is max accuracy NAVIGATION
