@@ -43,8 +43,10 @@ FOUNDATION_EXPORT NSString *const kArgDisposeCallback;
 FOUNDATION_EXPORT NSString *const kArgLocation;
 FOUNDATION_EXPORT NSString *const kArgSettings;
 FOUNDATION_EXPORT NSString *const kArgCallbackDispatcher;
-FOUNDATION_EXPORT NSString *const kArgInterval;
-FOUNDATION_EXPORT NSString *const kArgDistanceFilter;
+
+FOUNDATION_EXPORT NSString *const kSettingsAccuracy;
+FOUNDATION_EXPORT NSString *const kSettingsDistanceFilter;
+
 
 FOUNDATION_EXPORT NSString *const kBCMSendLocation;
 FOUNDATION_EXPORT NSString *const kBCMInit;

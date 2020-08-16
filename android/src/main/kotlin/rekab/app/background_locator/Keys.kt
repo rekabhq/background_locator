@@ -69,28 +69,28 @@ class Keys {
         val ARG_SETTINGS = "settings"
         @JvmStatic
         val ARG_CALLBACK_DISPATCHER = "callbackDispatcher"
-        @JvmStatic
-        val ARG_INTERVAL = "interval"
-        @JvmStatic
-        val ARG_DISTANCE_FILTER = "distanceFilter"
+
 
         @JvmStatic
-        val ARG_NOTIFICATION_CHANNEL_NAME = "notificationChannelName"
-
+        val SETTINGS_ACCURACY = "settings_accuracy"
         @JvmStatic
-        val ARG_NOTIFICATION_TITLE = "notificationTitle"
+        val SETTINGS_INTERVAL = "settings_interval"
         @JvmStatic
-        val ARG_NOTIFICATION_MSG = "notificationMsg"
+        val SETTINGS_DISTANCE_FILTER = "settings_distanceFilter"
         @JvmStatic
-        val ARG_NOTIFICATION_BIG_MSG = "notificationBigMsg"
+        val SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME = "settings_android_notificationChannelName"
         @JvmStatic
-        val ARG_NOTIFICATION_ICON = "notificationIcon"
-
+        val SETTINGS_ANDROID_NOTIFICATION_TITLE = "settings_android_notificationTitle"
         @JvmStatic
-        val ARG_NOTIFICATION_ICON_COLOR = "notificationIconColor"
-
+        val SETTINGS_ANDROID_NOTIFICATION_MSG = "settings_android_notificationMsg"
         @JvmStatic
-        val ARG_WAKE_LOCK_TIME = "wakeLockTime"
+        val SETTINGS_ANDROID_NOTIFICATION_BIG_MSG = "settings_android_notificationBigMsg"
+        @JvmStatic
+        val SETTINGS_ANDROID_NOTIFICATION_ICON = "settings_android_notificationIcon"
+        @JvmStatic
+        val SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR = "settings_android_notificationIconColor"
+        @JvmStatic
+        val SETTINGS_ANDROID_WAKE_LOCK_TIME = "settings_android_wakeLockTime"
 
         @JvmStatic
         val BCM_SEND_LOCATION = "BCM_SEND_LOCATION"

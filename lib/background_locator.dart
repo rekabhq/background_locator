@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:background_locator/settings/android_settings.dart';
+import 'package:background_locator/settings/ios_settings.dart';
+import 'package:background_locator/utils/settings_util.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -8,12 +11,9 @@ import 'auto_stop_handler.dart';
 import 'callback_dispatcher.dart';
 import 'keys.dart';
 import 'location_dto.dart';
-import 'location_settings.dart';
 
 class BackgroundLocator {
   static const MethodChannel _channel = const MethodChannel(Keys.CHANNEL_ID);
-  static const MethodChannel _background =
-      MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
 
   static Future<void> initialize() async {
     final CallbackHandle callback =
@@ -27,39 +27,20 @@ class BackgroundLocator {
       {void Function(Map<String, dynamic>) initCallback,
       Map<String, dynamic> initDataCallback = const {},
       void Function() disposeCallback,
-      void Function() androidNotificationCallback,
-      LocationSettings settings}) async {
-    final _settings = settings ?? LocationSettings();
-    if (_settings.autoStop) {
+      bool autoStop,
+      AndroidSettings androidSettings = const AndroidSettings(),
+      IOSSettings iosSettings = const IOSSettings()}) async {
+    if (autoStop) {
       WidgetsBinding.instance.addObserver(AutoStopHandler());
     }
 
-    final args = {
-      Keys.ARG_CALLBACK:
-          PluginUtilities.getCallbackHandle(callback).toRawHandle(),
-      Keys.ARG_SETTINGS: _settings.toMap()
-    };
-    if (androidNotificationCallback != null) {
-      args[Keys.ARG_NOTIFICATION_CALLBACK] =
-          PluginUtilities.getCallbackHandle(androidNotificationCallback)
-              .toRawHandle();
-    }
-
-    if (initCallback != null) {
-      args[Keys.ARG_INIT_CALLBACK] =
-          PluginUtilities.getCallbackHandle(initCallback).toRawHandle();
-    }
-    if (disposeCallback != null) {
-      args[Keys.ARG_DISPOSE_CALLBACK] =
-          PluginUtilities.getCallbackHandle(disposeCallback).toRawHandle();
-    }
-    args[Keys.ARG_INIT_DATA_CALLBACK] = initDataCallback;
-
-    if (androidNotificationCallback != null) {
-      args[Keys.ARG_NOTIFICATION_CALLBACK] =
-          PluginUtilities.getCallbackHandle(androidNotificationCallback)
-              .toRawHandle();
-    }
+    final args = SettingsUtil.getArgumentsMap(
+        callback: callback,
+        initCallback: initCallback,
+        initDataCallback: initDataCallback,
+        disposeCallback: disposeCallback,
+        androidSettings: androidSettings,
+        iosSettings: iosSettings);
 
     await _channel.invokeMethod(
         Keys.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE, args);

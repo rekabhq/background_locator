@@ -37,54 +37,54 @@ class PreferencesManager {
             val settings = map[Keys.ARG_SETTINGS] as Map<*, *>
 
             sharedPreferences.edit()
-                    .putString(Keys.ARG_NOTIFICATION_CHANNEL_NAME,
-                            settings[Keys.ARG_NOTIFICATION_CHANNEL_NAME] as String)
+                    .putString(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME,
+                            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
                     .apply()
 
             sharedPreferences.edit()
-                    .putString(Keys.ARG_NOTIFICATION_TITLE,
-                            settings[Keys.ARG_NOTIFICATION_TITLE] as String)
+                    .putString(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE,
+                            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
                     .apply()
 
             sharedPreferences.edit()
-                    .putString(Keys.ARG_NOTIFICATION_MSG,
-                            settings[Keys.ARG_NOTIFICATION_MSG] as String)
+                    .putString(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG,
+                            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
                     .apply()
 
             sharedPreferences.edit()
-                    .putString(Keys.ARG_NOTIFICATION_BIG_MSG,
-                            settings[Keys.ARG_NOTIFICATION_BIG_MSG] as String)
+                    .putString(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
+                            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
                     .apply()
 
             sharedPreferences.edit()
-                    .putString(Keys.ARG_NOTIFICATION_ICON,
-                            settings[Keys.ARG_NOTIFICATION_ICON] as String)
+                    .putString(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON,
+                            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON] as String)
                     .apply()
 
             sharedPreferences.edit()
-                    .putLong(Keys.ARG_NOTIFICATION_ICON_COLOR,
-                            settings[Keys.ARG_NOTIFICATION_ICON_COLOR] as Long)
+                    .putLong(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR,
+                            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
                     .apply()
 
             sharedPreferences.edit()
-                    .putInt(Keys.ARG_INTERVAL,
-                            settings[Keys.ARG_INTERVAL] as Int)
+                    .putInt(Keys.SETTINGS_INTERVAL,
+                            settings[Keys.SETTINGS_INTERVAL] as Int)
                     .apply()
 
             sharedPreferences.edit()
-                    .putInt(Keys.ARG_ACCURACY,
-                            settings[Keys.ARG_ACCURACY] as Int)
+                    .putInt(Keys.SETTINGS_ACCURACY,
+                            settings[Keys.SETTINGS_ACCURACY] as Int)
                     .apply()
 
             sharedPreferences.edit()
-                    .putFloat(Keys.ARG_DISTANCE_FILTER,
-                            (settings[Keys.ARG_DISTANCE_FILTER] as Double).toFloat())
+                    .putFloat(Keys.SETTINGS_DISTANCE_FILTER,
+                            (settings[Keys.SETTINGS_DISTANCE_FILTER] as Double).toFloat())
                     .apply()
 
-            if (settings.containsKey(Keys.ARG_WAKE_LOCK_TIME)) {
+            if (settings.containsKey(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME)) {
                 sharedPreferences.edit()
-                        .putInt(Keys.ARG_WAKE_LOCK_TIME,
-                                settings[Keys.ARG_WAKE_LOCK_TIME] as Int)
+                        .putInt(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME,
+                                settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
                         .apply()
             }
         }
@@ -106,35 +106,35 @@ class PreferencesManager {
 
             val settings = HashMap<String, Any?>()
 
-            settings[Keys.ARG_NOTIFICATION_CHANNEL_NAME] =
-                    sharedPreferences.getString(Keys.ARG_NOTIFICATION_CHANNEL_NAME, "")
+            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] =
+                    sharedPreferences.getString(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME, "")
 
-            settings[Keys.ARG_NOTIFICATION_TITLE] =
-                    sharedPreferences.getString(Keys.ARG_NOTIFICATION_TITLE, "")
+            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] =
+                    sharedPreferences.getString(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE, "")
 
-            settings[Keys.ARG_NOTIFICATION_MSG] =
-                    sharedPreferences.getString(Keys.ARG_NOTIFICATION_MSG, "")
+            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] =
+                    sharedPreferences.getString(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG, "")
 
-            settings[Keys.ARG_NOTIFICATION_BIG_MSG] =
-                    sharedPreferences.getString(Keys.ARG_NOTIFICATION_BIG_MSG, "")
+            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] =
+                    sharedPreferences.getString(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG, "")
 
-            settings[Keys.ARG_NOTIFICATION_ICON] =
-                    sharedPreferences.getString(Keys.ARG_NOTIFICATION_ICON, "")
+            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON] =
+                    sharedPreferences.getString(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON, "")
 
-            settings[Keys.ARG_NOTIFICATION_ICON_COLOR] =
-                    sharedPreferences.getLong(Keys.ARG_NOTIFICATION_ICON_COLOR, 0)
+            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] =
+                    sharedPreferences.getLong(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, 0)
 
-            settings[Keys.ARG_INTERVAL] =
-                    sharedPreferences.getInt(Keys.ARG_INTERVAL, 0)
+            settings[Keys.SETTINGS_INTERVAL] =
+                    sharedPreferences.getInt(Keys.SETTINGS_INTERVAL, 0)
 
-            settings[Keys.ARG_ACCURACY] =
-                    sharedPreferences.getInt(Keys.ARG_ACCURACY, 0)
+            settings[Keys.SETTINGS_ACCURACY] =
+                    sharedPreferences.getInt(Keys.SETTINGS_ACCURACY, 0)
 
-            settings[Keys.ARG_DISTANCE_FILTER] =
-                    sharedPreferences.getFloat(Keys.ARG_DISTANCE_FILTER, 0f).toDouble()
+            settings[Keys.SETTINGS_DISTANCE_FILTER] =
+                    sharedPreferences.getFloat(Keys.SETTINGS_DISTANCE_FILTER, 0f).toDouble()
 
-            if (sharedPreferences.contains(Keys.ARG_WAKE_LOCK_TIME)) {
-                settings[Keys.ARG_WAKE_LOCK_TIME] = sharedPreferences.getInt(Keys.ARG_WAKE_LOCK_TIME, 0)
+            if (sharedPreferences.contains(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME)) {
+                settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] = sharedPreferences.getInt(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME, 0)
             }
 
             result[Keys.ARG_SETTINGS] = settings

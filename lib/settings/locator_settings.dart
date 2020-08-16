@@ -12,17 +12,10 @@ class LocationAccuracy {
 
 class LocatorSettings {
   final LocationAccuracy accuracy;
-  final int interval; //seconds
   final double distanceFilter;
-  final bool autoStop;
 
   /// [accuracy] The accuracy of location, Default is max accuracy NAVIGATION.
   ///
-  /// [interval] Interval of retrieving location update in second. Only applies for android. Default is 5 second.
-  ///
   /// [distanceFilter] distance in meter to trigger location update, Default is 0 meter.
-  ///
-  /// [autoStop] If true locator will stop as soon as app goes to background.
-  LocatorSettings(
-      {this.accuracy, this.interval, this.distanceFilter, this.autoStop});
+  const LocatorSettings({this.accuracy, this.distanceFilter});
 }

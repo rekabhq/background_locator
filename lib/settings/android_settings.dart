@@ -1,4 +1,4 @@
-
+import 'package:background_locator/keys.dart';
 import 'package:background_locator/settings/locator_settings.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +9,7 @@ class AndroidNotificationSettings {
   final String notificationBigMsg;
   final String notificationIcon;
   final Color notificationIconColor;
+  final VoidCallback notificationTapCallback;
 
   /// [notificationTitle] Title of the notification. Only applies for android. Default is 'Start Location Tracking'.
   ///
@@ -21,29 +22,59 @@ class AndroidNotificationSettings {
   ///
   /// [notificationIconColor] Icon color for notification from notification drawer. Only applies for android. Default color is grey.
   ///
-  AndroidNotificationSettings(
+  /// [notificationTapCallback] callback for notification tap
+  ///
+  const AndroidNotificationSettings(
       {this.notificationChannelName = 'Location tracking',
       this.notificationTitle = 'Start Location Tracking',
       this.notificationMsg = 'Track location in background',
-      this.notificationBigMsg = 'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
+      this.notificationBigMsg =
+          'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
       this.notificationIcon = '',
-      this.notificationIconColor = Colors.grey});
+      this.notificationIconColor = Colors.grey,
+      this.notificationTapCallback});
 }
 
 class AndroidSettings extends LocatorSettings {
   final AndroidNotificationSettings androidNotificationSettings;
   final int wakeLockTime;
+  final int interval;
 
-  AndroidSettings(
+  /// [accuracy] The accuracy of location, Default is max accuracy NAVIGATION.
+  ///
+  /// [interval] Interval of retrieving location update in second. Only applies for android. Default is 5 second.
+  ///
+  /// [distanceFilter] distance in meter to trigger location update, Default is 0 meter.
+  ///
+  /// [androidNotificationSettings] Specific setting for android notification.
+  ///
+  /// [wakeLockTime] Time for living service in background in minutes. Only applies in android. Default is 60 minute.
+  const AndroidSettings(
       {LocationAccuracy accuracy = LocationAccuracy.NAVIGATION,
-      int interval = 5,
+      this.interval = 5,
       double distanceFilter = 0,
-      bool autoStop = false,
-      this.androidNotificationSettings,
+      this.androidNotificationSettings = const AndroidNotificationSettings(),
       this.wakeLockTime = 60})
-      : super(
-            accuracy: accuracy,
-            interval: interval,
-            distanceFilter: distanceFilter,
-            autoStop: autoStop); //minutes
+      : super(accuracy: accuracy, distanceFilter: distanceFilter);
+
+  Map<String, dynamic> toMap() {
+    return {
+      Keys.SETTINGS_ACCURACY: accuracy.value,
+      Keys.SETTINGS_INTERVAL: interval,
+      Keys.SETTINGS_DISTANCE_FILTER: distanceFilter,
+      Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME: wakeLockTime,
+      Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME:
+          androidNotificationSettings.notificationChannelName,
+      Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE:
+          androidNotificationSettings.notificationTitle,
+      Keys.SETTINGS_ANDROID_NOTIFICATION_MSG:
+          androidNotificationSettings.notificationMsg,
+      Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG:
+          androidNotificationSettings.notificationBigMsg,
+      Keys.SETTINGS_ANDROID_NOTIFICATION_ICON:
+          androidNotificationSettings.notificationIcon,
+      Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR:
+          androidNotificationSettings.notificationIconColor?.value,
+    };
+  }
 }

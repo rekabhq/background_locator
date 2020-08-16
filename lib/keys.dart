@@ -18,8 +18,8 @@ class Keys {
   static const String ARG_IS_MOCKED = 'is_mocked';
   static const String ARG_LATITUDE = 'latitude';
   static const String ARG_LONGITUDE = 'longitude';
-  static const String ARG_ACCURACY = 'accuracy';
   static const String ARG_ALTITUDE = 'altitude';
+  static const String ARG_ACCURACY = 'accuracy';
   static const String ARG_SPEED = 'speed';
   static const String ARG_SPEED_ACCURACY = 'speed_accuracy';
   static const String ARG_HEADING = 'heading';
@@ -32,16 +32,25 @@ class Keys {
   static const String ARG_LOCATION = 'location';
   static const String ARG_SETTINGS = 'settings';
   static const String ARG_CALLBACK_DISPATCHER = 'callbackDispatcher';
-  static const String ARG_INTERVAL = 'interval';
-  static const String ARG_DISTANCE_FILTER = 'distanceFilter';
-  static const String ARG_NOTIFICATION_CHANNEL_NAME = 'notificationChannelName';
-  static const String ARG_NOTIFICATION_TITLE = 'notificationTitle';
-  static const String ARG_NOTIFICATION_MSG = 'notificationMsg';
-  static const String ARG_NOTIFICATION_BIG_MSG = 'notificationBigMsg';
-  static const String ARG_NOTIFICATION_ICON = 'notificationIcon';
-  static const String ARG_NOTIFICATION_ICON_COLOR = 'notificationIconColor';
-  static const String ARG_WAKE_LOCK_TIME = 'wakeLockTime';
-  static const String ARG_AUTO_STOP = 'autoStop';
+
+  static const String SETTINGS_ACCURACY = 'settings_accuracy';
+  static const String SETTINGS_INTERVAL = 'settings_interval';
+  static const String SETTINGS_DISTANCE_FILTER = 'settings_distanceFilter';
+  static const String SETTINGS_AUTO_STOP = 'settings_autoStop';
+  static const String SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME =
+      'settings_android_notificationChannelName';
+  static const String SETTINGS_ANDROID_NOTIFICATION_TITLE =
+      'settings_android_notificationTitle';
+  static const String SETTINGS_ANDROID_NOTIFICATION_MSG =
+      'settings_android_notificationMsg';
+  static const String SETTINGS_ANDROID_NOTIFICATION_BIG_MSG =
+      'settings_android_notificationBigMsg';
+  static const String SETTINGS_ANDROID_NOTIFICATION_ICON =
+      'settings_android_notificationIcon';
+  static const String SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR =
+      'settings_android_notificationIconColor';
+  static const String SETTINGS_ANDROID_WAKE_LOCK_TIME =
+      'settings_android_wakeLockTime';
 
   static const String BCM_SEND_LOCATION = 'BCM_SEND_LOCATION';
   static const String BCM_NOTIFICATION_CLICK = 'BCM_NOTIFICATION_CLICK';

@@ -41,8 +41,9 @@ NSString *const kArgDisposeCallback = @"disposeCallback";
 NSString *const kArgLocation = @"location";
 NSString *const kArgSettings = @"settings";
 NSString *const kArgCallbackDispatcher = @"callbackDispatcher";
-NSString *const kArgInterval = @"interval";
-NSString *const kArgDistanceFilter = @"distanceFilter";
+
+NSString *const kSettingsAccuracy = @"settings_accuracy";
+NSString *const kSettingsDistanceFilter = @"settings_distanceFilter";
 
 NSString *const kBCMSendLocation = @"BCM_SEND_LOCATION";
 NSString *const kBCMInit = @"BCM_INIT";
