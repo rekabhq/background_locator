@@ -14,6 +14,8 @@ class Keys {
       'LocatorPlugin.isRegisterLocationUpdate';
   static const String METHOD_PLUGIN_IS_SERVICE_RUNNING =
       'LocatorPlugin.isServiceRunning';
+  static const String METHOD_PLUGIN_UPDATE_NOTIFICATION =
+      'LocatorPlugin.updateNotification';
 
   static const String ARG_IS_MOCKED = 'is_mocked';
   static const String ARG_LATITUDE = 'latitude';
@@ -32,6 +34,8 @@ class Keys {
   static const String ARG_LOCATION = 'location';
   static const String ARG_SETTINGS = 'settings';
   static const String ARG_CALLBACK_DISPATCHER = 'callbackDispatcher';
+  static const String ARG_UPDATE_ANDROID_NOTIFICATION_BIG_TEXT =
+      'update_big_text';
 
   static const String SETTINGS_ACCURACY = 'settings_accuracy';
   static const String SETTINGS_INTERVAL = 'settings_interval';

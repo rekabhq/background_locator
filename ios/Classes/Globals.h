@@ -27,6 +27,7 @@ FOUNDATION_EXPORT NSString *const kMethodPluginRegisterLocationUpdate;
 FOUNDATION_EXPORT NSString *const kMethodPluginUnRegisterLocationUpdate;
 FOUNDATION_EXPORT NSString *const kMethodPluginIsRegisteredLocationUpdate;
 FOUNDATION_EXPORT NSString *const kMethodPluginIsServiceRunning;
+FOUNDATION_EXPORT NSString *const kMethodPluginUpdateNotification;
 
 FOUNDATION_EXPORT NSString *const kArgLatitude;
 FOUNDATION_EXPORT NSString *const kArgLongitude;

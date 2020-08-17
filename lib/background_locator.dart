@@ -59,4 +59,10 @@ class BackgroundLocator {
     return await _channel
         .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING);
   }
+
+  static Future<void> updateNotificationText(String bigText) async {
+    final arg = {Keys.ARG_UPDATE_ANDROID_NOTIFICATION_BIG_TEXT, bigText};
+    return await _channel.invokeMethod<bool>(
+        Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING, arg);
+  }
 }
