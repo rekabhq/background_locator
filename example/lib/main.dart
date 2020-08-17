@@ -76,7 +76,9 @@ class _MyAppState extends State<MyApp> {
     }
 
     await BackgroundLocator.updateNotificationText(
-        "new location received ${DateTime.now()} ${data.latitude}, ${data.longitude}");
+        title: "new location received",
+        msg: "${DateTime.now()}",
+        bigMsg: "${data.latitude}, ${data.longitude}");
   }
 
   Future<void> initPlatformState() async {
@@ -234,8 +236,7 @@ class _MyAppState extends State<MyApp> {
  */
         disposeCallback: LocationCallbackHandler.disposeCallback,
         iosSettings: IOSSettings(
-            accuracy: LocationAccuracy.NAVIGATION,
-            distanceFilter: 0),
+            accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),
         autoStop: false,
         androidSettings: AndroidSettings(
             accuracy: LocationAccuracy.NAVIGATION,

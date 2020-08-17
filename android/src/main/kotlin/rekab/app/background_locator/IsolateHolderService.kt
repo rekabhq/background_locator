@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.FlutterNativeView
@@ -215,7 +216,17 @@ class IsolateHolderService : Service() {
     }
 
     private fun updateNotification(intent: Intent) {
-        notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)
+        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
+            notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)
+        }
+
+        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)) {
+            notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)
+        }
+
+        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
+            notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)
+        }
 
         val notification = getNotification()
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

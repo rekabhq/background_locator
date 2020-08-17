@@ -60,12 +60,22 @@ class BackgroundLocator {
         .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING);
   }
 
-  static Future<void> updateNotificationText(String bigText) async {
-    final Map<String, dynamic> arg = {
-      Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG: bigText
-    };
+  static Future<void> updateNotificationText(
+      {String title, String msg, String bigMsg}) async {
+    final Map<String, dynamic> arg = {};
 
-    await _channel.invokeMethod(
-        Keys.METHOD_PLUGIN_UPDATE_NOTIFICATION, arg);
+    if (title != null) {
+      arg[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] = title;
+    }
+
+    if (msg != null) {
+      arg[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] = msg;
+    }
+
+    if (bigMsg != null) {
+      arg[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] = bigMsg;
+    }
+
+    await _channel.invokeMethod(Keys.METHOD_PLUGIN_UPDATE_NOTIFICATION, arg);
   }
 }

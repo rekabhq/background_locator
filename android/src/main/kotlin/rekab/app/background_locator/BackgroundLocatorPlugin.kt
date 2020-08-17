@@ -224,8 +224,18 @@ class BackgroundLocatorPlugin
         private fun updateNotificationText(context: Context, args: Map<Any, Any>) {
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_UPDATE_NOTIFICATION
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
-                    args[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+            if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
+                intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE,
+                        args[SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
+            }
+            if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_MSG)) {
+                intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_MSG,
+                        args[SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
+            }
+            if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
+                intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
+                        args[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+            }
 
             ContextCompat.startForegroundService(context, intent)
         }
