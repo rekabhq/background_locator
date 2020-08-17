@@ -34,8 +34,6 @@ class Keys {
   static const String ARG_LOCATION = 'location';
   static const String ARG_SETTINGS = 'settings';
   static const String ARG_CALLBACK_DISPATCHER = 'callbackDispatcher';
-  static const String ARG_UPDATE_ANDROID_NOTIFICATION_BIG_TEXT =
-      'update_big_text';
 
   static const String SETTINGS_ACCURACY = 'settings_accuracy';
   static const String SETTINGS_INTERVAL = 'settings_interval';

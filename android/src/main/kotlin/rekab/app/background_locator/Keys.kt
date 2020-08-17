@@ -34,6 +34,8 @@ class Keys {
         val METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE = "LocatorPlugin.isRegisterLocationUpdate"
         @JvmStatic
         val METHOD_PLUGIN_IS_SERVICE_RUNNING = "LocatorPlugin.isServiceRunning"
+        @JvmStatic
+        val METHOD_PLUGIN_UPDATE_NOTIFICATION = "LocatorPlugin.updateNotification"
 
         @JvmStatic
         val ARG_IS_MOCKED = "is_mocked"

@@ -1,6 +1,7 @@
 package rekab.app.background_locator
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
@@ -44,6 +45,7 @@ import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOC
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_SERVICE_RUNNING
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
+import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UPDATE_NOTIFICATION
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.SETTINGS_ACCURACY
@@ -72,6 +74,7 @@ class BackgroundLocatorPlugin
         @JvmStatic
         private var channel: MethodChannel? = null
 
+        @SuppressLint("MissingPermission")
         @JvmStatic
         private fun registerLocator(context: Context,
                                     client: FusedLocationProviderClient,
@@ -218,6 +221,16 @@ class BackgroundLocatorPlugin
         }
 
         @JvmStatic
+        private fun updateNotificationText(context: Context, args: Map<Any, Any>) {
+            val intent = Intent(context, IsolateHolderService::class.java)
+            intent.action = IsolateHolderService.ACTION_UPDATE_NOTIFICATION
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
+                    args[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+
+            ContextCompat.startForegroundService(context, intent)
+        }
+
+        @JvmStatic
         private fun setCallbackDispatcherHandle(context: Context, handle: Long) {
             context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .edit()
@@ -314,6 +327,11 @@ class BackgroundLocatorPlugin
                     locatorClient)
             METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
             METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(result)
+            METHOD_PLUGIN_UPDATE_NOTIFICATION -> {
+                val args: Map<Any, Any> = call.arguments()
+                updateNotificationText(context!!, args)
+                result.success(true)
+            }
             else -> result.notImplemented()
         }
     }
