@@ -40,6 +40,9 @@
     }else if ([kMethodPluginIsServiceRunning isEqualToString:call.method]) {
         BOOL val = [delegate isServiceRunning];
         result(@(val));
+    } else if([kMethodPluginUpdateNotification isEqualToString:call.method]) {
+        // updating notification's text is just for android
+        result(nil);
     } else {
         result(FlutterMethodNotImplemented);
     }

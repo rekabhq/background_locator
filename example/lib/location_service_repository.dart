@@ -56,6 +56,7 @@ class LocationServiceRepository {
     final SendPort send = IsolateNameServer.lookupPortByName(isolateName);
     send?.send(locationDto);
     _count++;
+
   }
 
   static Future<void> setLogLabel(String label) async {

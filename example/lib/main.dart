@@ -58,6 +58,9 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> updateUI(LocationDto data) async {
     final log = await FileManager.readLogFile();
+
+    await _updateNotificationText(data);
+
     setState(() {
       if (data != null) {
         lastLocation = data;
@@ -65,6 +68,17 @@ class _MyAppState extends State<MyApp> {
       }
       logStr = log;
     });
+  }
+
+  Future<void> _updateNotificationText(LocationDto data) async {
+    if (data == null) {
+      return;
+    }
+
+    await BackgroundLocator.updateNotificationText(
+        title: "new location received",
+        msg: "${DateTime.now()}",
+        bigMsg: "${data.latitude}, ${data.longitude}");
   }
 
   Future<void> initPlatformState() async {
@@ -222,8 +236,7 @@ class _MyAppState extends State<MyApp> {
  */
         disposeCallback: LocationCallbackHandler.disposeCallback,
         iosSettings: IOSSettings(
-            accuracy: LocationAccuracy.NAVIGATION,
-            distanceFilter: 0),
+            accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),
         autoStop: false,
         androidSettings: AndroidSettings(
             accuracy: LocationAccuracy.NAVIGATION,

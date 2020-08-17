@@ -1,15 +1,13 @@
 package rekab.app.background_locator
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.FlutterNativeView
@@ -39,6 +37,9 @@ class IsolateHolderService : Service() {
 
         @JvmStatic
         val ACTION_START = "START"
+
+        @JvmStatic
+        val ACTION_UPDATE_NOTIFICATION = "UPDATE_NOTIFICATION"
 
         @JvmStatic
         private val WAKELOCK_TAG = "IsolateHolderService::WAKE_LOCK"
@@ -88,6 +89,7 @@ class IsolateHolderService : Service() {
     private var notificationIconColor = 0
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
+    private val notificationId = 1
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -97,31 +99,6 @@ class IsolateHolderService : Service() {
         if (isRunning) {
             return
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Notification channel is available in Android O and up
-            val channel = NotificationChannel(CHANNEL_ID, notificationChannelName,
-                    NotificationManager.IMPORTANCE_LOW)
-
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-                    .createNotificationChannel(channel)
-        }
-
-        val intent = Intent(this, getMainActivityClass(this))
-        intent.action = NOTIFICATION_ACTION
-
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(notificationTitle)
-                .setContentText(notificationMsg)
-                .setStyle(NotificationCompat.BigTextStyle()
-                        .bigText(notificationBigMsg))
-                .setSmallIcon(icon)
-                .setColor(notificationIconColor)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setContentIntent(pendingIntent)
-                .build()
 
         (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
@@ -134,9 +111,40 @@ class IsolateHolderService : Service() {
         sendInit()
 
         // Starting Service as foreground with a notification prevent service from closing
-        startForeground(1, notification)
+        val notification = getNotification()
+        startForeground(notificationId, notification)
 
         isRunning = true
+    }
+
+    private fun getNotification(): Notification {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Notification channel is available in Android O and up
+            val channel = NotificationChannel(CHANNEL_ID, notificationChannelName,
+                    NotificationManager.IMPORTANCE_LOW)
+
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                    .createNotificationChannel(channel)
+        }
+
+        val intent = Intent(this, getMainActivityClass(this))
+        intent.action = NOTIFICATION_ACTION
+
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(this,
+                1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(notificationTitle)
+                .setContentText(notificationMsg)
+                .setStyle(NotificationCompat.BigTextStyle()
+                        .bigText(notificationBigMsg))
+                .setSmallIcon(icon)
+                .setColor(notificationIconColor)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
+                .setOngoing(true)
+                .build()
     }
 
     private fun stop() {
@@ -163,10 +171,16 @@ class IsolateHolderService : Service() {
             return super.onStartCommand(intent, flags, startId)
         }
 
-        if (intent.action == ACTION_SHUTDOWN) {
-            shutdownHolderService()
-        } else if (intent.action == ACTION_START) {
-            startHolderService(intent)
+        when {
+            ACTION_SHUTDOWN == intent.action -> {
+                shutdownHolderService()
+            }
+            ACTION_START == intent.action -> {
+                startHolderService(intent)
+            }
+            ACTION_UPDATE_NOTIFICATION == intent.action -> {
+                updateNotification(intent)
+            }
         }
 
         return START_STICKY
@@ -199,6 +213,24 @@ class IsolateHolderService : Service() {
         stopForeground(true)
         stopSelf()
         stop()
+    }
+
+    private fun updateNotification(intent: Intent) {
+        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
+            notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)
+        }
+
+        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)) {
+            notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)
+        }
+
+        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
+            notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)
+        }
+
+        val notification = getNotification()
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(notificationId, notification)
     }
 
     private fun getMainActivityClass(context: Context): Class<*>? {
