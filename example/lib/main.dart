@@ -4,7 +4,9 @@ import 'dart:ui';
 
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
-import 'package:background_locator/location_settings.dart';
+import 'package:background_locator/settings/android_settings.dart';
+import 'package:background_locator/settings/ios_settings.dart';
+import 'package:background_locator/settings/locator_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:location_permissions/location_permissions.dart';
 
@@ -211,24 +213,31 @@ class _MyAppState extends State<MyApp> {
 
   void _startLocator() {
     Map<String, dynamic> data = {'countInit': 1};
-    BackgroundLocator.registerLocationUpdate(
-      LocationCallbackHandler.callback,
-      initCallback: LocationCallbackHandler.initCallback,
-      initDataCallback: data,
+    BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
+        initCallback: LocationCallbackHandler.initCallback,
+        initDataCallback: data,
 /*
         Comment initDataCallback, so service not set init variable,
         variable stay with value of last run after unRegisterLocationUpdate
  */
-      disposeCallback: LocationCallbackHandler.disposeCallback,
-      androidNotificationCallback: LocationCallbackHandler.notificationCallback,
-      settings: LocationSettings(
-          notificationChannelName: "Location tracking service",
-          notificationTitle: "Start Location Tracking example",
-          notificationMsg: "Track location in background example",
-          wakeLockTime: 20,
-          autoStop: false,
-          distanceFilter: 10,
-          interval: 5),
-    );
+        disposeCallback: LocationCallbackHandler.disposeCallback,
+        iosSettings: IOSSettings(
+            accuracy: LocationAccuracy.NAVIGATION,
+            distanceFilter: 0),
+        autoStop: false,
+        androidSettings: AndroidSettings(
+            accuracy: LocationAccuracy.NAVIGATION,
+            interval: 5,
+            distanceFilter: 0,
+            androidNotificationSettings: AndroidNotificationSettings(
+                notificationChannelName: 'Location tracking',
+                notificationTitle: 'Start Location Tracking',
+                notificationMsg: 'Track location in background',
+                notificationBigMsg:
+                    'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
+                notificationIcon: '',
+                notificationIconColor: Colors.grey,
+                notificationTapCallback:
+                    LocationCallbackHandler.notificationCallback)));
   }
 }

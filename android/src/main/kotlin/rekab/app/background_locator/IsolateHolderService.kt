@@ -13,16 +13,9 @@ import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.FlutterNativeView
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CHANNEL_NAME
 import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_BIG_MSG
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON_COLOR
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
-import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
 import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.BCM_DISPOSE
 import rekab.app.background_locator.Keys.Companion.BCM_INIT
@@ -31,6 +24,13 @@ import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.INIT_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_ICON
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_MSG
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_TITLE
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_WAKE_LOCK_TIME
 
 class IsolateHolderService : Service() {
     companion object {
@@ -173,18 +173,18 @@ class IsolateHolderService : Service() {
     }
 
     private fun startHolderService(intent: Intent) {
-        notificationChannelName = intent.getStringExtra(ARG_NOTIFICATION_CHANNEL_NAME)
-        notificationTitle = intent.getStringExtra(ARG_NOTIFICATION_TITLE)
-        notificationMsg = intent.getStringExtra(ARG_NOTIFICATION_MSG)
-        notificationBigMsg = intent.getStringExtra(ARG_NOTIFICATION_BIG_MSG)
+        notificationChannelName = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME)
+        notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)
+        notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)
+        notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)
         val iconNameDefault = "ic_launcher"
-        var iconName = intent.getStringExtra(ARG_NOTIFICATION_ICON)
+        var iconName = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_ICON)
         if (iconName == null || iconName.isEmpty()) {
             iconName = iconNameDefault
         }
         icon = resources.getIdentifier(iconName, "mipmap", packageName)
-        notificationIconColor = intent.getLongExtra(ARG_NOTIFICATION_ICON_COLOR, 0).toInt()
-        wakeLockTime = intent.getIntExtra(ARG_WAKE_LOCK_TIME, 60) * 60 * 1000L
+        notificationIconColor = intent.getLongExtra(SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, 0).toInt()
+        wakeLockTime = intent.getIntExtra(SETTINGS_ANDROID_WAKE_LOCK_TIME, 60) * 60 * 1000L
         start()
     }
 

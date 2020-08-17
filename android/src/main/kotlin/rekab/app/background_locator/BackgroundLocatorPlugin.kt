@@ -24,31 +24,21 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import rekab.app.background_locator.Keys.Companion.ARG_ACCURACY
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
+import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
+import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CHANNEL_NAME
-import rekab.app.background_locator.Keys.Companion.ARG_DISTANCE_FILTER
-import rekab.app.background_locator.Keys.Companion.ARG_INTERVAL
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_BIG_MSG
 import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_ICON_COLOR
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_MSG
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_TITLE
 import rekab.app.background_locator.Keys.Companion.ARG_SETTINGS
-import rekab.app.background_locator.Keys.Companion.ARG_WAKE_LOCK_TIME
+import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
+import rekab.app.background_locator.Keys.Companion.BCM_NOTIFICATION_CLICK
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.BCM_NOTIFICATION_CLICK
+import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
+import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.INIT_CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
-import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
-import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERVICE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_SERVICE_RUNNING
@@ -56,6 +46,16 @@ import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATI
 import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
 import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_KEY
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ACCURACY
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_ICON
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_MSG
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_TITLE
+import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_WAKE_LOCK_TIME
+import rekab.app.background_locator.Keys.Companion.SETTINGS_DISTANCE_FILTER
+import rekab.app.background_locator.Keys.Companion.SETTINGS_INTERVAL
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 
 
@@ -120,15 +120,15 @@ class BackgroundLocatorPlugin
         private fun startIsolateService(context: Context, settings: Map<*, *>) {
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
-            intent.putExtra(ARG_NOTIFICATION_CHANNEL_NAME, settings[ARG_NOTIFICATION_CHANNEL_NAME] as String)
-            intent.putExtra(ARG_NOTIFICATION_TITLE, settings[ARG_NOTIFICATION_TITLE] as String)
-            intent.putExtra(ARG_NOTIFICATION_MSG, settings[ARG_NOTIFICATION_MSG] as String)
-            intent.putExtra(ARG_NOTIFICATION_BIG_MSG, settings[ARG_NOTIFICATION_BIG_MSG] as String)
-            intent.putExtra(ARG_NOTIFICATION_ICON, settings[ARG_NOTIFICATION_ICON] as String)
-            intent.putExtra(ARG_NOTIFICATION_ICON_COLOR, settings[ARG_NOTIFICATION_ICON_COLOR] as Long)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME, settings[SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE, settings[SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_MSG, settings[SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG, settings[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_ICON, settings[SETTINGS_ANDROID_NOTIFICATION_ICON] as String)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, settings[SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
 
-            if (settings.containsKey(ARG_WAKE_LOCK_TIME)) {
-                intent.putExtra(ARG_WAKE_LOCK_TIME, settings[ARG_WAKE_LOCK_TIME] as Int)
+            if (settings.containsKey(SETTINGS_ANDROID_WAKE_LOCK_TIME)) {
+                intent.putExtra(SETTINGS_ANDROID_WAKE_LOCK_TIME, settings[SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
             }
 
             ContextCompat.startForegroundService(context, intent)
@@ -157,15 +157,15 @@ class BackgroundLocatorPlugin
         private fun getLocationRequest(settings: Map<*, *>): LocationRequest {
             val locationRequest = LocationRequest()
 
-            val interval: Long = (settings[ARG_INTERVAL] as Int * 1000).toLong()
+            val interval: Long = (settings[SETTINGS_INTERVAL] as Int * 1000).toLong()
             locationRequest.interval = interval
             locationRequest.fastestInterval = interval
             locationRequest.maxWaitTime = interval
 
-            val accuracyKey = settings[ARG_ACCURACY] as Int
+            val accuracyKey = settings[SETTINGS_ACCURACY] as Int
             locationRequest.priority = getAccuracy(accuracyKey)
 
-            val distanceFilter = settings[ARG_DISTANCE_FILTER] as Double
+            val distanceFilter = settings[SETTINGS_DISTANCE_FILTER] as Double
             locationRequest.smallestDisplacement = distanceFilter.toFloat()
 
             return locationRequest

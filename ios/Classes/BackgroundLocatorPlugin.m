@@ -173,9 +173,9 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                settings: (NSDictionary*)settings {
     [self->_locationManager requestAlwaysAuthorization];
         
-    long accuracyKey = [[settings objectForKey:kArgAccuracy] longValue];
+    long accuracyKey = [[settings objectForKey:kSettingsAccuracy] longValue];
     CLLocationAccuracy accuracy = [Util getAccuracy:accuracyKey];
-    double distanceFilter= [[settings objectForKey:kArgDistanceFilter] doubleValue];
+    double distanceFilter= [[settings objectForKey:kSettingsDistanceFilter] doubleValue];
 
     _locationManager.desiredAccuracy = accuracy;
     _locationManager.distanceFilter = distanceFilter;
@@ -190,7 +190,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                      };
     [_callbackChannel invokeMethod:kBCMInit arguments:map];
     [_locationManager startUpdatingLocation];
-//    [_locationManager startMonitoringSignificantLocationChanges];
+    [_locationManager startMonitoringSignificantLocationChanges];
 }
 
 - (void)removeLocator {
