@@ -28,7 +28,7 @@
         int64_t disposeCallbackHandle = [[arguments objectForKey:kArgDisposeCallback] longLongValue];
         NSDictionary *settings = [arguments objectForKey:kArgSettings];
         [delegate setServiceRunning:true];
-        [delegate registerLocator:callbackHandle initCallback:initCallbackHandle initialDataDictionary:initialDataDictionary disposeCallback:disposeCallbackHandle settings:settings];
+        [delegate registerLocator:callbackHandle initCallback:initCallbackHandle initialDataDictionary:initialDataDictionary disposeCallback:disposeCallbackHandle settings:arguments];
         result(@(YES));
     } else if ([kMethodPluginUnRegisterLocationUpdate isEqualToString:call.method]) {
         [delegate removeLocator];
