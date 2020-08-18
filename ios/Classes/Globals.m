@@ -45,6 +45,7 @@ NSString *const kArgCallbackDispatcher = @"callbackDispatcher";
 
 NSString *const kSettingsAccuracy = @"settings_accuracy";
 NSString *const kSettingsDistanceFilter = @"settings_distanceFilter";
+NSString *const kSettingsShowsBackgroundLocationIndicator = @"settings_ios_showsBackgroundLocationIndicator";
 
 NSString *const kBCMSendLocation = @"BCM_SEND_LOCATION";
 NSString *const kBCMInit = @"BCM_INIT";

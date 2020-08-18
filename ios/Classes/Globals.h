@@ -47,7 +47,7 @@ FOUNDATION_EXPORT NSString *const kArgCallbackDispatcher;
 
 FOUNDATION_EXPORT NSString *const kSettingsAccuracy;
 FOUNDATION_EXPORT NSString *const kSettingsDistanceFilter;
-
+FOUNDATION_EXPORT NSString *const kSettingsShowsBackgroundLocationIndicator;
 
 FOUNDATION_EXPORT NSString *const kBCMSendLocation;
 FOUNDATION_EXPORT NSString *const kBCMInit;

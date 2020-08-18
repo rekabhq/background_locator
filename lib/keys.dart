@@ -54,6 +54,9 @@ class Keys {
   static const String SETTINGS_ANDROID_WAKE_LOCK_TIME =
       'settings_android_wakeLockTime';
 
+  static const String SETTINGS_IOS_SHOWS_BACKGROUND_LOCATION_INDICATOR =
+      'settings_ios_showsBackgroundLocationIndicator';
+
   static const String BCM_SEND_LOCATION = 'BCM_SEND_LOCATION';
   static const String BCM_NOTIFICATION_CLICK = 'BCM_NOTIFICATION_CLICK';
   static const String BCM_INIT = 'BCM_INIT';
