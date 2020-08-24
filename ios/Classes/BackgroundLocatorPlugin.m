@@ -176,9 +176,15 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     long accuracyKey = [[settings objectForKey:kSettingsAccuracy] longValue];
     CLLocationAccuracy accuracy = [Util getAccuracy:accuracyKey];
     double distanceFilter= [[settings objectForKey:kSettingsDistanceFilter] doubleValue];
+    bool  showsBackgroundLocationIndicator=[[settings objectForKey:kSettingsShowsBackgroundLocationIndicator] boolValue];
 
     _locationManager.desiredAccuracy = accuracy;
     _locationManager.distanceFilter = distanceFilter;
+    
+    if (@available(iOS 11.0, *)) {
+      _locationManager.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator;
+    }
+    
     [PreferencesManager saveDistanceFilter:distanceFilter];
 
     [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
