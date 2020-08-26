@@ -1,3 +1,8 @@
+## 1.2.2+1
+* Add platform specific settings;
+* Add ability to update android notification;
+* Ability to showsBackgroundLocationIndicator on iOS;
+
 ## 1.1.13+1
 * add isServiceRunning method;
 
