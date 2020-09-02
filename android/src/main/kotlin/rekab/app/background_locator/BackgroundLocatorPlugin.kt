@@ -59,11 +59,13 @@ import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_WAKE_LOCK_TI
 import rekab.app.background_locator.Keys.Companion.SETTINGS_DISTANCE_FILTER
 import rekab.app.background_locator.Keys.Companion.SETTINGS_INTERVAL
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
+import rekab.app.background_locator.provider.BLLocationProvider
+import rekab.app.background_locator.provider.GoogleLocationProviderClient
 
 
 class BackgroundLocatorPlugin
     : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {
-    private lateinit var locatorClient: FusedLocationProviderClient
+    private lateinit var locatorClient: BLLocationProvider
     private var context: Context? = null
     private var activity: Activity? = null
 
@@ -77,7 +79,7 @@ class BackgroundLocatorPlugin
         @SuppressLint("MissingPermission")
         @JvmStatic
         private fun registerLocator(context: Context,
-                                    client: FusedLocationProviderClient,
+                                    client: BLLocationProvider,
                                     args: Map<Any, Any>,
                                     result: Result?) {
             if (IsolateHolderService.isRunning) {
@@ -188,7 +190,7 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun removeLocator(context: Context,
-                                  client: FusedLocationProviderClient) {
+                                  client: BLLocationProvider) {
             isLocationServiceRunning = false
             if (!IsolateHolderService.isRunning) {
                 // The service is not running
@@ -301,12 +303,17 @@ class BackgroundLocatorPlugin
 
             val plugin = BackgroundLocatorPlugin()
             plugin.context = context
-            plugin.locatorClient = LocationServices.getFusedLocationProviderClient(context)
+            plugin.locatorClient = getLocationClient(context)
 
             initializeService(context, settings)
             registerLocator(context,
                     plugin.locatorClient,
                     settings, null)
+        }
+
+        @JvmStatic
+        fun getLocationClient(context: Context): BLLocationProvider {
+            return GoogleLocationProviderClient(context)
         }
     }
 
@@ -356,7 +363,7 @@ class BackgroundLocatorPlugin
     private fun onAttachedToEngine(context: Context, messenger: BinaryMessenger) {
         val plugin = BackgroundLocatorPlugin()
         plugin.context = context
-        plugin.locatorClient = LocationServices.getFusedLocationProviderClient(context)
+        plugin.locatorClient = getLocationClient(context)
 
         channel = MethodChannel(messenger, CHANNEL_ID)
         channel?.setMethodCallHandler(plugin)
