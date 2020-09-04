@@ -11,9 +11,7 @@ import android.os.Build
 import android.os.Handler
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -59,8 +57,10 @@ import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_WAKE_LOCK_TI
 import rekab.app.background_locator.Keys.Companion.SETTINGS_DISTANCE_FILTER
 import rekab.app.background_locator.Keys.Companion.SETTINGS_INTERVAL
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
+import rekab.app.background_locator.provider.AndroidLocationProviderClient
 import rekab.app.background_locator.provider.BLLocationProvider
 import rekab.app.background_locator.provider.GoogleLocationProviderClient
+import rekab.app.background_locator.provider.LocationClient
 
 
 class BackgroundLocatorPlugin
@@ -313,7 +313,10 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         fun getLocationClient(context: Context): BLLocationProvider {
-            return GoogleLocationProviderClient(context)
+            return when (PreferencesManager.getLocationClient(context)) {
+                LocationClient.Google -> GoogleLocationProviderClient(context)
+                LocationClient.Android -> AndroidLocationProviderClient(context)
+            }
         }
     }
 

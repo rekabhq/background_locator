@@ -2,6 +2,8 @@ import 'package:background_locator/keys.dart';
 import 'package:background_locator/settings/locator_settings.dart';
 import 'package:flutter/material.dart';
 
+enum LocationClient { google, android }
+
 class AndroidNotificationSettings {
   final String notificationChannelName;
   final String notificationTitle;
@@ -39,6 +41,7 @@ class AndroidSettings extends LocatorSettings {
   final AndroidNotificationSettings androidNotificationSettings;
   final int wakeLockTime;
   final int interval;
+  final LocationClient client;
 
   /// [accuracy] The accuracy of location, Default is max accuracy NAVIGATION.
   ///
@@ -54,7 +57,8 @@ class AndroidSettings extends LocatorSettings {
       this.interval = 5,
       double distanceFilter = 0,
       this.androidNotificationSettings = const AndroidNotificationSettings(),
-      this.wakeLockTime = 60})
+      this.wakeLockTime = 60,
+      this.client = LocationClient.google})
       : super(accuracy: accuracy, distanceFilter: distanceFilter);
 
   Map<String, dynamic> toMap() {
@@ -75,6 +79,7 @@ class AndroidSettings extends LocatorSettings {
           androidNotificationSettings.notificationIcon,
       Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR:
           androidNotificationSettings.notificationIconColor?.value,
+      Keys.SETTINGS_ANDROID_LOCATION_CLIENT: client.index
     };
   }
 }
