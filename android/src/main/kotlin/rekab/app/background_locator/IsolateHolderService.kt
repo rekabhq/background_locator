@@ -179,7 +179,9 @@ class IsolateHolderService : Service() {
                 startHolderService(intent)
             }
             ACTION_UPDATE_NOTIFICATION == intent.action -> {
-                updateNotification(intent)
+                if (isRunning) {
+                    updateNotification(intent)
+                }
             }
         }
 

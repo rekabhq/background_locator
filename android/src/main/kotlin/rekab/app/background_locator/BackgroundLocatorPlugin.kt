@@ -89,6 +89,10 @@ class BackgroundLocatorPlugin
                 Log.d("BackgroundLocatorPlugin", "Locator service is already running")
                 return
             }
+
+            Log.d("BackgroundLocatorPlugin",
+                    "start locator with ${PreferencesManager.getLocationClient(context)} client")
+
             isLocationServiceRunning = true
 
             val callbackHandle = args[ARG_CALLBACK] as Long
@@ -337,7 +341,7 @@ class BackgroundLocatorPlugin
                 // save setting to use it when device reboots
                 PreferencesManager.saveSettings(context!!, args)
 
-
+                locatorClient = getLocationClient(context!!)
                 registerLocator(context!!,
                         locatorClient,
                         args,
