@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.PowerManager
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.FlutterNativeView
@@ -82,7 +81,7 @@ class IsolateHolderService : Service() {
         }
     }
 
-    private var notificationChannelName = "Flutter Locator Plugin";
+    private var notificationChannelName = "Flutter Locator Plugin"
     private var notificationTitle = "Start Location Tracking"
     private var notificationMsg = "Track location in background"
     private var notificationBigMsg = "Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running."

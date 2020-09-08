@@ -7,7 +7,6 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.LocationRequest
 import java.util.*
 
 class AndroidLocationProviderClient(context: Context) : BLLocationProvider {
@@ -19,10 +18,10 @@ class AndroidLocationProviderClient(context: Context) : BLLocationProvider {
     }
 
     @SuppressLint("MissingPermission")
-    override fun requestLocationUpdates(request: LocationRequest, pendingIntent: PendingIntent) {
+    override fun requestLocationUpdates(request: LocationRequestOptions, pendingIntent: PendingIntent) {
         client?.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                 request.interval,
-                request.smallestDisplacement,
+                request.distanceFilter,
                 pendingIntent)
     }
 

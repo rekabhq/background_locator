@@ -18,8 +18,20 @@ class GoogleLocationProviderClient(context: Context) : BLLocationProvider {
     }
 
     @SuppressLint("MissingPermission")
-    override fun requestLocationUpdates(request: LocationRequest, pendingIntent: PendingIntent) {
-        client.requestLocationUpdates(request, pendingIntent)
+    override fun requestLocationUpdates(request: LocationRequestOptions, pendingIntent: PendingIntent) {
+        client.requestLocationUpdates(getLocationRequest(request), pendingIntent)
+    }
+
+    private fun getLocationRequest(request: LocationRequestOptions): LocationRequest {
+        val locationRequest = LocationRequest()
+
+        locationRequest.interval = request.interval
+        locationRequest.fastestInterval = request.interval
+        locationRequest.maxWaitTime = request.interval
+        locationRequest.priority = request.accuracy
+        locationRequest.smallestDisplacement = request.distanceFilter
+
+        return locationRequest
     }
 
     companion object: BLLocationParser {

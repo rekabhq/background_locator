@@ -57,10 +57,7 @@ import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_WAKE_LOCK_TI
 import rekab.app.background_locator.Keys.Companion.SETTINGS_DISTANCE_FILTER
 import rekab.app.background_locator.Keys.Companion.SETTINGS_INTERVAL
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
-import rekab.app.background_locator.provider.AndroidLocationProviderClient
-import rekab.app.background_locator.provider.BLLocationProvider
-import rekab.app.background_locator.provider.GoogleLocationProviderClient
-import rekab.app.background_locator.provider.LocationClient
+import rekab.app.background_locator.provider.*
 
 
 class BackgroundLocatorPlugin
@@ -163,21 +160,13 @@ class BackgroundLocatorPlugin
         }
 
         @JvmStatic
-        private fun getLocationRequest(settings: Map<*, *>): LocationRequest {
-            val locationRequest = LocationRequest()
-
+        private fun getLocationRequest(settings: Map<*, *>): LocationRequestOptions {
             val interval: Long = (settings[SETTINGS_INTERVAL] as Int * 1000).toLong()
-            locationRequest.interval = interval
-            locationRequest.fastestInterval = interval
-            locationRequest.maxWaitTime = interval
-
             val accuracyKey = settings[SETTINGS_ACCURACY] as Int
-            locationRequest.priority = getAccuracy(accuracyKey)
-
+            val accuracy = getAccuracy(accuracyKey)
             val distanceFilter = settings[SETTINGS_DISTANCE_FILTER] as Double
-            locationRequest.smallestDisplacement = distanceFilter.toFloat()
 
-            return locationRequest
+            return LocationRequestOptions(interval, accuracy, distanceFilter.toFloat())
         }
 
         @JvmStatic
