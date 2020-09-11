@@ -25,6 +25,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import io.flutter.plugin.common.PluginRegistry.Registrar
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
 import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
@@ -68,6 +69,11 @@ class BackgroundLocatorPlugin
     private var activity: Activity? = null
 
     companion object {
+        fun registerWith(registrar: Registrar) {
+            val plugin = BackgroundLocatorPlugin()
+            plugin.onAttachedToEngine(registrar.context(), registrar.messenger())
+        }
+
         @JvmStatic
         private var isLocationServiceRunning: Boolean = false
 
@@ -76,10 +82,11 @@ class BackgroundLocatorPlugin
 
         @SuppressLint("MissingPermission")
         @JvmStatic
-        private fun registerLocator(context: Context,
-                                    client: FusedLocationProviderClient,
-                                    args: Map<Any, Any>,
-                                    result: Result?) {
+        private fun registerLocator(
+                context: Context,
+                client: FusedLocationProviderClient,
+                args: Map<Any, Any>,
+                result: Result?) {
             if (IsolateHolderService.isRunning) {
                 // The service is running already
                 isLocationServiceRunning = true
@@ -104,8 +111,9 @@ class BackgroundLocatorPlugin
             val settings = args[ARG_SETTINGS] as Map<*, *>
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_DENIED) {
+                context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_DENIED
+            ) {
 
                 val msg = "'registerLocator' requires the ACCESS_FINE_LOCATION permission."
                 result?.error(msg, null, null)
@@ -116,19 +124,23 @@ class BackgroundLocatorPlugin
             startIsolateService(context, settings)
 
             client.requestLocationUpdates(getLocationRequest(settings),
-                    getLocatorPendingIndent(context))
+                                          getLocatorPendingIndent(context))
         }
 
         @JvmStatic
         private fun startIsolateService(context: Context, settings: Map<*, *>) {
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME, settings[SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE, settings[SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME,
+                            settings[SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE,
+                            settings[SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
             intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_MSG, settings[SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG, settings[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
+                            settings[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
             intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_ICON, settings[SETTINGS_ANDROID_NOTIFICATION_ICON] as String)
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, settings[SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
+            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR,
+                            settings[SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
 
             if (settings.containsKey(SETTINGS_ANDROID_WAKE_LOCK_TIME)) {
                 intent.putExtra(SETTINGS_ANDROID_WAKE_LOCK_TIME, settings[SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
@@ -187,8 +199,9 @@ class BackgroundLocatorPlugin
         }
 
         @JvmStatic
-        private fun removeLocator(context: Context,
-                                  client: FusedLocationProviderClient) {
+        private fun removeLocator(
+                context: Context,
+                client: FusedLocationProviderClient) {
             isLocationServiceRunning = false
             if (!IsolateHolderService.isRunning) {
                 // The service is not running
@@ -204,7 +217,8 @@ class BackgroundLocatorPlugin
         private fun isRegisterLocator(result: Result?) {
             if (IsolateHolderService.isRunning) {
                 result?.success(true)
-            } else {
+            }
+            else {
                 result?.success(false)
             }
             return
@@ -214,7 +228,8 @@ class BackgroundLocatorPlugin
         private fun isServiceRunning(result: Result?) {
             if (isLocationServiceRunning) {
                 result?.success(true)
-            } else {
+            }
+            else {
                 result?.success(false)
             }
             return
@@ -226,15 +241,15 @@ class BackgroundLocatorPlugin
             intent.action = IsolateHolderService.ACTION_UPDATE_NOTIFICATION
             if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
                 intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE,
-                        args[SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
+                                args[SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
             }
             if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_MSG)) {
                 intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_MSG,
-                        args[SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
+                                args[SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
             }
             if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
                 intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
-                        args[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+                                args[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
             }
 
             ContextCompat.startForegroundService(context, intent)
@@ -243,41 +258,41 @@ class BackgroundLocatorPlugin
         @JvmStatic
         private fun setCallbackDispatcherHandle(context: Context, handle: Long) {
             context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .edit()
-                    .putLong(CALLBACK_DISPATCHER_HANDLE_KEY, handle)
-                    .apply()
+                .edit()
+                .putLong(CALLBACK_DISPATCHER_HANDLE_KEY, handle)
+                .apply()
         }
 
         @JvmStatic
         fun setCallbackHandle(context: Context, key: String, handle: Long?) {
             if (handle == null) {
                 context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                        .edit()
-                        .remove(key)
-                        .apply()
+                    .edit()
+                    .remove(key)
+                    .apply()
                 return
             }
 
             context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .edit()
-                    .putLong(key, handle)
-                    .apply()
+                .edit()
+                .putLong(key, handle)
+                .apply()
         }
 
         @JvmStatic
         fun setDataCallback(context: Context, key: String, data: Map<*, *>?) {
             if (data == null) {
                 context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                        .edit()
-                        .remove(key)
-                        .apply()
+                    .edit()
+                    .remove(key)
+                    .apply()
                 return
             }
             val dataStr = Gson().toJson(data)
             context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .edit()
-                    .putString(key, dataStr)
-                    .apply()
+                .edit()
+                .putString(key, dataStr)
+                .apply()
         }
 
         @JvmStatic
@@ -290,7 +305,7 @@ class BackgroundLocatorPlugin
         @JvmStatic
         fun getDataCallback(context: Context, key: String): Map<*, *> {
             val initialDataStr = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .getString(key, null)
+                .getString(key, null)
             val type = object : TypeToken<Map<*, *>>() {}.type
             return Gson().fromJson(initialDataStr, type)
         }
@@ -305,8 +320,8 @@ class BackgroundLocatorPlugin
 
             initializeService(context, settings)
             registerLocator(context,
-                    plugin.locatorClient,
-                    settings, null)
+                            plugin.locatorClient,
+                            settings, null)
         }
     }
 
@@ -329,12 +344,12 @@ class BackgroundLocatorPlugin
 
 
                 registerLocator(context!!,
-                        locatorClient,
-                        args,
-                        result)
+                                locatorClient,
+                                args,
+                                result)
             }
             METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
-                    locatorClient)
+                                                                       locatorClient)
             METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
             METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(result)
             METHOD_PLUGIN_UPDATE_NOTIFICATION -> {
@@ -342,7 +357,7 @@ class BackgroundLocatorPlugin
                 updateNotificationText(context!!, args)
                 result.success(true)
             }
-            else -> result.notImplemented()
+            else                                      -> result.notImplemented()
         }
     }
 
@@ -351,9 +366,11 @@ class BackgroundLocatorPlugin
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        context = null
     }
 
     private fun onAttachedToEngine(context: Context, messenger: BinaryMessenger) {
+        this.context = context
         val plugin = BackgroundLocatorPlugin()
         plugin.context = context
         plugin.locatorClient = LocationServices.getFusedLocationProviderClient(context)
@@ -369,14 +386,15 @@ class BackgroundLocatorPlugin
         }
 
         val notificationCallback = getCallbackHandle(activity!!, NOTIFICATION_CALLBACK_HANDLE_KEY)
-        if (notificationCallback != null && IsolateHolderService.backgroundFlutterView != null) {
-            val backgroundChannel = MethodChannel(IsolateHolderService.backgroundFlutterView,
-                    BACKGROUND_CHANNEL_ID)
+        if (notificationCallback != null && IsolateHolderService.sBackgroundFlutterEngine != null) {
+            val backgroundChannel = MethodChannel(IsolateHolderService.sBackgroundFlutterEngine!!.dartExecutor
+                                                      .binaryMessenger,
+                                                  BACKGROUND_CHANNEL_ID)
             Handler(activity?.mainLooper)
-                    .post {
-                        backgroundChannel.invokeMethod(BCM_NOTIFICATION_CLICK,
-                                hashMapOf(ARG_NOTIFICATION_CALLBACK to notificationCallback))
-                    }
+                .post {
+                    backgroundChannel.invokeMethod(BCM_NOTIFICATION_CLICK,
+                                                   hashMapOf(ARG_NOTIFICATION_CALLBACK to notificationCallback))
+                }
         }
 
         return true
@@ -395,4 +413,5 @@ class BackgroundLocatorPlugin
 
     override fun onDetachedFromActivityForConfigChanges() {
     }
+
 }

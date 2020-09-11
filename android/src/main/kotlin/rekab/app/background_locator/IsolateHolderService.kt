@@ -7,8 +7,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.PowerManager
-import android.util.Log
 import androidx.core.app.NotificationCompat
+import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.FlutterNativeView
 import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
@@ -45,11 +45,11 @@ class IsolateHolderService : Service() {
         private val WAKELOCK_TAG = "IsolateHolderService::WAKE_LOCK"
 
         @JvmStatic
-        var backgroundFlutterView: FlutterNativeView? = null
+        var sBackgroundFlutterEngine: FlutterEngine? = null
 
         @JvmStatic
-        fun setBackgroundFlutterViewManually(view: FlutterNativeView?) {
-            backgroundFlutterView = view
+        fun setBackgroundFlutterEngine(view: FlutterEngine?) {
+            sBackgroundFlutterEngine = view
             sendInit()
         }
 
@@ -64,13 +64,13 @@ class IsolateHolderService : Service() {
 
         @JvmStatic
         fun sendInit() {
-            if (backgroundFlutterView != null && instance != null && !isSendedInit) {
+            if (sBackgroundFlutterEngine != null && instance != null && !isSendedInit) {
                 val context = instance
                 val initCallback = BackgroundLocatorPlugin.getCallbackHandle(context!!, INIT_CALLBACK_HANDLE_KEY)
                 if (initCallback != null) {
                     val initialDataMap = BackgroundLocatorPlugin.getDataCallback(context, INIT_DATA_CALLBACK_KEY)
-                    val backgroundChannel = MethodChannel(backgroundFlutterView,
-                            BACKGROUND_CHANNEL_ID)
+                    val backgroundChannel = MethodChannel(sBackgroundFlutterEngine!!.dartExecutor.binaryMessenger,
+                                                          BACKGROUND_CHANNEL_ID)
                     Handler(context.mainLooper)
                             .post {
                                 backgroundChannel.invokeMethod(BCM_INIT,
@@ -151,12 +151,12 @@ class IsolateHolderService : Service() {
         instance = null
         isRunning = false
         isSendedInit = false
-        if (backgroundFlutterView != null) {
+        if (sBackgroundFlutterEngine != null) {
             val context = this
             val disposeCallback = BackgroundLocatorPlugin.getCallbackHandle(context, DISPOSE_CALLBACK_HANDLE_KEY)
-            if (disposeCallback != null && backgroundFlutterView != null) {
-                val backgroundChannel = MethodChannel(backgroundFlutterView,
-                        BACKGROUND_CHANNEL_ID)
+            if (disposeCallback != null && sBackgroundFlutterEngine != null) {
+                val backgroundChannel = MethodChannel(sBackgroundFlutterEngine!!.dartExecutor.binaryMessenger,
+                                                      BACKGROUND_CHANNEL_ID)
                 Handler(context.mainLooper)
                         .post {
                             backgroundChannel.invokeMethod(BCM_DISPOSE,

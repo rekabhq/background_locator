@@ -7,6 +7,7 @@ import io.flutter.view.FlutterMain
 
 class LocatorBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        FlutterMain.startInitialization(context)
         FlutterMain.ensureInitializationComplete(context, null)
         LocatorService.enqueueWork(context, intent)
     }

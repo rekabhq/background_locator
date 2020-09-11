@@ -2,12 +2,12 @@ package rekab.app.background_locator
 
 import android.content.Context
 import android.content.Intent
-import android.location.LocationManager
 import android.os.Build
 import android.os.Handler
-import android.util.Log
 import androidx.core.app.JobIntentService
 import com.google.android.gms.location.LocationResult
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
@@ -20,12 +20,12 @@ import rekab.app.background_locator.Keys.Companion.ARG_ALTITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_HEADING
 import rekab.app.background_locator.Keys.Companion.ARG_IS_MOCKED
-import rekab.app.background_locator.Keys.Companion.ARG_TIME
 import rekab.app.background_locator.Keys.Companion.ARG_LATITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_LOCATION
 import rekab.app.background_locator.Keys.Companion.ARG_LONGITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_SPEED
 import rekab.app.background_locator.Keys.Companion.ARG_SPEED_ACCURACY
+import rekab.app.background_locator.Keys.Companion.ARG_TIME
 import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.BCM_SEND_LOCATION
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
@@ -45,7 +45,7 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
         private val JOB_ID = UUID.randomUUID().mostSignificantBits.toInt()
 
         @JvmStatic
-        private var backgroundFlutterView: FlutterNativeView? = null
+        private var sBackgroundFlutterEngine: FlutterEngine? = null
 
         @JvmStatic
         private val serviceStarted = AtomicBoolean(false)
@@ -73,30 +73,29 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
         // start synchronized block to prevent multiple service instant
         synchronized(serviceStarted) {
             this.context = context
-            if (backgroundFlutterView == null) {
+            if (sBackgroundFlutterEngine == null) {
                 val callbackHandle = context.getSharedPreferences(
-                        SHARED_PREFERENCES_KEY,
-                        Context.MODE_PRIVATE)
-                        .getLong(CALLBACK_DISPATCHER_HANDLE_KEY, 0)
+                    SHARED_PREFERENCES_KEY,
+                    Context.MODE_PRIVATE)
+                    .getLong(CALLBACK_DISPATCHER_HANDLE_KEY, 0)
                 val callbackInfo = FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
 
                 // We need flutter view to handle callback, so if it is not available we have to create a
                 // Flutter background view without any view
-                backgroundFlutterView = FlutterNativeView(context, true)
+                sBackgroundFlutterEngine = FlutterEngine(context)
 
-                val args = FlutterRunArguments()
-                args.bundlePath = FlutterMain.findAppBundlePath()
-                args.entrypoint = callbackInfo.callbackName
-                args.libraryPath = callbackInfo.callbackLibraryPath
-
-                backgroundFlutterView!!.runFromBundle(args)
-                IsolateHolderService.setBackgroundFlutterViewManually(backgroundFlutterView)
+                val args = DartExecutor.DartCallback(
+                    context.assets,
+                    FlutterMain.findAppBundlePath(context)!!,
+                    callbackInfo
+                )
+                sBackgroundFlutterEngine!!.dartExecutor.executeDartCallback(args)
+                IsolateHolderService.setBackgroundFlutterEngine(sBackgroundFlutterEngine)
             }
 
-            pluginRegistrantCallback?.registerWith(backgroundFlutterView!!.pluginRegistry)
         }
 
-        backgroundChannel = MethodChannel(backgroundFlutterView, BACKGROUND_CHANNEL_ID)
+        backgroundChannel = MethodChannel(sBackgroundFlutterEngine!!.dartExecutor.binaryMessenger, BACKGROUND_CHANNEL_ID)
         backgroundChannel.setMethodCallHandler(this)
     }
 
@@ -110,7 +109,7 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                     serviceStarted.set(true)
                 }
             }
-            else -> result.notImplemented()
+            else                       -> result.notImplemented()
         }
 
         result.success(null)
@@ -129,27 +128,28 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
                 isMocked = location.isFromMockProvider;
             }
             val locationMap: HashMap<Any, Any> =
-                    hashMapOf(
-                            ARG_IS_MOCKED to isMocked,
-                            ARG_LATITUDE to location.latitude,
-                            ARG_LONGITUDE to location.longitude,
-                            ARG_ACCURACY to location.accuracy,
-                            ARG_ALTITUDE to location.altitude,
-                            ARG_SPEED to location.speed,
-                            ARG_SPEED_ACCURACY to speedAccuracy,
-                            ARG_HEADING to location.bearing,
-                            ARG_TIME to location.time.toDouble())
+                hashMapOf(
+                    ARG_IS_MOCKED to isMocked,
+                    ARG_LATITUDE to location.latitude,
+                    ARG_LONGITUDE to location.longitude,
+                    ARG_ACCURACY to location.accuracy,
+                    ARG_ALTITUDE to location.altitude,
+                    ARG_SPEED to location.speed,
+                    ARG_SPEED_ACCURACY to speedAccuracy,
+                    ARG_HEADING to location.bearing,
+                    ARG_TIME to location.time.toDouble())
 
             val callback = BackgroundLocatorPlugin.getCallbackHandle(context, CALLBACK_HANDLE_KEY) as Long
 
             val result: HashMap<Any, Any> =
-                    hashMapOf(ARG_CALLBACK to callback,
-                            ARG_LOCATION to locationMap)
+                hashMapOf(ARG_CALLBACK to callback,
+                          ARG_LOCATION to locationMap)
 
             synchronized(serviceStarted) {
                 if (!serviceStarted.get()) {
                     queue.add(result)
-                } else {
+                }
+                else {
                     sendLocationEvent(result)
                 }
             }
@@ -162,8 +162,8 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
         // new version of flutter can not invoke method from background thread
         Handler(mainLooper)
-                .post {
-                    backgroundChannel.invokeMethod(BCM_SEND_LOCATION, result)
-                }
+            .post {
+                backgroundChannel.invokeMethod(BCM_SEND_LOCATION, result)
+            }
     }
 }
