@@ -111,7 +111,7 @@ class BackgroundLocatorPlugin
                 result?.error(msg, null, null)
             }
 
-            val initialDataMap = args[ARG_INIT_DATA_CALLBACK] as Map<*, *>
+            val initialDataMap = args[ARG_INIT_DATA_CALLBACK] as? Map<*, *>
             setDataCallback(context, INIT_DATA_CALLBACK_KEY, initialDataMap)
             startIsolateService(context, settings)
 
