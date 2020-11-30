@@ -53,6 +53,8 @@ class Keys {
       'settings_android_notificationIconColor';
   static const String SETTINGS_ANDROID_WAKE_LOCK_TIME =
       'settings_android_wakeLockTime';
+  static const String SETTINGS_ANDROID_LOCATION_CLIENT =
+      "settings_android_location_client";
 
   static const String SETTINGS_IOS_SHOWS_BACKGROUND_LOCATION_INDICATOR =
       'settings_ios_showsBackgroundLocationIndicator';

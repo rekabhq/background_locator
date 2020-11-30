@@ -2,12 +2,8 @@ package rekab.app.background_locator
 
 import android.content.Context
 import android.content.Intent
-import android.location.LocationManager
-import android.os.Build
 import android.os.Handler
-import android.util.Log
 import androidx.core.app.JobIntentService
-import com.google.android.gms.location.LocationResult
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
@@ -15,23 +11,17 @@ import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
 import io.flutter.view.FlutterNativeView
 import io.flutter.view.FlutterRunArguments
-import rekab.app.background_locator.Keys.Companion.ARG_ACCURACY
-import rekab.app.background_locator.Keys.Companion.ARG_ALTITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_HEADING
-import rekab.app.background_locator.Keys.Companion.ARG_IS_MOCKED
-import rekab.app.background_locator.Keys.Companion.ARG_TIME
-import rekab.app.background_locator.Keys.Companion.ARG_LATITUDE
 import rekab.app.background_locator.Keys.Companion.ARG_LOCATION
-import rekab.app.background_locator.Keys.Companion.ARG_LONGITUDE
-import rekab.app.background_locator.Keys.Companion.ARG_SPEED
-import rekab.app.background_locator.Keys.Companion.ARG_SPEED_ACCURACY
 import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
 import rekab.app.background_locator.Keys.Companion.BCM_SEND_LOCATION
 import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
 import rekab.app.background_locator.Keys.Companion.METHOD_SERVICE_INITIALIZED
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
+import rekab.app.background_locator.provider.AndroidLocationProviderClient
+import rekab.app.background_locator.provider.GoogleLocationProviderClient
+import rekab.app.background_locator.provider.LocationClient
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -117,29 +107,12 @@ class LocatorService : MethodChannel.MethodCallHandler, JobIntentService() {
     }
 
     override fun onHandleWork(intent: Intent) {
-        if (LocationResult.hasResult(intent)) {
-            val location = LocationResult.extractResult(intent).lastLocation
+        val locationMap: HashMap<Any, Any>? = when (PreferencesManager.getLocationClient(context)) {
+            LocationClient.Google -> GoogleLocationProviderClient.getLocationMapFromIntent(intent)
+            LocationClient.Android -> AndroidLocationProviderClient.getLocationMapFromIntent(intent)
+        }
 
-            var speedAccuracy = 0f
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                speedAccuracy = location.speedAccuracyMetersPerSecond
-            }
-            var isMocked = false;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                isMocked = location.isFromMockProvider;
-            }
-            val locationMap: HashMap<Any, Any> =
-                    hashMapOf(
-                            ARG_IS_MOCKED to isMocked,
-                            ARG_LATITUDE to location.latitude,
-                            ARG_LONGITUDE to location.longitude,
-                            ARG_ACCURACY to location.accuracy,
-                            ARG_ALTITUDE to location.altitude,
-                            ARG_SPEED to location.speed,
-                            ARG_SPEED_ACCURACY to speedAccuracy,
-                            ARG_HEADING to location.bearing,
-                            ARG_TIME to location.time.toDouble())
-
+        if (locationMap != null) {
             val callback = BackgroundLocatorPlugin.getCallbackHandle(context, CALLBACK_HANDLE_KEY) as Long
 
             val result: HashMap<Any, Any> =
