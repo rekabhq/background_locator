@@ -1,3 +1,7 @@
+## 1.3.0+1
+* Add google location client as option;
+* Several bug fixes;
+
 ## 1.2.2+1
 * Add platform specific settings;
 * Add ability to update android notification;
