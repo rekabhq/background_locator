@@ -188,10 +188,10 @@ class IsolateHolderService : Service() {
     }
 
     private fun startHolderService(intent: Intent) {
-        notificationChannelName = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME)
-        notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)
-        notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)
-        notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)
+        notificationChannelName = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME).toString()
+        notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE).toString()
+        notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG).toString()
+        notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG).toString()
         val iconNameDefault = "ic_launcher"
         var iconName = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_ICON)
         if (iconName == null || iconName.isEmpty()) {
@@ -218,15 +218,15 @@ class IsolateHolderService : Service() {
 
     private fun updateNotification(intent: Intent) {
         if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
-            notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)
+            notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE).toString()
         }
 
         if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)) {
-            notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)
+            notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG).toString()
         }
 
         if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
-            notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)
+            notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG).toString()
         }
 
         val notification = getNotification()
