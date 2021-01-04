@@ -1,3 +1,7 @@
+## 1.3.2+1
+* Fix compile error on sdk 30;
+* Fix app stop locating on android sdk 30 in background;
+
 ## 1.3.0+1
 * Add google location client as option;
 * Several bug fixes;
