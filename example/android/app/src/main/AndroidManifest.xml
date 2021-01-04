@@ -63,6 +63,7 @@
             android:name="rekab.app.background_locator.IsolateHolderService"
             android:permission="android.permission.FOREGROUND_SERVICE"
             android:exported="true"
+            android:foregroundServiceType = "location"
             />
 
         <meta-data android:name="flutterEmbedding" android:value="2"/>
