@@ -375,11 +375,13 @@ class BackgroundLocatorPlugin
         if (notificationCallback != null && IsolateHolderService.backgroundFlutterView != null) {
             val backgroundChannel = MethodChannel(IsolateHolderService.backgroundFlutterView,
                     BACKGROUND_CHANNEL_ID)
-            Handler(activity?.mainLooper)
-                    .post {
-                        backgroundChannel.invokeMethod(BCM_NOTIFICATION_CLICK,
-                                hashMapOf(ARG_NOTIFICATION_CALLBACK to notificationCallback))
-                    }
+            activity?.mainLooper?.let {
+                Handler(it)
+                        .post {
+                            backgroundChannel.invokeMethod(BCM_NOTIFICATION_CLICK,
+                                    hashMapOf(ARG_NOTIFICATION_CALLBACK to notificationCallback))
+                        }
+            }
         }
 
         return true
