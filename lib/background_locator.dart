@@ -27,7 +27,7 @@ class BackgroundLocator {
       {void Function(Map<String, dynamic>) initCallback,
       Map<String, dynamic> initDataCallback = const {},
       void Function() disposeCallback,
-      bool autoStop,
+      bool autoStop = false,
       AndroidSettings androidSettings = const AndroidSettings(),
       IOSSettings iosSettings = const IOSSettings()}) async {
     if (autoStop) {
