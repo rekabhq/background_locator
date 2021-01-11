@@ -120,6 +120,8 @@ class BackgroundLocatorPlugin
 
             client.requestLocationUpdates(getLocationRequest(settings),
                     getLocatorPendingIndent(context))
+
+            result?.success(true)
         }
 
         @JvmStatic
@@ -336,8 +338,11 @@ class BackgroundLocatorPlugin
                         args,
                         result)
             }
-            METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> removeLocator(context!!,
-                    locatorClient)
+            METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> {
+                removeLocator(context!!,
+                        locatorClient)
+                result.success(true)
+            }
             METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
             METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(result)
             METHOD_PLUGIN_UPDATE_NOTIFICATION -> {
