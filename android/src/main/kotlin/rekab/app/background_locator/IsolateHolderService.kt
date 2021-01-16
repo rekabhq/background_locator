@@ -8,7 +8,9 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.PluginRegistry
 import io.flutter.view.FlutterNativeView
 import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
@@ -28,8 +30,9 @@ import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION
 import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_MSG
 import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_TITLE
 import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_WAKE_LOCK_TIME
+import java.util.concurrent.atomic.AtomicBoolean
 
-class IsolateHolderService : Service() {
+class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     companion object {
         @JvmStatic
         val ACTION_SHUTDOWN = "SHUTDOWN"
@@ -79,6 +82,17 @@ class IsolateHolderService : Service() {
                 isSendedInit = true
             }
         }
+
+        @JvmStatic
+        internal val serviceStarted = AtomicBoolean(false)
+
+        @JvmStatic
+        internal var pluginRegistrantCallback: PluginRegistry.PluginRegistrantCallback? = null
+
+        @JvmStatic
+        fun setPluginRegistrant(callback: PluginRegistry.PluginRegistrantCallback) {
+            pluginRegistrantCallback = callback
+        }
     }
 
     private var notificationChannelName = "Flutter Locator Plugin"
@@ -89,9 +103,16 @@ class IsolateHolderService : Service() {
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
     private val notificationId = 1
+    internal lateinit var backgroundChannel: MethodChannel
+    internal lateinit var context: Context
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        startLocatorService(this)
     }
 
     private fun start() {
@@ -246,4 +267,19 @@ class IsolateHolderService : Service() {
             null
         }
     }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        when (call.method) {
+            Keys.METHOD_SERVICE_INITIALIZED -> {
+                synchronized(serviceStarted) {
+                    serviceStarted.set(true)
+                }
+            }
+            else -> result.notImplemented()
+        }
+
+        result.success(null)
+    }
+
+
 }
