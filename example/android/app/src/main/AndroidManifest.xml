@@ -41,24 +41,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver
-            android:name="rekab.app.background_locator.LocatorBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"
-            />
-
         <receiver android:name="rekab.app.background_locator.BootBroadcastReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-
-        <service
-            android:name="rekab.app.background_locator.LocatorService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true"
-            />
         <service
             android:name="rekab.app.background_locator.IsolateHolderService"
             android:permission="android.permission.FOREGROUND_SERVICE"
