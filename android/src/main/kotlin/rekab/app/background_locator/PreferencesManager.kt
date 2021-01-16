@@ -88,7 +88,7 @@ class PreferencesManager {
                                 settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
                         .apply()
             }
-            
+
             sharedPreferences.edit()
                     .putInt(Keys.SETTINGS_ANDROID_LOCATION_CLIENT,
                             settings[Keys.SETTINGS_ANDROID_LOCATION_CLIENT] as Int)
