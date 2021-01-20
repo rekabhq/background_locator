@@ -1,3 +1,8 @@
+## 1.4.0+1
+* Set default value for autoStop;
+* Fix register and unregister futures never complete on Android;
+* Fix Doze problem for Android >= 10;
+
 ## 1.3.2+1
 * Fix compile error on sdk 30;
 * Fix app stop locating on android sdk 30 in background;
