@@ -3,7 +3,6 @@ package rekab.app.background_locator
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -23,6 +22,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import io.flutter.view.FlutterMain
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
 import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
 import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
@@ -58,10 +58,11 @@ import rekab.app.background_locator.Keys.Companion.SETTINGS_DISTANCE_FILTER
 import rekab.app.background_locator.Keys.Companion.SETTINGS_INTERVAL
 import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 import rekab.app.background_locator.provider.*
+import java.util.HashMap
 
 
 class BackgroundLocatorPlugin
-    : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {
+    : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware, LocationUpdateListener {
     private lateinit var locatorClient: BLLocationProvider
     private var context: Context? = null
     private var activity: Activity? = null
@@ -118,8 +119,7 @@ class BackgroundLocatorPlugin
             setDataCallback(context, INIT_DATA_CALLBACK_KEY, initialDataMap)
             startIsolateService(context, settings)
 
-            client.requestLocationUpdates(getLocationRequest(settings),
-                    getLocatorPendingIndent(context))
+            client.requestLocationUpdates(getLocationRequest(settings))
 
             result?.success(true)
         }
@@ -156,12 +156,6 @@ class BackgroundLocatorPlugin
         }
 
         @JvmStatic
-        private fun getLocatorPendingIndent(context: Context): PendingIntent {
-            val intent = Intent(context, LocatorBroadcastReceiver::class.java)
-            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        }
-
-        @JvmStatic
         private fun getLocationRequest(settings: Map<*, *>): LocationRequestOptions {
             val interval: Long = (settings[SETTINGS_INTERVAL] as Int * 1000).toLong()
             val accuracyKey = settings[SETTINGS_ACCURACY] as Int
@@ -193,7 +187,7 @@ class BackgroundLocatorPlugin
                 return
             }
 
-            client.removeLocationUpdates(getLocatorPendingIndent(context))
+            client.removeLocationUpdates()
             stopIsolateService(context)
         }
 
@@ -298,7 +292,7 @@ class BackgroundLocatorPlugin
 
             val plugin = BackgroundLocatorPlugin()
             plugin.context = context
-            plugin.locatorClient = getLocationClient(context)
+            plugin.locatorClient = plugin.getLocationClient(context)
 
             initializeService(context, settings)
             registerLocator(context,
@@ -306,12 +300,13 @@ class BackgroundLocatorPlugin
                     settings, null)
         }
 
-        @JvmStatic
-        fun getLocationClient(context: Context): BLLocationProvider {
-            return when (PreferencesManager.getLocationClient(context)) {
-                LocationClient.Google -> GoogleLocationProviderClient(context)
-                LocationClient.Android -> AndroidLocationProviderClient(context)
-            }
+
+    }
+
+    fun getLocationClient(context: Context): BLLocationProvider {
+        return when (PreferencesManager.getLocationClient(context)) {
+            LocationClient.Google -> GoogleLocationProviderClient(context, this)
+            LocationClient.Android -> AndroidLocationProviderClient(context, this)
         }
     }
 
@@ -404,5 +399,43 @@ class BackgroundLocatorPlugin
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+    }
+
+    override fun onLocationUpdated(location: HashMap<Any, Any>?) {
+        FlutterMain.ensureInitializationComplete(context!!, null)
+
+        //https://github.com/flutter/plugins/pull/1641
+        //https://github.com/flutter/flutter/issues/36059
+        //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
+        // new version of flutter can not invoke method from background thread
+        if (location != null) {
+            val callback = getCallbackHandle(context!!, CALLBACK_HANDLE_KEY) as Long
+
+            val result: HashMap<Any, Any> =
+                    hashMapOf(ARG_CALLBACK to callback,
+                            Keys.ARG_LOCATION to location)
+
+            synchronized(IsolateHolderService.serviceStarted) {
+                sendLocationEvent(result)
+            }
+        }
+
+    }
+
+    private fun sendLocationEvent(result: HashMap<Any, Any>) {
+        //https://github.com/flutter/plugins/pull/1641
+        //https://github.com/flutter/flutter/issues/36059
+        //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
+        // new version of flutter can not invoke method from background thread
+
+        if (IsolateHolderService.backgroundFlutterView != null) {
+            val backgroundChannel = MethodChannel(IsolateHolderService.backgroundFlutterView,
+                    BACKGROUND_CHANNEL_ID)
+            Handler(context!!.mainLooper)
+                    .post {
+                        Log.d("plugin", "sendLocationEvent $result")
+                        backgroundChannel.invokeMethod(Keys.BCM_SEND_LOCATION, result)
+                    }
+        }
     }
 }

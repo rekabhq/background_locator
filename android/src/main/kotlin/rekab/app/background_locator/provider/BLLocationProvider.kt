@@ -5,11 +5,9 @@ import android.content.Intent
 import java.util.HashMap
 
 interface BLLocationProvider {
-    fun removeLocationUpdates(pendingIntent: PendingIntent)
+    var listener: LocationUpdateListener?
 
-    fun requestLocationUpdates(request: LocationRequestOptions, pendingIntent: PendingIntent)
-}
+    fun removeLocationUpdates()
 
-interface BLLocationParser {
-    fun getLocationMapFromIntent(intent: Intent): HashMap<Any, Any>?
+    fun requestLocationUpdates(request: LocationRequestOptions)
 }
