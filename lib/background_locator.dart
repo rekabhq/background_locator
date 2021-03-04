@@ -17,21 +17,21 @@ class BackgroundLocator {
 
   static Future<void> initialize() async {
     final CallbackHandle callback =
-        PluginUtilities.getCallbackHandle(callbackDispatcher);
+        PluginUtilities.getCallbackHandle(callbackDispatcher)!;
     await _channel.invokeMethod(Keys.METHOD_PLUGIN_INITIALIZE_SERVICE,
         {Keys.ARG_CALLBACK_DISPATCHER: callback.toRawHandle()});
   }
 
   static Future<void> registerLocationUpdate(
       void Function(LocationDto) callback,
-      {void Function(Map<String, dynamic>) initCallback,
+      {void Function(Map<String, dynamic>)? initCallback,
       Map<String, dynamic> initDataCallback = const {},
-      void Function() disposeCallback,
+      void Function()? disposeCallback,
       bool autoStop = false,
       AndroidSettings androidSettings = const AndroidSettings(),
       IOSSettings iosSettings = const IOSSettings()}) async {
     if (autoStop) {
-      WidgetsBinding.instance.addObserver(AutoStopHandler());
+      WidgetsBinding.instance!.addObserver(AutoStopHandler());
     }
 
     final args = SettingsUtil.getArgumentsMap(
@@ -51,17 +51,17 @@ class BackgroundLocator {
   }
 
   static Future<bool> isRegisterLocationUpdate() async {
-    return await _channel
-        .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE);
+    return (await _channel
+        .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE))!;
   }
 
   static Future<bool> isServiceRunning() async {
-    return await _channel
-        .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING);
+    return (await _channel
+        .invokeMethod<bool>(Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING))!;
   }
 
   static Future<void> updateNotificationText(
-      {String title, String msg, String bigMsg}) async {
+      {String? title, String? msg, String? bigMsg}) async {
     final Map<String, dynamic> arg = {};
 
     if (title != null) {

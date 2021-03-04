@@ -11,7 +11,7 @@ class AndroidNotificationSettings {
   final String notificationBigMsg;
   final String notificationIcon;
   final Color notificationIconColor;
-  final VoidCallback notificationTapCallback;
+  final VoidCallback? notificationTapCallback;
 
   /// [notificationTitle] Title of the notification. Only applies for android. Default is 'Start Location Tracking'.
   ///
@@ -78,7 +78,7 @@ class AndroidSettings extends LocatorSettings {
       Keys.SETTINGS_ANDROID_NOTIFICATION_ICON:
           androidNotificationSettings.notificationIcon,
       Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR:
-          androidNotificationSettings.notificationIconColor?.value,
+          androidNotificationSettings.notificationIconColor.value,
       Keys.SETTINGS_ANDROID_LOCATION_CLIENT: client.index
     };
   }
