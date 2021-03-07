@@ -97,7 +97,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final start = SizedBox(
       width: double.maxFinite,
-      child: RaisedButton(
+      child: ElevatedButton(
         child: Text('Start'),
         onPressed: () {
           _onStart();
@@ -106,7 +106,7 @@ class _MyAppState extends State<MyApp> {
     );
     final stop = SizedBox(
       width: double.maxFinite,
-      child: RaisedButton(
+      child: ElevatedButton(
         child: Text('Stop'),
         onPressed: () {
           onStop();
@@ -115,7 +115,7 @@ class _MyAppState extends State<MyApp> {
     );
     final clear = SizedBox(
       width: double.maxFinite,
-      child: RaisedButton(
+      child: ElevatedButton(
         child: Text('Clear Log'),
         onPressed: () {
           FileManager.clearLogFile();
