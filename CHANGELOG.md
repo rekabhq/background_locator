@@ -1,3 +1,6 @@
+## 1.5.0+1
+* Add null safety support;
+
 ## 1.4.0+1
 * Set default value for autoStop;
 * Fix register and unregister futures never complete on Android;
