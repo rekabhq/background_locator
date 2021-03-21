@@ -22,7 +22,7 @@ class GoogleLocationProviderClient(context: Context, override var listener: Loca
     }
 
     private fun getLocationRequest(request: LocationRequestOptions): LocationRequest {
-        val locationRequest = LocationRequest()
+        val locationRequest = LocationRequest.create()
 
         locationRequest.interval = request.interval
         locationRequest.fastestInterval = request.interval

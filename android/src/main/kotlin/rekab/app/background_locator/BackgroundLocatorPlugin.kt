@@ -32,9 +32,6 @@ class BackgroundLocatorPlugin
 
     companion object {
         @JvmStatic
-        private var isLocationServiceRunning: Boolean = false
-
-        @JvmStatic
         private var channel: MethodChannel? = null
 
         @SuppressLint("MissingPermission")
@@ -43,19 +40,15 @@ class BackgroundLocatorPlugin
                                     client: BLLocationProvider,
                                     args: Map<Any, Any>,
                                     result: Result?) {
-            if (IsolateHolderService.isRunning) {
+            if (PreferencesManager.isServiceRunning(context)) {
                 // The service is running already
-                isLocationServiceRunning = true
-
                 Log.d("BackgroundLocatorPlugin", "Locator service is already running")
                 return
             }
 
             Log.d("BackgroundLocatorPlugin",
                     "start locator with ${PreferencesManager.getLocationClient(context)} client")
-
-            isLocationServiceRunning = true
-
+            
             val callbackHandle = args[Keys.ARG_CALLBACK] as Long
             setCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY, callbackHandle)
 
@@ -77,6 +70,8 @@ class BackgroundLocatorPlugin
             client.requestLocationUpdates(getLocationRequest(settings))
 
             result?.success(true)
+
+            PreferencesManager.setServiceRunning(context, true)
         }
 
         @JvmStatic
@@ -135,30 +130,20 @@ class BackgroundLocatorPlugin
         @JvmStatic
         private fun removeLocator(context: Context,
                                   client: BLLocationProvider) {
-            isLocationServiceRunning = false
-            if (!IsolateHolderService.isRunning) {
+            if (!PreferencesManager.isServiceRunning(context)) {
                 // The service is not running
                 Log.d("BackgroundLocatorPlugin", "Locator service is not running, nothing to stop")
                 return
             }
 
+            PreferencesManager.setServiceRunning(context, false)
             client.removeLocationUpdates()
             stopIsolateService(context)
         }
 
         @JvmStatic
-        private fun isRegisterLocator(result: Result?) {
-            if (IsolateHolderService.isRunning) {
-                result?.success(true)
-            } else {
-                result?.success(false)
-            }
-            return
-        }
-
-        @JvmStatic
-        private fun isServiceRunning(result: Result?) {
-            if (isLocationServiceRunning) {
+        private fun isServiceRunning(context: Context, result: Result?) {
+            if (PreferencesManager.isServiceRunning(context)) {
                 result?.success(true)
             } else {
                 result?.success(false)
@@ -269,9 +254,11 @@ class BackgroundLocatorPlugin
                         locatorClient)
                 result.success(true)
             }
-            Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
-            Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(result)
+            Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isServiceRunning(context!!, result)
+            Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(context!!, result)
             Keys.METHOD_PLUGIN_UPDATE_NOTIFICATION -> {
+                if (!PreferencesManager.isServiceRunning(context!!)) {return}
+
                 val args: Map<Any, Any> = call.arguments()
                 updateNotificationText(context!!, args)
                 result.success(true)
@@ -346,11 +333,8 @@ class BackgroundLocatorPlugin
                     hashMapOf(Keys.ARG_CALLBACK to callback,
                             Keys.ARG_LOCATION to location)
 
-            synchronized(IsolateHolderService.serviceStarted) {
-                sendLocationEvent(result)
-            }
+            sendLocationEvent(result)
         }
-
     }
 
     private fun sendLocationEvent(result: HashMap<Any, Any>) {

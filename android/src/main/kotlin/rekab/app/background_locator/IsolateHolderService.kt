@@ -6,11 +6,11 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.util.concurrent.atomic.AtomicBoolean
 
 class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     companion object {
@@ -30,10 +30,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
         var backgroundEngine: FlutterEngine? = null
 
         @JvmStatic
-        var isRunning = false
-
-        @JvmStatic
-        internal val serviceStarted = AtomicBoolean(false)
+        private val notificationId = 1
     }
 
     private var notificationChannelName = "Flutter Locator Plugin"
@@ -43,7 +40,6 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     private var notificationIconColor = 0
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
-    private val notificationId = 1
     internal lateinit var backgroundChannel: MethodChannel
     internal lateinit var context: Context
 
@@ -54,10 +50,11 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     override fun onCreate() {
         super.onCreate()
         startLocatorService(this)
+        startForeground(notificationId, getNotification())
     }
 
     private fun start() {
-        if (isRunning) {
+        if (PreferencesManager.isServiceRunning(this)) {
             return
         }
 
@@ -72,7 +69,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
         val notification = getNotification()
         startForeground(notificationId, notification)
 
-        isRunning = true
+        PreferencesManager.setServiceRunning(this, true)
     }
 
     private fun getNotification(): Notification {
@@ -118,7 +115,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
                 startHolderService(intent)
             }
             ACTION_UPDATE_NOTIFICATION == intent.action -> {
-                if (isRunning) {
+                if (PreferencesManager.isServiceRunning(this)) {
                     updateNotification(intent)
                 }
             }
@@ -151,9 +148,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
                 }
             }
         }
+
+        PreferencesManager.setServiceRunning(this, false)
         stopForeground(true)
         stopSelf()
-        isRunning = false
     }
 
     private fun updateNotification(intent: Intent) {
@@ -190,9 +188,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             Keys.METHOD_SERVICE_INITIALIZED -> {
-                synchronized(serviceStarted) {
-                    serviceStarted.set(true)
-                }
+                PreferencesManager.setServiceRunning(this, true)
             }
             else -> result.notImplemented()
         }
@@ -200,5 +196,9 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
         result.success(null)
     }
 
+    override fun onDestroy() {
+        PreferencesManager.setServiceRunning(this, false)
 
+        super.onDestroy()
+    }
 }
