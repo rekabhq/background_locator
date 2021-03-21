@@ -11,8 +11,7 @@ import android.os.Handler
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationRequest
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -22,44 +21,8 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import io.flutter.view.FlutterMain
-import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_CALLBACK_DISPATCHER
-import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_NOTIFICATION_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_SETTINGS
-import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
-import rekab.app.background_locator.Keys.Companion.BCM_NOTIFICATION_CLICK
-import rekab.app.background_locator.Keys.Companion.CALLBACK_DISPATCHER_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
-import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.INIT_CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
-import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_INITIALIZE_SERVICE
-import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE
-import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_IS_SERVICE_RUNNING
-import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE
-import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE
-import rekab.app.background_locator.Keys.Companion.METHOD_PLUGIN_UPDATE_NOTIFICATION
-import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
-import rekab.app.background_locator.Keys.Companion.NOTIFICATION_CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ACCURACY
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_ICON
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_MSG
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_TITLE
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_WAKE_LOCK_TIME
-import rekab.app.background_locator.Keys.Companion.SETTINGS_DISTANCE_FILTER
-import rekab.app.background_locator.Keys.Companion.SETTINGS_INTERVAL
-import rekab.app.background_locator.Keys.Companion.SHARED_PREFERENCES_KEY
 import rekab.app.background_locator.provider.*
 import java.util.HashMap
-
 
 class BackgroundLocatorPlugin
     : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware, LocationUpdateListener {
@@ -93,19 +56,13 @@ class BackgroundLocatorPlugin
 
             isLocationServiceRunning = true
 
-            val callbackHandle = args[ARG_CALLBACK] as Long
-            setCallbackHandle(context, CALLBACK_HANDLE_KEY, callbackHandle)
+            val callbackHandle = args[Keys.ARG_CALLBACK] as Long
+            setCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY, callbackHandle)
 
-            val notificationCallback = args[ARG_NOTIFICATION_CALLBACK] as? Long
-            setCallbackHandle(context, NOTIFICATION_CALLBACK_HANDLE_KEY, notificationCallback)
+            val notificationCallback = args[Keys.ARG_NOTIFICATION_CALLBACK] as? Long
+            setCallbackHandle(context, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY, notificationCallback)
 
-            val initCallback = args[ARG_INIT_CALLBACK] as? Long
-            setCallbackHandle(context, INIT_CALLBACK_HANDLE_KEY, initCallback)
-
-            val disposeCallback = args[ARG_DISPOSE_CALLBACK] as? Long
-            setCallbackHandle(context, DISPOSE_CALLBACK_HANDLE_KEY, disposeCallback)
-
-            val settings = args[ARG_SETTINGS] as Map<*, *>
+            val settings = args[Keys.ARG_SETTINGS] as Map<*, *>
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                     context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -115,8 +72,6 @@ class BackgroundLocatorPlugin
                 result?.error(msg, null, null)
             }
 
-            val initialDataMap = args[ARG_INIT_DATA_CALLBACK] as? Map<*, *>
-            setDataCallback(context, INIT_DATA_CALLBACK_KEY, initialDataMap)
             startIsolateService(context, settings)
 
             client.requestLocationUpdates(getLocationRequest(settings))
@@ -128,15 +83,15 @@ class BackgroundLocatorPlugin
         private fun startIsolateService(context: Context, settings: Map<*, *>) {
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME, settings[SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE, settings[SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_MSG, settings[SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG, settings[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_ICON, settings[SETTINGS_ANDROID_NOTIFICATION_ICON] as String)
-            intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, settings[SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
 
-            if (settings.containsKey(SETTINGS_ANDROID_WAKE_LOCK_TIME)) {
-                intent.putExtra(SETTINGS_ANDROID_WAKE_LOCK_TIME, settings[SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
+            if (settings.containsKey(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME)) {
+                intent.putExtra(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME, settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
             }
 
             ContextCompat.startForegroundService(context, intent)
@@ -151,16 +106,16 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun initializeService(context: Context, args: Map<Any, Any>) {
-            val callbackHandle: Long = args[ARG_CALLBACK_DISPATCHER] as Long
+            val callbackHandle: Long = args[Keys.ARG_CALLBACK_DISPATCHER] as Long
             setCallbackDispatcherHandle(context, callbackHandle)
         }
 
         @JvmStatic
         private fun getLocationRequest(settings: Map<*, *>): LocationRequestOptions {
-            val interval: Long = (settings[SETTINGS_INTERVAL] as Int * 1000).toLong()
-            val accuracyKey = settings[SETTINGS_ACCURACY] as Int
+            val interval: Long = (settings[Keys.SETTINGS_INTERVAL] as Int * 1000).toLong()
+            val accuracyKey = settings[Keys.SETTINGS_ACCURACY] as Int
             val accuracy = getAccuracy(accuracyKey)
-            val distanceFilter = settings[SETTINGS_DISTANCE_FILTER] as Double
+            val distanceFilter = settings[Keys.SETTINGS_DISTANCE_FILTER] as Double
 
             return LocationRequestOptions(interval, accuracy, distanceFilter.toFloat())
         }
@@ -215,17 +170,17 @@ class BackgroundLocatorPlugin
         private fun updateNotificationText(context: Context, args: Map<Any, Any>) {
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_UPDATE_NOTIFICATION
-            if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
-                intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE,
-                        args[SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
+            if (args.containsKey(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
+                intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE,
+                        args[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
             }
-            if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_MSG)) {
-                intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_MSG,
-                        args[SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
+            if (args.containsKey(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG)) {
+                intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG,
+                        args[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
             }
-            if (args.containsKey(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
-                intent.putExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
-                        args[SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+            if (args.containsKey(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
+                intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
+                        args[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
             }
 
             ContextCompat.startForegroundService(context, intent)
@@ -233,57 +188,33 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun setCallbackDispatcherHandle(context: Context, handle: Long) {
-            context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+            context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .edit()
-                    .putLong(CALLBACK_DISPATCHER_HANDLE_KEY, handle)
+                    .putLong(Keys.CALLBACK_DISPATCHER_HANDLE_KEY, handle)
                     .apply()
         }
 
         @JvmStatic
         fun setCallbackHandle(context: Context, key: String, handle: Long?) {
             if (handle == null) {
-                context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                         .edit()
                         .remove(key)
                         .apply()
                 return
             }
 
-            context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+            context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .edit()
                     .putLong(key, handle)
                     .apply()
         }
 
         @JvmStatic
-        fun setDataCallback(context: Context, key: String, data: Map<*, *>?) {
-            if (data == null) {
-                context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                        .edit()
-                        .remove(key)
-                        .apply()
-                return
-            }
-            val dataStr = Gson().toJson(data)
-            context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .edit()
-                    .putString(key, dataStr)
-                    .apply()
-        }
-
-        @JvmStatic
         fun getCallbackHandle(context: Context, key: String): Long? {
-            val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+            val sharedPreferences = context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
             if (sharedPreferences.contains(key)) return sharedPreferences.getLong(key, 0L)
             return null
-        }
-
-        @JvmStatic
-        fun getDataCallback(context: Context, key: String): Map<*, *> {
-            val initialDataStr = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .getString(key, null)
-            val type = object : TypeToken<Map<*, *>>() {}.type
-            return Gson().fromJson(initialDataStr, type)
         }
 
         @JvmStatic
@@ -312,7 +243,7 @@ class BackgroundLocatorPlugin
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
-            METHOD_PLUGIN_INITIALIZE_SERVICE -> {
+            Keys.METHOD_PLUGIN_INITIALIZE_SERVICE -> {
                 val args: Map<Any, Any> = call.arguments()
 
                 // save callback dispatcher to use it when device reboots
@@ -321,7 +252,7 @@ class BackgroundLocatorPlugin
                 initializeService(context!!, args)
                 result.success(true)
             }
-            METHOD_PLUGIN_REGISTER_LOCATION_UPDATE -> {
+            Keys.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE -> {
                 val args: Map<Any, Any> = call.arguments()
 
                 // save setting to use it when device reboots
@@ -333,14 +264,14 @@ class BackgroundLocatorPlugin
                         args,
                         result)
             }
-            METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> {
+            Keys.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> {
                 removeLocator(context!!,
                         locatorClient)
                 result.success(true)
             }
-            METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
-            METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(result)
-            METHOD_PLUGIN_UPDATE_NOTIFICATION -> {
+            Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isRegisterLocator(result)
+            Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(result)
+            Keys.METHOD_PLUGIN_UPDATE_NOTIFICATION -> {
                 val args: Map<Any, Any> = call.arguments()
                 updateNotificationText(context!!, args)
                 result.success(true)
@@ -361,25 +292,25 @@ class BackgroundLocatorPlugin
         plugin.context = context
         plugin.locatorClient = getLocationClient(context)
 
-        channel = MethodChannel(messenger, CHANNEL_ID)
+        channel = MethodChannel(messenger, Keys.CHANNEL_ID)
         channel?.setMethodCallHandler(plugin)
     }
 
     override fun onNewIntent(intent: Intent?): Boolean {
-        if (intent?.action != NOTIFICATION_ACTION) {
+        if (intent?.action != Keys.NOTIFICATION_ACTION) {
             // this is not our notification
             return false
         }
 
-        val notificationCallback = getCallbackHandle(activity!!, NOTIFICATION_CALLBACK_HANDLE_KEY)
-        if (notificationCallback != null && IsolateHolderService.backgroundFlutterView != null) {
-            val backgroundChannel = MethodChannel(IsolateHolderService.backgroundFlutterView,
-                    BACKGROUND_CHANNEL_ID)
+        val notificationCallback = getCallbackHandle(activity!!, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY)
+        if (notificationCallback != null && IsolateHolderService.backgroundEngine != null) {
+            val backgroundChannel =
+                    MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
             activity?.mainLooper?.let {
                 Handler(it)
                         .post {
-                            backgroundChannel.invokeMethod(BCM_NOTIFICATION_CLICK,
-                                    hashMapOf(ARG_NOTIFICATION_CALLBACK to notificationCallback))
+                            backgroundChannel.invokeMethod(Keys.BCM_NOTIFICATION_CLICK,
+                                    hashMapOf(Keys.ARG_NOTIFICATION_CALLBACK to notificationCallback))
                         }
             }
         }
@@ -402,17 +333,17 @@ class BackgroundLocatorPlugin
     }
 
     override fun onLocationUpdated(location: HashMap<Any, Any>?) {
-        FlutterMain.ensureInitializationComplete(context!!, null)
+        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context!!, null)
 
         //https://github.com/flutter/plugins/pull/1641
         //https://github.com/flutter/flutter/issues/36059
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
         // new version of flutter can not invoke method from background thread
         if (location != null) {
-            val callback = getCallbackHandle(context!!, CALLBACK_HANDLE_KEY) as Long
+            val callback = getCallbackHandle(context!!, Keys.CALLBACK_HANDLE_KEY) as Long
 
             val result: HashMap<Any, Any> =
-                    hashMapOf(ARG_CALLBACK to callback,
+                    hashMapOf(Keys.ARG_CALLBACK to callback,
                             Keys.ARG_LOCATION to location)
 
             synchronized(IsolateHolderService.serviceStarted) {
@@ -428,9 +359,9 @@ class BackgroundLocatorPlugin
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
         // new version of flutter can not invoke method from background thread
 
-        if (IsolateHolderService.backgroundFlutterView != null) {
-            val backgroundChannel = MethodChannel(IsolateHolderService.backgroundFlutterView,
-                    BACKGROUND_CHANNEL_ID)
+        if (IsolateHolderService.backgroundEngine != null) {
+            val backgroundChannel =
+                    MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
             Handler(context!!.mainLooper)
                     .post {
                         Log.d("plugin", "sendLocationEvent $result")

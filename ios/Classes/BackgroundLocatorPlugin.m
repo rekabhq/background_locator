@@ -188,13 +188,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [PreferencesManager saveDistanceFilter:distanceFilter];
 
     [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
-    [PreferencesManager setCallbackHandle:initCallback key:kInitCallbackKey];
-    [PreferencesManager setCallbackHandle:disposeCallback key:kDisposeCallbackKey];
-    NSDictionary *map = @{
-                     kArgInitCallback : @([PreferencesManager getCallbackHandle:kInitCallbackKey]),
-                     kArgInitDataCallback: initialDataDictionary
-                     };
-    [_callbackChannel invokeMethod:kBCMInit arguments:map];
+    
     [_locationManager startUpdatingLocation];
     [_locationManager startMonitoringSignificantLocationChanges];
 }
@@ -206,10 +200,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
             for (CLRegion* region in [_locationManager monitoredRegions]) {
                 [_locationManager stopMonitoringForRegion:region];
             }
-            NSDictionary *map = @{
-                             kArgDisposeCallback : @([PreferencesManager getCallbackHandle:kDisposeCallbackKey])
-                             };
-            [_callbackChannel invokeMethod:kBCMDispose arguments:map];
         }
     }
 }

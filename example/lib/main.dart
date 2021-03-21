@@ -226,15 +226,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _startLocator() {
-    Map<String, dynamic> data = {'countInit': 1};
     BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
-        initCallback: LocationCallbackHandler.initCallback,
-        initDataCallback: data,
-/*
-        Comment initDataCallback, so service not set init variable,
-        variable stay with value of last run after unRegisterLocationUpdate
- */
-        disposeCallback: LocationCallbackHandler.disposeCallback,
         iosSettings: IOSSettings(
             accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),
         autoStop: false,

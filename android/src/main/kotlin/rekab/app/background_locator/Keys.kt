@@ -15,15 +15,6 @@ class Keys {
         val NOTIFICATION_CALLBACK_HANDLE_KEY = "NOTIFICATION_CALLBACK_HANDLE_KEY"
 
         @JvmStatic
-        val INIT_CALLBACK_HANDLE_KEY = "INIT_CALLBACK_HANDLE_KEY"
-
-        @JvmStatic
-        val INIT_DATA_CALLBACK_KEY = "INIT_DATA_CALLBACK_KEY"
-
-        @JvmStatic
-        val DISPOSE_CALLBACK_HANDLE_KEY = "DISPOSE_CALLBACK_HANDLE_KEY"
-
-        @JvmStatic
         val CHANNEL_ID = "app.rekab/locator_plugin"
 
         @JvmStatic
@@ -84,15 +75,6 @@ class Keys {
         val ARG_NOTIFICATION_CALLBACK = "notificationCallback"
 
         @JvmStatic
-        val ARG_INIT_CALLBACK = "initCallback"
-
-        @JvmStatic
-        val ARG_INIT_DATA_CALLBACK = "initDataCallback"
-
-        @JvmStatic
-        val ARG_DISPOSE_CALLBACK = "disposeCallback"
-
-        @JvmStatic
         val ARG_LOCATION = "location"
 
         @JvmStatic
@@ -140,12 +122,6 @@ class Keys {
 
         @JvmStatic
         val BCM_NOTIFICATION_CLICK = "BCM_NOTIFICATION_CLICK"
-
-        @JvmStatic
-        val BCM_INIT = "BCM_INIT"
-
-        @JvmStatic
-        val BCM_DISPOSE = "BCM_DISPOSE"
 
         @JvmStatic
         val NOTIFICATION_ACTION = "com.rekab.background_locator.notification"
