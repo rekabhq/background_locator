@@ -1,14 +1,11 @@
 package rekab.app.background_locator.provider
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
-import java.util.*
 
 class AndroidLocationProviderClient(context: Context, override var listener: LocationUpdateListener?) : BLLocationProvider, LocationListener {
     private val client: LocationManager? =

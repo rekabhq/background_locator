@@ -1,16 +1,15 @@
 package rekab.app.background_locator
 
-import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
+import com.google.android.gms.location.LocationRequest
 import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.FlutterCallbackInformation
+import rekab.app.background_locator.provider.LocationRequestOptions
 import java.util.concurrent.atomic.AtomicBoolean
-
 
 internal fun IsolateHolderService.startLocatorService(context: Context) {
 
@@ -45,13 +44,22 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
     backgroundChannel.setMethodCallHandler(this)
 }
 
-//fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
-//    val manager: ActivityManager? = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
-//    for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-//        if (serviceClass.name == service.service.getClassName()) {
-//            return true
-//        }
-//    }
-//    return false
-//}
+fun getLocationRequest(intent: Intent): LocationRequestOptions {
+    val interval: Long = (intent.getIntExtra(Keys.SETTINGS_INTERVAL, 10) * 1000).toLong()
+    val accuracyKey = intent.getIntExtra(Keys.SETTINGS_ACCURACY, 4)
+    val accuracy = getAccuracy(accuracyKey)
+    val distanceFilter = intent.getDoubleExtra(Keys.SETTINGS_DISTANCE_FILTER, 0.0)
 
+    return LocationRequestOptions(interval, accuracy, distanceFilter.toFloat())
+}
+
+fun getAccuracy(key: Int): Int {
+    return when (key) {
+        0 -> LocationRequest.PRIORITY_NO_POWER
+        1 -> LocationRequest.PRIORITY_LOW_POWER
+        2 -> LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        3 -> LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        4 -> LocationRequest.PRIORITY_HIGH_ACCURACY
+        else -> LocationRequest.PRIORITY_HIGH_ACCURACY
+    }
+}

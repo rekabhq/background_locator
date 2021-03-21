@@ -1,12 +1,8 @@
 package rekab.app.background_locator.provider
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.util.Log
 import com.google.android.gms.location.*
-import java.util.HashMap
 
 class GoogleLocationProviderClient(context: Context, override var listener: LocationUpdateListener?) : BLLocationProvider {
     private val client: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)

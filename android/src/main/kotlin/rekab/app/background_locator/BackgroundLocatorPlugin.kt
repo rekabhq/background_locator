@@ -10,8 +10,6 @@ import android.os.Build
 import android.os.Handler
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.LocationRequest
-import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -21,12 +19,9 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import rekab.app.background_locator.provider.*
-import java.util.HashMap
 
 class BackgroundLocatorPlugin
-    : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware, LocationUpdateListener {
-    private lateinit var locatorClient: BLLocationProvider
+    : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {
     private var context: Context? = null
     private var activity: Activity? = null
 
@@ -37,7 +32,6 @@ class BackgroundLocatorPlugin
         @SuppressLint("MissingPermission")
         @JvmStatic
         private fun registerLocator(context: Context,
-                                    client: BLLocationProvider,
                                     args: Map<Any, Any>,
                                     result: Result?) {
             if (PreferencesManager.isServiceRunning(context)) {
@@ -48,7 +42,7 @@ class BackgroundLocatorPlugin
 
             Log.d("BackgroundLocatorPlugin",
                     "start locator with ${PreferencesManager.getLocationClient(context)} client")
-            
+
             val callbackHandle = args[Keys.ARG_CALLBACK] as Long
             setCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY, callbackHandle)
 
@@ -66,11 +60,7 @@ class BackgroundLocatorPlugin
             }
 
             startIsolateService(context, settings)
-
-            client.requestLocationUpdates(getLocationRequest(settings))
-
             result?.success(true)
-
             PreferencesManager.setServiceRunning(context, true)
         }
 
@@ -78,15 +68,25 @@ class BackgroundLocatorPlugin
         private fun startIsolateService(context: Context, settings: Map<*, *>) {
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
-            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
-            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
-            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
-            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
-            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON] as String)
-            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME,
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE,
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG,
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON,
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON] as String)
+            intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR,
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
+            intent.putExtra(Keys.SETTINGS_INTERVAL, settings[Keys.SETTINGS_INTERVAL] as Int)
+            intent.putExtra(Keys.SETTINGS_ACCURACY, settings[Keys.SETTINGS_ACCURACY] as Int)
+            intent.putExtra(Keys.SETTINGS_DISTANCE_FILTER, settings[Keys.SETTINGS_DISTANCE_FILTER] as Double)
 
             if (settings.containsKey(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME)) {
-                intent.putExtra(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME, settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
+                intent.putExtra(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME,
+                        settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
             }
 
             ContextCompat.startForegroundService(context, intent)
@@ -106,30 +106,7 @@ class BackgroundLocatorPlugin
         }
 
         @JvmStatic
-        private fun getLocationRequest(settings: Map<*, *>): LocationRequestOptions {
-            val interval: Long = (settings[Keys.SETTINGS_INTERVAL] as Int * 1000).toLong()
-            val accuracyKey = settings[Keys.SETTINGS_ACCURACY] as Int
-            val accuracy = getAccuracy(accuracyKey)
-            val distanceFilter = settings[Keys.SETTINGS_DISTANCE_FILTER] as Double
-
-            return LocationRequestOptions(interval, accuracy, distanceFilter.toFloat())
-        }
-
-        @JvmStatic
-        private fun getAccuracy(key: Int): Int {
-            return when (key) {
-                0 -> LocationRequest.PRIORITY_NO_POWER
-                1 -> LocationRequest.PRIORITY_LOW_POWER
-                2 -> LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-                3 -> LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-                4 -> LocationRequest.PRIORITY_HIGH_ACCURACY
-                else -> LocationRequest.PRIORITY_HIGH_ACCURACY
-            }
-        }
-
-        @JvmStatic
-        private fun removeLocator(context: Context,
-                                  client: BLLocationProvider) {
+        private fun unRegisterPlugin(context: Context) {
             if (!PreferencesManager.isServiceRunning(context)) {
                 // The service is not running
                 Log.d("BackgroundLocatorPlugin", "Locator service is not running, nothing to stop")
@@ -137,7 +114,6 @@ class BackgroundLocatorPlugin
             }
 
             PreferencesManager.setServiceRunning(context, false)
-            client.removeLocationUpdates()
             stopIsolateService(context)
         }
 
@@ -208,21 +184,9 @@ class BackgroundLocatorPlugin
 
             val plugin = BackgroundLocatorPlugin()
             plugin.context = context
-            plugin.locatorClient = plugin.getLocationClient(context)
 
             initializeService(context, settings)
-            registerLocator(context,
-                    plugin.locatorClient,
-                    settings, null)
-        }
-
-
-    }
-
-    fun getLocationClient(context: Context): BLLocationProvider {
-        return when (PreferencesManager.getLocationClient(context)) {
-            LocationClient.Google -> GoogleLocationProviderClient(context, this)
-            LocationClient.Android -> AndroidLocationProviderClient(context, this)
+            startIsolateService(context, settings)
         }
     }
 
@@ -243,21 +207,20 @@ class BackgroundLocatorPlugin
                 // save setting to use it when device reboots
                 PreferencesManager.saveSettings(context!!, args)
 
-                locatorClient = getLocationClient(context!!)
                 registerLocator(context!!,
-                        locatorClient,
                         args,
                         result)
             }
             Keys.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> {
-                removeLocator(context!!,
-                        locatorClient)
+                unRegisterPlugin(context!!)
                 result.success(true)
             }
             Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isServiceRunning(context!!, result)
             Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(context!!, result)
             Keys.METHOD_PLUGIN_UPDATE_NOTIFICATION -> {
-                if (!PreferencesManager.isServiceRunning(context!!)) {return}
+                if (!PreferencesManager.isServiceRunning(context!!)) {
+                    return
+                }
 
                 val args: Map<Any, Any> = call.arguments()
                 updateNotificationText(context!!, args)
@@ -277,7 +240,6 @@ class BackgroundLocatorPlugin
     private fun onAttachedToEngine(context: Context, messenger: BinaryMessenger) {
         val plugin = BackgroundLocatorPlugin()
         plugin.context = context
-        plugin.locatorClient = getLocationClient(context)
 
         channel = MethodChannel(messenger, Keys.CHANNEL_ID)
         channel?.setMethodCallHandler(plugin)
@@ -319,38 +281,5 @@ class BackgroundLocatorPlugin
     override fun onDetachedFromActivityForConfigChanges() {
     }
 
-    override fun onLocationUpdated(location: HashMap<Any, Any>?) {
-        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context!!, null)
 
-        //https://github.com/flutter/plugins/pull/1641
-        //https://github.com/flutter/flutter/issues/36059
-        //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
-        // new version of flutter can not invoke method from background thread
-        if (location != null) {
-            val callback = getCallbackHandle(context!!, Keys.CALLBACK_HANDLE_KEY) as Long
-
-            val result: HashMap<Any, Any> =
-                    hashMapOf(Keys.ARG_CALLBACK to callback,
-                            Keys.ARG_LOCATION to location)
-
-            sendLocationEvent(result)
-        }
-    }
-
-    private fun sendLocationEvent(result: HashMap<Any, Any>) {
-        //https://github.com/flutter/plugins/pull/1641
-        //https://github.com/flutter/flutter/issues/36059
-        //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
-        // new version of flutter can not invoke method from background thread
-
-        if (IsolateHolderService.backgroundEngine != null) {
-            val backgroundChannel =
-                    MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
-            Handler(context!!.mainLooper)
-                    .post {
-                        Log.d("plugin", "sendLocationEvent $result")
-                        backgroundChannel.invokeMethod(Keys.BCM_SEND_LOCATION, result)
-                    }
-        }
-    }
 }

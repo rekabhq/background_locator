@@ -4,15 +4,19 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import rekab.app.background_locator.provider.*
+import java.util.HashMap
 
-class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
+class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateListener, Service() {
     companion object {
         @JvmStatic
         val ACTION_SHUTDOWN = "SHUTDOWN"
@@ -40,6 +44,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     private var notificationIconColor = 0
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
+    private lateinit var locatorClient: BLLocationProvider
     internal lateinit var backgroundChannel: MethodChannel
     internal lateinit var context: Context
 
@@ -137,6 +142,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
         icon = resources.getIdentifier(iconName, "mipmap", packageName)
         notificationIconColor = intent.getLongExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, 0).toInt()
         wakeLockTime = intent.getIntExtra(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME, 60) * 60 * 1000L
+
+        locatorClient = getLocationClient(context)
+        locatorClient.requestLocationUpdates(getLocationRequest(intent))
+
         start()
     }
 
@@ -149,6 +158,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
             }
         }
 
+        locatorClient.removeLocationUpdates()
         PreferencesManager.setServiceRunning(this, false)
         stopForeground(true)
         stopSelf()
@@ -198,7 +208,50 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
 
     override fun onDestroy() {
         PreferencesManager.setServiceRunning(this, false)
-
         super.onDestroy()
     }
+
+
+    private fun getLocationClient(context: Context): BLLocationProvider {
+        return when (PreferencesManager.getLocationClient(context)) {
+            LocationClient.Google -> GoogleLocationProviderClient(context, this)
+            LocationClient.Android -> AndroidLocationProviderClient(context, this)
+        }
+    }
+
+    override fun onLocationUpdated(location: HashMap<Any, Any>?) {
+        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null)
+
+        //https://github.com/flutter/plugins/pull/1641
+        //https://github.com/flutter/flutter/issues/36059
+        //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
+        // new version of flutter can not invoke method from background thread
+        if (location != null) {
+            val callback = BackgroundLocatorPlugin.getCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY) as Long
+
+            val result: HashMap<Any, Any> =
+                    hashMapOf(Keys.ARG_CALLBACK to callback,
+                            Keys.ARG_LOCATION to location)
+
+            sendLocationEvent(result)
+        }
+    }
+
+    private fun sendLocationEvent(result: HashMap<Any, Any>) {
+        //https://github.com/flutter/plugins/pull/1641
+        //https://github.com/flutter/flutter/issues/36059
+        //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
+        // new version of flutter can not invoke method from background thread
+
+        if (backgroundEngine != null) {
+            val backgroundChannel =
+                    MethodChannel(backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
+            Handler(context.mainLooper)
+                    .post {
+                        Log.d("plugin", "sendLocationEvent $result")
+                        backgroundChannel.invokeMethod(Keys.BCM_SEND_LOCATION, result)
+                    }
+        }
+    }
+
 }
