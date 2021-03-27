@@ -19,6 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (double)getDistanceFilter;
 + (void)setObservingRegion:(BOOL) observing;
 + (BOOL)isObservingRegion;
++ (void)setServiceRunning:(BOOL) running;
++ (BOOL)isServiceRunning;
 
 @end
 

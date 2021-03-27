@@ -14,7 +14,6 @@
 
 static FlutterPluginRegistrantCallback registerPlugins = nil;
 static BackgroundLocatorPlugin *instance = nil;
-static BOOL isLocationServiceRunning = NO;
 
 #pragma mark FlutterPlugin Methods
 
@@ -202,12 +201,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void) setServiceRunning:(BOOL) value {
     @synchronized(self) {
-        isLocationServiceRunning = value;
+        [PreferencesManager setServiceRunning:value];
     }
 }
 
 - (BOOL)isServiceRunning{
-    return isLocationServiceRunning;
+    return [PreferencesManager isServiceRunning];
 }
 
 @end

@@ -56,4 +56,12 @@
     return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefObservingRegion];
 }
 
++ (void)setServiceRunning:(BOOL)running {
+    [[NSUserDefaults standardUserDefaults] setBool:running forKey:kPrefServiceRunning];
+}
+
++ (BOOL)isServiceRunning {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefServiceRunning];
+}
+
 @end
