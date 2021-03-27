@@ -13,7 +13,6 @@
 }
 
 static FlutterPluginRegistrantCallback registerPlugins = nil;
-static BOOL initialized = NO;
 static BOOL observingRegions = NO;
 static BackgroundLocatorPlugin *instance = nil;
 static BOOL isLocationServiceRunning = NO;
@@ -79,9 +78,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     _lastLocation = location;
     NSDictionary<NSString*,NSNumber*>* locationMap = [Util getLocationMap:location];
     
-    if (initialized) {
-        [self sendLocationEvent:locationMap];
-    }
+    [self sendLocationEvent:locationMap];
 }
 
 #pragma mark LocationManagerDelegate Methods
@@ -104,6 +101,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 #pragma mark LocatorPlugin Methods
 - (void) sendLocationEvent: (NSDictionary<NSString*,NSNumber*>*)location {
+    if (_callbackChannel == nil) {
+        return;
+    }
+    
     NSDictionary *map = @{
                      kArgCallback : @([PreferencesManager getCallbackHandle:kCallbackKey]),
                      kArgLocation: location
@@ -160,12 +161,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [_registrar addMethodCallDelegate:self channel:_callbackChannel];
 }
 
-- (void) setInitialized {
-    @synchronized(self) {
-        initialized = YES;
-    }
-}
-
 - (void)registerLocator:(int64_t)callback
            initCallback:(int64_t)initCallback
   initialDataDictionary:(NSDictionary*)initialDataDictionary
@@ -194,18 +189,16 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 - (void)removeLocator {
+    if (_locationManager == nil) {
+        return;
+    }
+    
     @synchronized (self) {
-        if(initialized){
-            [_locationManager stopUpdatingLocation];
-            for (CLRegion* region in [_locationManager monitoredRegions]) {
-                [_locationManager stopMonitoringForRegion:region];
-            }
+        [_locationManager stopUpdatingLocation];
+        for (CLRegion* region in [_locationManager monitoredRegions]) {
+            [_locationManager stopMonitoringForRegion:region];
         }
     }
-}
-
-- (BOOL)isLocatorRegistered{
-    return initialized;
 }
 
 - (void) setServiceRunning:(BOOL) value {
