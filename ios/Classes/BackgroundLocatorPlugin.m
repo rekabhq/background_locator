@@ -45,13 +45,11 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
         // Restart the headless service.
         [self startLocatorService:[PreferencesManager getCallbackDispatcherHandle]];
         [PreferencesManager setObservingRegion:YES];
-    } else {
-        if([PreferencesManager isObservingRegion]) {
-            [self prepareLocationManager];
-            [self removeLocator];
-            [PreferencesManager setObservingRegion:NO];
-            [_locationManager startUpdatingLocation];
-        }
+    } else if([PreferencesManager isObservingRegion]) {
+        [self prepareLocationManager];
+        [self removeLocator];
+        [PreferencesManager setObservingRegion:NO];
+        [_locationManager startUpdatingLocation];
     }
     
     // Note: if we return NO, this vetos the launch of the application.

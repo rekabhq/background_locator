@@ -13,7 +13,7 @@ class IOSSettings extends LocatorSettings {
   const IOSSettings({
     LocationAccuracy accuracy = LocationAccuracy.NAVIGATION,
     double distanceFilter = 0,
-    this.showsBackgroundLocationIndicator = false,
+    this.showsBackgroundLocationIndicator = true,
   }) : super(accuracy: accuracy, distanceFilter: distanceFilter); //minutes
 
   Map<String, dynamic> toMap() {
