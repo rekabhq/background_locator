@@ -48,6 +48,8 @@ FOUNDATION_EXPORT NSString *const kSettingsShowsBackgroundLocationIndicator;
 
 FOUNDATION_EXPORT NSString *const kBCMSendLocation;
 
+FOUNDATION_EXPORT NSString *const kPrefObservingRegion;
+
 @end
 
 NS_ASSUME_NONNULL_END

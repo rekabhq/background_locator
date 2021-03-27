@@ -48,4 +48,12 @@
     return [[NSUserDefaults standardUserDefaults] doubleForKey:kDistanceFilterKey];
 }
 
++ (void)setObservingRegion:(BOOL)observing {
+    [[NSUserDefaults standardUserDefaults] setBool:observing forKey:kPrefObservingRegion];
+}
+
++ (BOOL)isObservingRegion {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefObservingRegion];
+}
+
 @end

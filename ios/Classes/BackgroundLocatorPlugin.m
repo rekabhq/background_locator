@@ -13,7 +13,6 @@
 }
 
 static FlutterPluginRegistrantCallback registerPlugins = nil;
-static BOOL observingRegions = NO;
 static BackgroundLocatorPlugin *instance = nil;
 static BOOL isLocationServiceRunning = NO;
 
@@ -46,12 +45,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     if (launchOptions[UIApplicationLaunchOptionsLocationKey] != nil) {
         // Restart the headless service.
         [self startLocatorService:[PreferencesManager getCallbackDispatcherHandle]];
-        observingRegions = YES;
+        [PreferencesManager setObservingRegion:YES];
     } else {
-        if(observingRegions == YES) {
+        if([PreferencesManager isObservingRegion]) {
             [self prepareLocationManager];
             [self removeLocator];
-            observingRegions = NO;
+            [PreferencesManager setObservingRegion:NO];
             [_locationManager startUpdatingLocation];
         }
     }
@@ -87,7 +86,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     if (locations.count > 0) {
         CLLocation* location = [locations objectAtIndex:0];
         [self prepareLocationMap: location];
-        if(observingRegions) {
+        if([PreferencesManager isObservingRegion]) {
             [self observeRegionForLocation: location];
             [_locationManager stopUpdatingLocation];
         }

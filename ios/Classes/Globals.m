@@ -46,4 +46,6 @@ NSString *const kSettingsShowsBackgroundLocationIndicator = @"settings_ios_shows
 
 NSString *const kBCMSendLocation = @"BCM_SEND_LOCATION";
 
+NSString *const kPrefObservingRegion = @"pref_observingRegion";
+
 @end
