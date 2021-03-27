@@ -56,6 +56,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     return YES;
 }
 
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    if ([PreferencesManager isServiceRunning]) {
+        [_locationManager startMonitoringSignificantLocationChanges];
+    }
+}
+
 -(void)applicationWillTerminate:(UIApplication *)application {
     [self observeRegionForLocation:_lastLocation];
 }
