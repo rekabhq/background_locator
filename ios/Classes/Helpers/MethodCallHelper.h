@@ -10,14 +10,12 @@
 
 @protocol MethodCallHelperDelegate <NSObject>
 - (void) startLocatorService:(int64_t) callbackDispatcher;
-- (void) setInitialized;
 - (void)registerLocator:(int64_t)callback
            initCallback:(int64_t)initCallback
   initialDataDictionary:(NSDictionary *_Nullable)initialDataDictionary
         disposeCallback:(int64_t)disposeCallback
                settings:(NSDictionary *_Nonnull)settings;
 - (void) removeLocator;
-- (BOOL) isLocatorRegistered;
 - (BOOL) isServiceRunning;
 - (void) setServiceRunning:(BOOL)value;
 

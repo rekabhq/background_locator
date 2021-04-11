@@ -1,3 +1,7 @@
+## 1.6.0+1-beta
+* Use new flutter engine;
+* Fix start stop bug which prevents correct state in plugin;
+
 ## 1.5.0+1
 * Add null safety support;
 

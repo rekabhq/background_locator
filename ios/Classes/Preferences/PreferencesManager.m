@@ -48,4 +48,20 @@
     return [[NSUserDefaults standardUserDefaults] doubleForKey:kDistanceFilterKey];
 }
 
++ (void)setObservingRegion:(BOOL)observing {
+    [[NSUserDefaults standardUserDefaults] setBool:observing forKey:kPrefObservingRegion];
+}
+
++ (BOOL)isObservingRegion {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefObservingRegion];
+}
+
++ (void)setServiceRunning:(BOOL)running {
+    [[NSUserDefaults standardUserDefaults] setBool:running forKey:kPrefServiceRunning];
+}
+
++ (BOOL)isServiceRunning {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefServiceRunning];
+}
+
 @end

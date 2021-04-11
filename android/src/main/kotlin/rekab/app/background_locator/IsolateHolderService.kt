@@ -7,32 +7,16 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import androidx.core.app.NotificationCompat
+import io.flutter.FlutterInjector
+import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.PluginRegistry
-import io.flutter.view.FlutterNativeView
-import rekab.app.background_locator.Keys.Companion.ARG_DISPOSE_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_INIT_CALLBACK
-import rekab.app.background_locator.Keys.Companion.ARG_INIT_DATA_CALLBACK
-import rekab.app.background_locator.Keys.Companion.BACKGROUND_CHANNEL_ID
-import rekab.app.background_locator.Keys.Companion.BCM_DISPOSE
-import rekab.app.background_locator.Keys.Companion.BCM_INIT
-import rekab.app.background_locator.Keys.Companion.CHANNEL_ID
-import rekab.app.background_locator.Keys.Companion.DISPOSE_CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.INIT_CALLBACK_HANDLE_KEY
-import rekab.app.background_locator.Keys.Companion.INIT_DATA_CALLBACK_KEY
-import rekab.app.background_locator.Keys.Companion.NOTIFICATION_ACTION
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_ICON
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_MSG
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_NOTIFICATION_TITLE
-import rekab.app.background_locator.Keys.Companion.SETTINGS_ANDROID_WAKE_LOCK_TIME
-import java.util.concurrent.atomic.AtomicBoolean
+import rekab.app.background_locator.provider.*
+import java.util.HashMap
 
-class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
+class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateListener, Service() {
     companion object {
         @JvmStatic
         val ACTION_SHUTDOWN = "SHUTDOWN"
@@ -47,52 +31,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
         private val WAKELOCK_TAG = "IsolateHolderService::WAKE_LOCK"
 
         @JvmStatic
-        var backgroundFlutterView: FlutterNativeView? = null
+        var backgroundEngine: FlutterEngine? = null
 
         @JvmStatic
-        fun setBackgroundFlutterViewManually(view: FlutterNativeView?) {
-            backgroundFlutterView = view
-            sendInit()
-        }
-
-        @JvmStatic
-        var isRunning = false
-
-        @JvmStatic
-        var isSendedInit = false
-
-        @JvmStatic
-        var instance: Context? = null
-
-        @JvmStatic
-        fun sendInit() {
-            if (backgroundFlutterView != null && instance != null && !isSendedInit) {
-                val context = instance
-                val initCallback = BackgroundLocatorPlugin.getCallbackHandle(context!!, INIT_CALLBACK_HANDLE_KEY)
-                if (initCallback != null) {
-                    val initialDataMap = BackgroundLocatorPlugin.getDataCallback(context, INIT_DATA_CALLBACK_KEY)
-                    val backgroundChannel = MethodChannel(backgroundFlutterView,
-                            BACKGROUND_CHANNEL_ID)
-                    Handler(context.mainLooper)
-                            .post {
-                                backgroundChannel.invokeMethod(BCM_INIT,
-                                        hashMapOf(ARG_INIT_CALLBACK to initCallback, ARG_INIT_DATA_CALLBACK to initialDataMap))
-                            }
-                }
-                isSendedInit = true
-            }
-        }
-
-        @JvmStatic
-        internal val serviceStarted = AtomicBoolean(false)
-
-        @JvmStatic
-        internal var pluginRegistrantCallback: PluginRegistry.PluginRegistrantCallback? = null
-
-        @JvmStatic
-        fun setPluginRegistrant(callback: PluginRegistry.PluginRegistrantCallback) {
-            pluginRegistrantCallback = callback
-        }
+        private val notificationId = 1
     }
 
     private var notificationChannelName = "Flutter Locator Plugin"
@@ -102,7 +44,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     private var notificationIconColor = 0
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
-    private val notificationId = 1
+    private lateinit var locatorClient: BLLocationProvider
     internal lateinit var backgroundChannel: MethodChannel
     internal lateinit var context: Context
 
@@ -113,10 +55,11 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     override fun onCreate() {
         super.onCreate()
         startLocatorService(this)
+        startForeground(notificationId, getNotification())
     }
 
     private fun start() {
-        if (isRunning) {
+        if (PreferencesManager.isServiceRunning(this)) {
             return
         }
 
@@ -127,20 +70,17 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
             }
         }
 
-        instance = this
-        sendInit()
-
         // Starting Service as foreground with a notification prevent service from closing
         val notification = getNotification()
         startForeground(notificationId, notification)
 
-        isRunning = true
+        PreferencesManager.setServiceRunning(this, true)
     }
 
     private fun getNotification(): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Notification channel is available in Android O and up
-            val channel = NotificationChannel(CHANNEL_ID, notificationChannelName,
+            val channel = NotificationChannel(Keys.CHANNEL_ID, notificationChannelName,
                     NotificationManager.IMPORTANCE_LOW)
 
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
@@ -148,12 +88,12 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
         }
 
         val intent = Intent(this, getMainActivityClass(this))
-        intent.action = NOTIFICATION_ACTION
+        intent.action = Keys.NOTIFICATION_ACTION
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(this,
                 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, Keys.CHANNEL_ID)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationMsg)
                 .setStyle(NotificationCompat.BigTextStyle()
@@ -165,25 +105,6 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
                 .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
                 .setOngoing(true)
                 .build()
-    }
-
-    private fun stop() {
-        instance = null
-        isRunning = false
-        isSendedInit = false
-        if (backgroundFlutterView != null) {
-            val context = this
-            val disposeCallback = BackgroundLocatorPlugin.getCallbackHandle(context, DISPOSE_CALLBACK_HANDLE_KEY)
-            if (disposeCallback != null && backgroundFlutterView != null) {
-                val backgroundChannel = MethodChannel(backgroundFlutterView,
-                        BACKGROUND_CHANNEL_ID)
-                Handler(context.mainLooper)
-                        .post {
-                            backgroundChannel.invokeMethod(BCM_DISPOSE,
-                                    hashMapOf(ARG_DISPOSE_CALLBACK to disposeCallback))
-                        }
-            }
-        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -199,7 +120,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
                 startHolderService(intent)
             }
             ACTION_UPDATE_NOTIFICATION == intent.action -> {
-                if (isRunning) {
+                if (PreferencesManager.isServiceRunning(this)) {
                     updateNotification(intent)
                 }
             }
@@ -209,18 +130,22 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     }
 
     private fun startHolderService(intent: Intent) {
-        notificationChannelName = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME).toString()
-        notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE).toString()
-        notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG).toString()
-        notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG).toString()
+        notificationChannelName = intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME).toString()
+        notificationTitle = intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE).toString()
+        notificationMsg = intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG).toString()
+        notificationBigMsg = intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG).toString()
         val iconNameDefault = "ic_launcher"
-        var iconName = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_ICON)
+        var iconName = intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON)
         if (iconName == null || iconName.isEmpty()) {
             iconName = iconNameDefault
         }
         icon = resources.getIdentifier(iconName, "mipmap", packageName)
-        notificationIconColor = intent.getLongExtra(SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, 0).toInt()
-        wakeLockTime = intent.getIntExtra(SETTINGS_ANDROID_WAKE_LOCK_TIME, 60) * 60 * 1000L
+        notificationIconColor = intent.getLongExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR, 0).toInt()
+        wakeLockTime = intent.getIntExtra(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME, 60) * 60 * 1000L
+
+        locatorClient = getLocationClient(context)
+        locatorClient.requestLocationUpdates(getLocationRequest(intent))
+
         start()
     }
 
@@ -232,22 +157,24 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
                 }
             }
         }
+
+        locatorClient.removeLocationUpdates()
+        PreferencesManager.setServiceRunning(this, false)
         stopForeground(true)
         stopSelf()
-        stop()
     }
 
     private fun updateNotification(intent: Intent) {
-        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
-            notificationTitle = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_TITLE).toString()
+        if (intent.hasExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
+            notificationTitle = intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE).toString()
         }
 
-        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_MSG)) {
-            notificationMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_MSG).toString()
+        if (intent.hasExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG)) {
+            notificationMsg = intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG).toString()
         }
 
-        if (intent.hasExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
-            notificationBigMsg = intent.getStringExtra(SETTINGS_ANDROID_NOTIFICATION_BIG_MSG).toString()
+        if (intent.hasExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG)) {
+            notificationBigMsg = intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG).toString()
         }
 
         val notification = getNotification()
@@ -271,9 +198,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             Keys.METHOD_SERVICE_INITIALIZED -> {
-                synchronized(serviceStarted) {
-                    serviceStarted.set(true)
-                }
+                PreferencesManager.setServiceRunning(this, true)
             }
             else -> result.notImplemented()
         }
@@ -281,5 +206,52 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, Service() {
         result.success(null)
     }
 
+    override fun onDestroy() {
+        PreferencesManager.setServiceRunning(this, false)
+        super.onDestroy()
+    }
+
+
+    private fun getLocationClient(context: Context): BLLocationProvider {
+        return when (PreferencesManager.getLocationClient(context)) {
+            LocationClient.Google -> GoogleLocationProviderClient(context, this)
+            LocationClient.Android -> AndroidLocationProviderClient(context, this)
+        }
+    }
+
+    override fun onLocationUpdated(location: HashMap<Any, Any>?) {
+        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null)
+
+        //https://github.com/flutter/plugins/pull/1641
+        //https://github.com/flutter/flutter/issues/36059
+        //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
+        // new version of flutter can not invoke method from background thread
+        if (location != null) {
+            val callback = BackgroundLocatorPlugin.getCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY) as Long
+
+            val result: HashMap<Any, Any> =
+                    hashMapOf(Keys.ARG_CALLBACK to callback,
+                            Keys.ARG_LOCATION to location)
+
+            sendLocationEvent(result)
+        }
+    }
+
+    private fun sendLocationEvent(result: HashMap<Any, Any>) {
+        //https://github.com/flutter/plugins/pull/1641
+        //https://github.com/flutter/flutter/issues/36059
+        //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
+        // new version of flutter can not invoke method from background thread
+
+        if (backgroundEngine != null) {
+            val backgroundChannel =
+                    MethodChannel(backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
+            Handler(context.mainLooper)
+                    .post {
+                        Log.d("plugin", "sendLocationEvent $result")
+                        backgroundChannel.invokeMethod(Keys.BCM_SEND_LOCATION, result)
+                    }
+        }
+    }
 
 }

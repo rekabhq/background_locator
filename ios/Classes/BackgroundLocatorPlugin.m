@@ -13,10 +13,7 @@
 }
 
 static FlutterPluginRegistrantCallback registerPlugins = nil;
-static BOOL initialized = NO;
-static BOOL observingRegions = NO;
 static BackgroundLocatorPlugin *instance = nil;
-static BOOL isLocationServiceRunning = NO;
 
 #pragma mark FlutterPlugin Methods
 
@@ -47,18 +44,22 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     if (launchOptions[UIApplicationLaunchOptionsLocationKey] != nil) {
         // Restart the headless service.
         [self startLocatorService:[PreferencesManager getCallbackDispatcherHandle]];
-        observingRegions = YES;
-    } else {
-        if(observingRegions == YES) {
-            [self prepareLocationManager];
-            [self removeLocator];
-            observingRegions = NO;
-            [_locationManager startUpdatingLocation];
-        }
+        [PreferencesManager setObservingRegion:YES];
+    } else if([PreferencesManager isObservingRegion]) {
+        [self prepareLocationManager];
+        [self removeLocator];
+        [PreferencesManager setObservingRegion:NO];
+        [_locationManager startUpdatingLocation];
     }
     
     // Note: if we return NO, this vetos the launch of the application.
     return YES;
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    if ([PreferencesManager isServiceRunning]) {
+        [_locationManager startMonitoringSignificantLocationChanges];
+    }
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application {
@@ -79,9 +80,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     _lastLocation = location;
     NSDictionary<NSString*,NSNumber*>* locationMap = [Util getLocationMap:location];
     
-    if (initialized) {
-        [self sendLocationEvent:locationMap];
-    }
+    [self sendLocationEvent:locationMap];
 }
 
 #pragma mark LocationManagerDelegate Methods
@@ -90,7 +89,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     if (locations.count > 0) {
         CLLocation* location = [locations objectAtIndex:0];
         [self prepareLocationMap: location];
-        if(observingRegions) {
+        if([PreferencesManager isObservingRegion]) {
             [self observeRegionForLocation: location];
             [_locationManager stopUpdatingLocation];
         }
@@ -104,6 +103,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 #pragma mark LocatorPlugin Methods
 - (void) sendLocationEvent: (NSDictionary<NSString*,NSNumber*>*)location {
+    if (_callbackChannel == nil) {
+        return;
+    }
+    
     NSDictionary *map = @{
                      kArgCallback : @([PreferencesManager getCallbackHandle:kCallbackKey]),
                      kArgLocation: location
@@ -160,12 +163,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [_registrar addMethodCallDelegate:self channel:_callbackChannel];
 }
 
-- (void) setInitialized {
-    @synchronized(self) {
-        initialized = YES;
-    }
-}
-
 - (void)registerLocator:(int64_t)callback
            initCallback:(int64_t)initCallback
   initialDataDictionary:(NSDictionary*)initialDataDictionary
@@ -188,44 +185,32 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [PreferencesManager saveDistanceFilter:distanceFilter];
 
     [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
-    [PreferencesManager setCallbackHandle:initCallback key:kInitCallbackKey];
-    [PreferencesManager setCallbackHandle:disposeCallback key:kDisposeCallbackKey];
-    NSDictionary *map = @{
-                     kArgInitCallback : @([PreferencesManager getCallbackHandle:kInitCallbackKey]),
-                     kArgInitDataCallback: initialDataDictionary
-                     };
-    [_callbackChannel invokeMethod:kBCMInit arguments:map];
+    
     [_locationManager startUpdatingLocation];
     [_locationManager startMonitoringSignificantLocationChanges];
 }
 
 - (void)removeLocator {
+    if (_locationManager == nil) {
+        return;
+    }
+    
     @synchronized (self) {
-        if(initialized){
-            [_locationManager stopUpdatingLocation];
-            for (CLRegion* region in [_locationManager monitoredRegions]) {
-                [_locationManager stopMonitoringForRegion:region];
-            }
-            NSDictionary *map = @{
-                             kArgDisposeCallback : @([PreferencesManager getCallbackHandle:kDisposeCallbackKey])
-                             };
-            [_callbackChannel invokeMethod:kBCMDispose arguments:map];
+        [_locationManager stopUpdatingLocation];
+        for (CLRegion* region in [_locationManager monitoredRegions]) {
+            [_locationManager stopMonitoringForRegion:region];
         }
     }
 }
 
-- (BOOL)isLocatorRegistered{
-    return initialized;
-}
-
 - (void) setServiceRunning:(BOOL) value {
     @synchronized(self) {
-        isLocationServiceRunning = value;
+        [PreferencesManager setServiceRunning:value];
     }
 }
 
 - (BOOL)isServiceRunning{
-    return isLocationServiceRunning;
+    return [PreferencesManager isServiceRunning];
 }
 
 @end

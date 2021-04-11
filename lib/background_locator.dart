@@ -24,10 +24,7 @@ class BackgroundLocator {
 
   static Future<void> registerLocationUpdate(
       void Function(LocationDto) callback,
-      {void Function(Map<String, dynamic>)? initCallback,
-      Map<String, dynamic> initDataCallback = const {},
-      void Function()? disposeCallback,
-      bool autoStop = false,
+      {bool autoStop = false,
       AndroidSettings androidSettings = const AndroidSettings(),
       IOSSettings iosSettings = const IOSSettings()}) async {
     if (autoStop) {
@@ -36,9 +33,6 @@ class BackgroundLocator {
 
     final args = SettingsUtil.getArgumentsMap(
         callback: callback,
-        initCallback: initCallback,
-        initDataCallback: initDataCallback,
-        disposeCallback: disposeCallback,
         androidSettings: androidSettings,
         iosSettings: iosSettings);
 

@@ -27,7 +27,6 @@ class _MyAppState extends State<MyApp> {
   String logStr = '';
   bool isRunning;
   LocationDto lastLocation;
-  DateTime lastTimeLocation;
 
   @override
   void initState() {
@@ -64,7 +63,6 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       if (data != null) {
         lastLocation = data;
-        lastTimeLocation = DateTime.now();
       }
       logStr = log;
     });
@@ -135,23 +133,6 @@ class _MyAppState extends State<MyApp> {
     }
     final status = Text("Status: $msgStatus");
 
-    String lastRunTxt = "-";
-    if (isRunning != null) {
-      if (isRunning) {
-        if (lastTimeLocation == null || lastLocation == null) {
-          lastRunTxt = "?";
-        } else {
-          lastRunTxt =
-              LocationServiceRepository.formatDateLog(lastTimeLocation) +
-                  "-" +
-                  LocationServiceRepository.formatLog(lastLocation);
-        }
-      }
-    }
-    final lastRun = Text(
-      "Last run: $lastRunTxt",
-    );
-
     final log = Text(
       logStr,
     );
@@ -167,7 +148,7 @@ class _MyAppState extends State<MyApp> {
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[start, stop, clear, status, lastRun, log],
+              children: <Widget>[start, stop, clear, status, log],
             ),
           ),
         ),
@@ -181,8 +162,6 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       isRunning = _isRunning;
-//      lastTimeLocation = null;
-//      lastLocation = null;
     });
   }
 
@@ -193,7 +172,6 @@ class _MyAppState extends State<MyApp> {
 
       setState(() {
         isRunning = _isRunning;
-        lastTimeLocation = null;
         lastLocation = null;
       });
     } else {
@@ -226,15 +204,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _startLocator() {
-    Map<String, dynamic> data = {'countInit': 1};
     BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
-        initCallback: LocationCallbackHandler.initCallback,
-        initDataCallback: data,
-/*
-        Comment initDataCallback, so service not set init variable,
-        variable stay with value of last run after unRegisterLocationUpdate
- */
-        disposeCallback: LocationCallbackHandler.disposeCallback,
         iosSettings: IOSSettings(
             accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),
         autoStop: false,
@@ -249,7 +219,6 @@ class _MyAppState extends State<MyApp> {
                 notificationMsg: 'Track location in background',
                 notificationBigMsg:
                     'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
-                notificationIcon: '',
                 notificationIconColor: Colors.grey,
                 notificationTapCallback:
                     LocationCallbackHandler.notificationCallback)));

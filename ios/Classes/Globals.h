@@ -13,9 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 FOUNDATION_EXPORT NSString *const kCallbackDispatcherKey;
 FOUNDATION_EXPORT NSString *const kCallbackKey;
-FOUNDATION_EXPORT NSString *const kInitCallbackKey;
-FOUNDATION_EXPORT NSString *const kInitDataCallbackKey;
-FOUNDATION_EXPORT NSString *const kDisposeCallbackKey;
 FOUNDATION_EXPORT NSString *const kDistanceFilterKey;
 
 FOUNDATION_EXPORT NSString *const kChannelId;
@@ -50,8 +47,9 @@ FOUNDATION_EXPORT NSString *const kSettingsDistanceFilter;
 FOUNDATION_EXPORT NSString *const kSettingsShowsBackgroundLocationIndicator;
 
 FOUNDATION_EXPORT NSString *const kBCMSendLocation;
-FOUNDATION_EXPORT NSString *const kBCMInit;
-FOUNDATION_EXPORT NSString *const kBCMDispose;
+
+FOUNDATION_EXPORT NSString *const kPrefObservingRegion;
+FOUNDATION_EXPORT NSString *const kPrefServiceRunning;
 
 @end
 
