@@ -44,7 +44,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     private var notificationIconColor = 0
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
-    private lateinit var locatorClient: BLLocationProvider
+    private var locatorClient: BLLocationProvider? = null
     internal lateinit var backgroundChannel: MethodChannel
     internal lateinit var context: Context
 
@@ -144,7 +144,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         wakeLockTime = intent.getIntExtra(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME, 60) * 60 * 1000L
 
         locatorClient = getLocationClient(context)
-        locatorClient.requestLocationUpdates(getLocationRequest(intent))
+        locatorClient?.requestLocationUpdates(getLocationRequest(intent))
 
         start()
     }
@@ -158,7 +158,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
             }
         }
 
-        locatorClient.removeLocationUpdates()
+        locatorClient?.removeLocationUpdates()
         PreferencesManager.setServiceRunning(this, false)
         stopForeground(true)
         stopSelf()
