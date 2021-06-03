@@ -27,4 +27,12 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
     override fun onLocationChanged(location: Location) {
         listener?.onLocationUpdated(LocationParserUtil.getLocationMapFromLocation(location))
     }
+
+    override fun onProviderDisabled(provider: String) {
+        // nop
+    }
+
+    override fun onProviderEnabled(provider: String) {
+        // nop
+    }
 }
