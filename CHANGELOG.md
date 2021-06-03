@@ -1,3 +1,6 @@
+## 1.6.1+1-beta
+* Fix crash on Android location client causing by change in status of location provider;
+
 ## 1.6.0+2-beta
 * Fix crash on start;
 
