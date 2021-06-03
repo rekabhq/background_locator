@@ -1,3 +1,6 @@
+## 1.6.0+2-beta
+* Fix crash on start;
+
 ## 1.6.0+1-beta
 * Use new flutter engine;
 * Fix start stop bug which prevents correct state in plugin;
