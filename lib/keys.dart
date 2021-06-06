@@ -28,6 +28,9 @@ class Keys {
   static const String ARG_TIME = 'time';
   static const String ARG_CALLBACK = 'callback';
   static const String ARG_NOTIFICATION_CALLBACK = 'notificationCallback';
+  static const String ARG_INIT_CALLBACK = 'initCallback';
+  static const String ARG_INIT_DATA_CALLBACK = 'initDataCallback';
+  static const String ARG_DISPOSE_CALLBACK = 'disposeCallback';
   static const String ARG_LOCATION = 'location';
   static const String ARG_SETTINGS = 'settings';
   static const String ARG_CALLBACK_DISPATCHER = 'callbackDispatcher';
