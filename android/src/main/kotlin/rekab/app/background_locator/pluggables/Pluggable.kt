@@ -4,6 +4,6 @@ import android.content.Context
 
 interface Pluggable {
     fun setCallback(context: Context, callbackHandle: Long)
-    fun onServiceStart() { /*optional*/ }
-    fun onServiceDispose() {/*optional*/ }
+    fun onServiceStart(context: Context) { /*optional*/ }
+    fun onServiceDispose(context: Context) {/*optional*/ }
 }

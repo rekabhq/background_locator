@@ -136,6 +136,12 @@ class Keys {
         val SETTINGS_ANDROID_LOCATION_CLIENT = "settings_android_location_client"
 
         @JvmStatic
+        val SETTINGS_INIT_PLUGGABLE = "settings_init_pluggable"
+
+        @JvmStatic
+        val SETTINGS_DISPOSABLE_PLUGGABLE = "settings_disposable_pluggable"
+
+        @JvmStatic
         val BCM_SEND_LOCATION = "BCM_SEND_LOCATION"
 
         @JvmStatic

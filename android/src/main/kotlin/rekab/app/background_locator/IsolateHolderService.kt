@@ -13,6 +13,9 @@ import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import rekab.app.background_locator.pluggables.DisposePluggable
+import rekab.app.background_locator.pluggables.InitPluggable
+import rekab.app.background_locator.pluggables.Pluggable
 import rekab.app.background_locator.provider.*
 import java.util.HashMap
 
@@ -45,26 +48,9 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
     private var locatorClient: BLLocationProvider? = null
-    private var isInitCallbackCalled = false
     internal lateinit var backgroundChannel: MethodChannel
     internal lateinit var context: Context
-
-    private fun sendInit() {
-        if (!isInitCallbackCalled) {
-            val initCallback = PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY)
-            if (initCallback != null) {
-                val initialDataMap = PreferencesManager.getDataCallback(context, Keys.INIT_DATA_CALLBACK_KEY)
-                val backgroundChannel = MethodChannel(backgroundEngine?.dartExecutor?.binaryMessenger,
-                        Keys.BACKGROUND_CHANNEL_ID)
-                Handler(context.mainLooper)
-                        .post {
-                            backgroundChannel.invokeMethod(Keys.BCM_INIT,
-                                    hashMapOf(Keys.ARG_INIT_CALLBACK to initCallback, Keys.ARG_INIT_DATA_CALLBACK to initialDataMap))
-                        }
-            }
-            isInitCallbackCalled = true
-        }
-    }
+    private var pluggables: ArrayList<Pluggable> = ArrayList()
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -88,13 +74,15 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
             }
         }
 
-        sendInit()
-
         // Starting Service as foreground with a notification prevent service from closing
         val notification = getNotification()
         startForeground(notificationId, notification)
 
         PreferencesManager.setServiceRunning(this, true)
+
+        pluggables.forEach {
+            it.onServiceStart(context)
+        }
     }
 
     private fun getNotification(): Notification {
@@ -165,6 +153,15 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
 
         locatorClient = getLocationClient(context)
         locatorClient?.requestLocationUpdates(getLocationRequest(intent))
+
+        // Fill pluggable list
+        if( intent.hasExtra(Keys.SETTINGS_INIT_PLUGGABLE)) {
+            pluggables.add(InitPluggable())
+        }
+
+        if (intent.hasExtra(Keys.SETTINGS_DISPOSABLE_PLUGGABLE)) {
+            pluggables.add(DisposePluggable())
+        }
 
         start()
     }

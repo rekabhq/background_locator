@@ -107,6 +107,13 @@ class BackgroundLocatorPlugin
                         settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
             }
 
+            if (PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY) != null) {
+                intent.putExtra(Keys.SETTINGS_INIT_PLUGGABLE, true)
+            }
+            if(PreferencesManager.getCallbackHandle(context, Keys.DISPOSE_CALLBACK_HANDLE_KEY) != null) {
+                intent.putExtra(Keys.SETTINGS_DISPOSABLE_PLUGGABLE, true)
+            }
+
             ContextCompat.startForegroundService(context, intent)
         }
 

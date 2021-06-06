@@ -7,7 +7,7 @@ class DisposePluggable: Pluggable {
 
     }
 
-    override fun onServiceDispose() {
-        
+    override fun onServiceDispose(context: Context) {
+
     }
 }
