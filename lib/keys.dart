@@ -61,4 +61,6 @@ class Keys {
 
   static const String BCM_SEND_LOCATION = 'BCM_SEND_LOCATION';
   static const String BCM_NOTIFICATION_CLICK = 'BCM_NOTIFICATION_CLICK';
+  static const String BCM_INIT = 'BCM_INIT';
+  static const String BCM_DISPOSE = 'BCM_DISPOSE';
 }

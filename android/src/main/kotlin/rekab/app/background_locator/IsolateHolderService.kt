@@ -45,8 +45,26 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
     private var locatorClient: BLLocationProvider? = null
+    private var isInitCallbackCalled = false
     internal lateinit var backgroundChannel: MethodChannel
     internal lateinit var context: Context
+
+    private fun sendInit() {
+        if (!isInitCallbackCalled) {
+            val initCallback = PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY)
+            if (initCallback != null) {
+                val initialDataMap = PreferencesManager.getDataCallback(context, Keys.INIT_DATA_CALLBACK_KEY)
+                val backgroundChannel = MethodChannel(backgroundEngine?.dartExecutor?.binaryMessenger,
+                        Keys.BACKGROUND_CHANNEL_ID)
+                Handler(context.mainLooper)
+                        .post {
+                            backgroundChannel.invokeMethod(Keys.BCM_INIT,
+                                    hashMapOf(Keys.ARG_INIT_CALLBACK to initCallback, Keys.ARG_INIT_DATA_CALLBACK to initialDataMap))
+                        }
+            }
+            isInitCallbackCalled = true
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -69,6 +87,8 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                 acquire(wakeLockTime)
             }
         }
+
+        sendInit()
 
         // Starting Service as foreground with a notification prevent service from closing
         val notification = getNotification()
@@ -227,7 +247,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
         // new version of flutter can not invoke method from background thread
         if (location != null) {
-            val callback = BackgroundLocatorPlugin.getCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY) as Long
+            val callback = PreferencesManager.getCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY) as Long
 
             val result: HashMap<Any, Any> =
                     hashMapOf(Keys.ARG_CALLBACK to callback,

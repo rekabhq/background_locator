@@ -19,6 +19,8 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import rekab.app.background_locator.pluggables.DisposePluggable
+import rekab.app.background_locator.pluggables.InitPluggable
 
 class BackgroundLocatorPlugin
     : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {
@@ -44,10 +46,27 @@ class BackgroundLocatorPlugin
                     "start locator with ${PreferencesManager.getLocationClient(context)} client")
 
             val callbackHandle = args[Keys.ARG_CALLBACK] as Long
-            setCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY, callbackHandle)
+            PreferencesManager.setCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY, callbackHandle);
 
             val notificationCallback = args[Keys.ARG_NOTIFICATION_CALLBACK] as? Long
-            setCallbackHandle(context, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY, notificationCallback)
+            PreferencesManager.setCallbackHandle(context, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY, notificationCallback)
+
+            // Call InitPluggable with initCallbackHandle
+            (args[Keys.ARG_INIT_CALLBACK] as? Long)?.let { initCallbackHandle ->
+                val initPluggable = InitPluggable()
+                initPluggable.setCallback(context, initCallbackHandle)
+
+                // Set init data if available
+                (args[Keys.ARG_INIT_DATA_CALLBACK] as? Map<*, *>)?.let { initData ->
+                    initPluggable.setInitData(context, initData)
+                }
+            }
+
+            // Call DisposePluggable with disposeCallbackHandle
+            (args[Keys.ARG_DISPOSE_CALLBACK] as? Long)?.let {
+                val disposePluggable = DisposePluggable()
+                disposePluggable.setCallback(context, it)
+            }
 
             val settings = args[Keys.ARG_SETTINGS] as Map<*, *>
 
@@ -61,7 +80,6 @@ class BackgroundLocatorPlugin
 
             startIsolateService(context, settings)
             result?.success(true)
-            PreferencesManager.setServiceRunning(context, true)
         }
 
         @JvmStatic
@@ -113,7 +131,6 @@ class BackgroundLocatorPlugin
                 return
             }
 
-            PreferencesManager.setServiceRunning(context, false)
             stopIsolateService(context)
         }
 
@@ -153,29 +170,6 @@ class BackgroundLocatorPlugin
                     .edit()
                     .putLong(Keys.CALLBACK_DISPATCHER_HANDLE_KEY, handle)
                     .apply()
-        }
-
-        @JvmStatic
-        fun setCallbackHandle(context: Context, key: String, handle: Long?) {
-            if (handle == null) {
-                context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                        .edit()
-                        .remove(key)
-                        .apply()
-                return
-            }
-
-            context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-                    .edit()
-                    .putLong(key, handle)
-                    .apply()
-        }
-
-        @JvmStatic
-        fun getCallbackHandle(context: Context, key: String): Long? {
-            val sharedPreferences = context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-            if (sharedPreferences.contains(key)) return sharedPreferences.getLong(key, 0L)
-            return null
         }
 
         @JvmStatic
@@ -251,7 +245,7 @@ class BackgroundLocatorPlugin
             return false
         }
 
-        val notificationCallback = getCallbackHandle(activity!!, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY)
+        val notificationCallback = PreferencesManager.getCallbackHandle(activity!!, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY)
         if (notificationCallback != null && IsolateHolderService.backgroundEngine != null) {
             val backgroundChannel =
                     MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)

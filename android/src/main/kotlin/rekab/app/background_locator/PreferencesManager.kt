@@ -1,6 +1,8 @@
 package rekab.app.background_locator
 
 import android.content.Context
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import rekab.app.background_locator.provider.LocationClient
 
 class PreferencesManager {
@@ -169,6 +171,53 @@ class PreferencesManager {
             context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
                     .edit().putBoolean(Keys.PREF_SERVICE_IS_RUNNING, running)
                     .apply()
+        }
+
+        @JvmStatic
+        fun setCallbackHandle(context: Context, key: String, handle: Long?) {
+            if (handle == null) {
+                context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                        .edit()
+                        .remove(key)
+                        .apply()
+                return
+            }
+
+            context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                    .edit()
+                    .putLong(key, handle)
+                    .apply()
+        }
+
+        @JvmStatic
+        fun setDataCallback(context: Context, key: String, data: Map<*, *>?) {
+            if (data == null) {
+                context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                        .edit()
+                        .remove(key)
+                        .apply()
+                return
+            }
+            val dataStr = Gson().toJson(data)
+            context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(key, dataStr)
+                    .apply()
+        }
+
+        @JvmStatic
+        fun getCallbackHandle(context: Context, key: String): Long? {
+            val sharedPreferences = context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+            if (sharedPreferences.contains(key)) return sharedPreferences.getLong(key, 0L)
+            return null
+        }
+
+        @JvmStatic
+        fun getDataCallback(context: Context, key: String): Map<*, *> {
+            val initialDataStr = context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+                    .getString(key, null)
+            val type = object : TypeToken<Map<*, *>>() {}.type
+            return Gson().fromJson(initialDataStr, type)
         }
     }
 }
