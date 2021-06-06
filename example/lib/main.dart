@@ -204,7 +204,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _startLocator() {
+    Map<String, dynamic> data = {'countInit': 1};
     BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
+        initCallback: LocationCallbackHandler.initCallback,
+        initDataCallback: data,
+        disposeCallback: LocationCallbackHandler.disposeCallback,
         iosSettings: IOSSettings(
             accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),
         autoStop: false,
