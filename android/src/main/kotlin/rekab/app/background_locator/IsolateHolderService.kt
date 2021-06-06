@@ -179,6 +179,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         PreferencesManager.setServiceRunning(this, false)
         stopForeground(true)
         stopSelf()
+
+        pluggables.forEach {
+            it.onServiceDispose(context)
+        }
     }
 
     private fun updateNotification(intent: Intent) {

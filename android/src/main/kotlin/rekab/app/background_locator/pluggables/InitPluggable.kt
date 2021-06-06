@@ -17,8 +17,7 @@ class InitPluggable : Pluggable {
 
     override fun onServiceStart(context: Context) {
         if (!isInitCallbackCalled) {
-            val initCallback = PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY)
-            if (initCallback != null) {
+            (PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY))?.let { initCallback ->
                 val initialDataMap = PreferencesManager.getDataCallback(context, Keys.INIT_DATA_CALLBACK_KEY)
                 val backgroundChannel = MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger,
                         Keys.BACKGROUND_CHANNEL_ID)
@@ -30,6 +29,10 @@ class InitPluggable : Pluggable {
             }
             isInitCallbackCalled = true
         }
+    }
+
+    override fun onServiceDispose(context: Context) {
+        isInitCallbackCalled = false
     }
 
     fun setInitData(context: Context, data: Map<*, *>) {
