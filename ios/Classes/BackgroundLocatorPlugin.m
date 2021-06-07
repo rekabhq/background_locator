@@ -3,6 +3,7 @@
 #import "Utils/Util.h"
 #import "Preferences/PreferencesManager.h"
 #import "InitPluggable.h"
+#import "DisposePluggable.h"
 
 @implementation BackgroundLocatorPlugin {
     FlutterEngine *_headlessRunner;
@@ -202,6 +203,9 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     InitPluggable *initPluggable = [[InitPluggable alloc] init];
     [initPluggable setCallback:initCallback];
     [initPluggable onServiceStart:initData];
+    
+    DisposePluggable *disposePluggable = [[DisposePluggable alloc] init];
+    [disposePluggable setCallback:disposeCallback];
         
     [_locationManager startUpdatingLocation];
     [_locationManager startMonitoringSignificantLocationChanges];
@@ -218,6 +222,9 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
             [_locationManager stopMonitoringForRegion:region];
         }
     }
+    
+    DisposePluggable *disposePluggable = [[DisposePluggable alloc] init];
+    [disposePluggable onServiceDispose];
 }
 
 - (void) setServiceRunning:(BOOL) value {
