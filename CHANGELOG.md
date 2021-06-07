@@ -1,3 +1,6 @@
+## 1.6.2+1-beta
+* Bring back init and dispose callback;
+
 ## 1.6.1+1-beta
 * Fix crash on Android location client causing by change in status of location provider;
 
