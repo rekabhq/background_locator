@@ -13,6 +13,9 @@ import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import rekab.app.background_locator.pluggables.DisposePluggable
+import rekab.app.background_locator.pluggables.InitPluggable
+import rekab.app.background_locator.pluggables.Pluggable
 import rekab.app.background_locator.provider.*
 import java.util.HashMap
 
@@ -47,6 +50,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     private var locatorClient: BLLocationProvider? = null
     internal lateinit var backgroundChannel: MethodChannel
     internal lateinit var context: Context
+    private var pluggables: ArrayList<Pluggable> = ArrayList()
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -75,6 +79,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         startForeground(notificationId, notification)
 
         PreferencesManager.setServiceRunning(this, true)
+
+        pluggables.forEach {
+            it.onServiceStart(context)
+        }
     }
 
     private fun getNotification(): Notification {
@@ -146,6 +154,15 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         locatorClient = getLocationClient(context)
         locatorClient?.requestLocationUpdates(getLocationRequest(intent))
 
+        // Fill pluggable list
+        if( intent.hasExtra(Keys.SETTINGS_INIT_PLUGGABLE)) {
+            pluggables.add(InitPluggable())
+        }
+
+        if (intent.hasExtra(Keys.SETTINGS_DISPOSABLE_PLUGGABLE)) {
+            pluggables.add(DisposePluggable())
+        }
+
         start()
     }
 
@@ -162,6 +179,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         PreferencesManager.setServiceRunning(this, false)
         stopForeground(true)
         stopSelf()
+
+        pluggables.forEach {
+            it.onServiceDispose(context)
+        }
     }
 
     private fun updateNotification(intent: Intent) {
@@ -227,7 +248,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
         // new version of flutter can not invoke method from background thread
         if (location != null) {
-            val callback = BackgroundLocatorPlugin.getCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY) as Long
+            val callback = PreferencesManager.getCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY) as Long
 
             val result: HashMap<Any, Any> =
                     hashMapOf(Keys.ARG_CALLBACK to callback,

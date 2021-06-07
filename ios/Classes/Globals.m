@@ -11,8 +11,10 @@
 
 NSString *const kCallbackDispatcherKey = @"callback_dispatcher_handle_key";
 NSString *const kCallbackKey = @"callback_handle_key";
+NSString *const kInitCallbackKey = @"init_callback_handle_key";
+NSString *const kInitDataCallbackKey = @"init_data_callback_key";
+NSString *const kDisposeCallbackKey = @"dispose_callback_handle_key";
 NSString *const kDistanceFilterKey = @"distance_filter_key";
-
 NSString *const kChannelId = @"app.rekab/locator_plugin";
 NSString *const kBackgroundChannelId = @"app.rekab/locator_plugin_background";
 
@@ -45,6 +47,8 @@ NSString *const kSettingsDistanceFilter = @"settings_distanceFilter";
 NSString *const kSettingsShowsBackgroundLocationIndicator = @"settings_ios_showsBackgroundLocationIndicator";
 
 NSString *const kBCMSendLocation = @"BCM_SEND_LOCATION";
+NSString *const kBCMInit = @"BCM_INIT";
+NSString *const kBCMDispose = @"BCM_DISPOSE";
 
 NSString *const kPrefObservingRegion = @"pref_observingRegion";
 NSString *const kPrefServiceRunning = @"pref_serviceRunning";
