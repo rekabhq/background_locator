@@ -2,6 +2,7 @@
 #import "Globals.h"
 #import "Utils/Util.h"
 #import "Preferences/PreferencesManager.h"
+#import "InitPluggable.h"
 
 @implementation BackgroundLocatorPlugin {
     FlutterEngine *_headlessRunner;
@@ -28,6 +29,14 @@ static BackgroundLocatorPlugin *instance = nil;
 
 + (void)setPluginRegistrantCallback:(FlutterPluginRegistrantCallback)callback {
     registerPlugins = callback;
+}
+
++ (BackgroundLocatorPlugin *) getInstance {
+    return instance;
+}
+
+- (void)invokeMethod:(NSString*_Nonnull)method arguments:(id _Nullable)arguments {
+    [_callbackChannel invokeMethod:method arguments:arguments];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall *)call
@@ -186,6 +195,14 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
     
+    NSDictionary *initData = @{
+                     kArgInitCallback : @(initCallback),
+                     kArgInitDataCallback: initialDataDictionary
+                     };
+    InitPluggable *initPluggable = [[InitPluggable alloc] init];
+    [initPluggable setCallback:initCallback];
+    [initPluggable onServiceStart:initData];
+        
     [_locationManager startUpdatingLocation];
     [_locationManager startMonitoringSignificantLocationChanges];
 }
