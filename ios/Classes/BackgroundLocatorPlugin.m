@@ -111,7 +111,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                      kArgCallback : @([PreferencesManager getCallbackHandle:kCallbackKey]),
                      kArgLocation: location
                      };
-    [_callbackChannel invokeMethod:kBCMSendLocation arguments:map];
+    @try {
+        [_callbackChannel invokeMethod:kBCMSendLocation arguments:map];
+    }
+    @catch (NSException *exception) {}
 }
 
 - (instancetype)init:(NSObject<FlutterPluginRegistrar> *)registrar {
