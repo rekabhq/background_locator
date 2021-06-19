@@ -39,6 +39,7 @@ class BackgroundLocatorPlugin
             if (PreferencesManager.isServiceRunning(context)) {
                 // The service is running already
                 Log.d("BackgroundLocatorPlugin", "Locator service is already running")
+                result?.success(true)
                 return
             }
 
