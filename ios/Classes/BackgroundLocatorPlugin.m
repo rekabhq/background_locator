@@ -196,13 +196,9 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
     
-    NSDictionary *initData = @{
-                     kArgInitCallback : @(initCallback),
-                     kArgInitDataCallback: initialDataDictionary
-                     };
     InitPluggable *initPluggable = [[InitPluggable alloc] init];
     [initPluggable setCallback:initCallback];
-    [initPluggable onServiceStart:initData];
+    [initPluggable onServiceStart:initialDataDictionary];
     
     DisposePluggable *disposePluggable = [[DisposePluggable alloc] init];
     [disposePluggable setCallback:disposeCallback];
