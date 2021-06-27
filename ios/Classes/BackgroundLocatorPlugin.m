@@ -103,7 +103,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 #pragma mark LocatorPlugin Methods
 - (void) sendLocationEvent: (NSDictionary<NSString*,NSNumber*>*)location {
-    if (_callbackChannel == nil) {
+    NSString *isolateId = [_headlessRunner isolateId];
+    if (_callbackChannel == nil || isolateId == nil) {
         return;
     }
     
@@ -111,10 +112,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                      kArgCallback : @([PreferencesManager getCallbackHandle:kCallbackKey]),
                      kArgLocation: location
                      };
-    @try {
-        [_callbackChannel invokeMethod:kBCMSendLocation arguments:map];
-    }
-    @catch (NSException *exception) {}
+    [_callbackChannel invokeMethod:kBCMSendLocation arguments:map];
 }
 
 - (instancetype)init:(NSObject<FlutterPluginRegistrar> *)registrar {
