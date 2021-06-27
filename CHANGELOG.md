@@ -1,3 +1,6 @@
+## 1.6.3
+* Bug fixes;
+
 ## 1.6.2+1-beta
 * Bring back init and dispose callback;
 
