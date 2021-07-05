@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 internal fun IsolateHolderService.startLocatorService(context: Context) {
 
-    val serviceStarted = AtomicBoolean(PreferencesManager.isServiceRunning(context))
+    val serviceStarted = AtomicBoolean(IsolateHolderService.isServiceRunning)
     // start synchronized block to prevent multiple service instant
     synchronized(serviceStarted) {
         this.context = context

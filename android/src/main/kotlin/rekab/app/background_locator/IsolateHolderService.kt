@@ -38,6 +38,9 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
 
         @JvmStatic
         private val notificationId = 1
+
+        @JvmStatic
+        var isServiceRunning = false
     }
 
     private var notificationChannelName = "Flutter Locator Plugin"
@@ -63,10 +66,6 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     private fun start() {
-        if (PreferencesManager.isServiceRunning(this)) {
-            return
-        }
-
         (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
                 setReferenceCounted(false)
@@ -77,8 +76,6 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         // Starting Service as foreground with a notification prevent service from closing
         val notification = getNotification()
         startForeground(notificationId, notification)
-
-        PreferencesManager.setServiceRunning(this, true)
 
         pluggables.forEach {
             it.onServiceStart(context)
@@ -122,13 +119,17 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
 
         when {
             ACTION_SHUTDOWN == intent.action -> {
+                isServiceRunning = false
                 shutdownHolderService()
             }
             ACTION_START == intent.action -> {
-                startHolderService(intent)
+                if (!isServiceRunning) {
+                    isServiceRunning = true
+                    startHolderService(intent)
+                }
             }
             ACTION_UPDATE_NOTIFICATION == intent.action -> {
-                if (PreferencesManager.isServiceRunning(this)) {
+                if (isServiceRunning) {
                     updateNotification(intent)
                 }
             }
@@ -176,7 +177,6 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         }
 
         locatorClient?.removeLocationUpdates()
-        PreferencesManager.setServiceRunning(this, false)
         stopForeground(true)
         stopSelf()
 
@@ -219,7 +219,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             Keys.METHOD_SERVICE_INITIALIZED -> {
-                PreferencesManager.setServiceRunning(this, true)
+                isServiceRunning = true
             }
             else -> result.notImplemented()
         }
@@ -228,7 +228,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onDestroy() {
-        PreferencesManager.setServiceRunning(this, false)
+        isServiceRunning = false
         super.onDestroy()
     }
 

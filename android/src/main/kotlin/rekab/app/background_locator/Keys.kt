@@ -155,8 +155,5 @@ class Keys {
 
         @JvmStatic
         val NOTIFICATION_ACTION = "com.rekab.background_locator.notification"
-
-        @JvmStatic
-        val PREF_SERVICE_IS_RUNNING = "com.rekab.background_locator.serviceIsRunning"
     }
 }

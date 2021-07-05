@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:isolate';
 import 'dart:ui';
 
@@ -157,9 +158,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void onStop() async {
-    BackgroundLocator.unRegisterLocationUpdate();
+    await BackgroundLocator.unRegisterLocationUpdate();
     final _isRunning = await BackgroundLocator.isServiceRunning();
-
     setState(() {
       isRunning = _isRunning;
     });
@@ -167,7 +167,7 @@ class _MyAppState extends State<MyApp> {
 
   void _onStart() async {
     if (await _checkLocationPermission()) {
-      _startLocator();
+      await _startLocator();
       final _isRunning = await BackgroundLocator.isServiceRunning();
 
       setState(() {
@@ -203,9 +203,9 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void _startLocator() {
+  Future<void> _startLocator() async{
     Map<String, dynamic> data = {'countInit': 1};
-    BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
+    return await BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
         initCallback: LocationCallbackHandler.initCallback,
         initDataCallback: data,
         disposeCallback: LocationCallbackHandler.disposeCallback,
