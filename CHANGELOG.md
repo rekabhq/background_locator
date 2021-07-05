@@ -1,3 +1,7 @@
+## 1.6.4
+* Fix triggering location update when plugin is stopped; (#258)
+* Fix saving service start stop status; (#259)
+
 ## 1.6.3
 * Bug fixes;
 
