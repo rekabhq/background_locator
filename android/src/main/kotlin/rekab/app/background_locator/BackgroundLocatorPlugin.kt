@@ -31,12 +31,21 @@ class BackgroundLocatorPlugin
         @JvmStatic
         private var channel: MethodChannel? = null
 
+        @JvmStatic
+        private fun sendResultWithDelay(context: Context, result: Result?, value: Boolean, delay: Long) {
+            context.mainLooper.let {
+                Handler(it).postDelayed({
+                    result?.success(value)
+                }, delay)
+            }
+        }
+
         @SuppressLint("MissingPermission")
         @JvmStatic
         private fun registerLocator(context: Context,
                                     args: Map<Any, Any>,
                                     result: Result?) {
-            if (PreferencesManager.isServiceRunning(context)) {
+            if (IsolateHolderService.isServiceRunning) {
                 // The service is running already
                 Log.d("BackgroundLocatorPlugin", "Locator service is already running")
                 result?.success(true)
@@ -47,7 +56,7 @@ class BackgroundLocatorPlugin
                     "start locator with ${PreferencesManager.getLocationClient(context)} client")
 
             val callbackHandle = args[Keys.ARG_CALLBACK] as Long
-            PreferencesManager.setCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY, callbackHandle);
+            PreferencesManager.setCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY, callbackHandle)
 
             val notificationCallback = args[Keys.ARG_NOTIFICATION_CALLBACK] as? Long
             PreferencesManager.setCallbackHandle(context, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY, notificationCallback)
@@ -80,7 +89,11 @@ class BackgroundLocatorPlugin
             }
 
             startIsolateService(context, settings)
-            result?.success(true)
+
+            // We need to know when the service binded exactly, there is some delay between starting a
+            // service and it's binding
+            // HELP WANTED: I couldn't find a better way to handle this, so any help or suggestion would be appreciated
+            sendResultWithDelay(context, result, true, 1000)
         }
 
         @JvmStatic
@@ -111,7 +124,7 @@ class BackgroundLocatorPlugin
             if (PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY) != null) {
                 intent.putExtra(Keys.SETTINGS_INIT_PLUGGABLE, true)
             }
-            if(PreferencesManager.getCallbackHandle(context, Keys.DISPOSE_CALLBACK_HANDLE_KEY) != null) {
+            if (PreferencesManager.getCallbackHandle(context, Keys.DISPOSE_CALLBACK_HANDLE_KEY) != null) {
                 intent.putExtra(Keys.SETTINGS_DISPOSABLE_PLUGGABLE, true)
             }
 
@@ -132,24 +145,24 @@ class BackgroundLocatorPlugin
         }
 
         @JvmStatic
-        private fun unRegisterPlugin(context: Context) {
-            if (!PreferencesManager.isServiceRunning(context)) {
+        private fun unRegisterPlugin(context: Context, result: Result?) {
+            if (!IsolateHolderService.isServiceRunning) {
                 // The service is not running
                 Log.d("BackgroundLocatorPlugin", "Locator service is not running, nothing to stop")
                 return
             }
 
             stopIsolateService(context)
+
+            // We need to know when the service detached exactly, there is some delay between stopping a
+            // service and it's detachment
+            // HELP WANTED: I couldn't find a better way to handle this, so any help or suggestion would be appreciated
+            sendResultWithDelay(context, result, true, 1000)
         }
 
         @JvmStatic
-        private fun isServiceRunning(context: Context, result: Result?) {
-            if (PreferencesManager.isServiceRunning(context)) {
-                result?.success(true)
-            } else {
-                result?.success(false)
-            }
-            return
+        private fun isServiceRunning(result: Result?) {
+            result?.success(IsolateHolderService.isServiceRunning)
         }
 
         @JvmStatic
@@ -214,13 +227,12 @@ class BackgroundLocatorPlugin
                         result)
             }
             Keys.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> {
-                unRegisterPlugin(context!!)
-                result.success(true)
+                unRegisterPlugin(context!!, result)
             }
-            Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isServiceRunning(context!!, result)
-            Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(context!!, result)
+            Keys.METHOD_PLUGIN_IS_REGISTER_LOCATION_UPDATE -> isServiceRunning(result)
+            Keys.METHOD_PLUGIN_IS_SERVICE_RUNNING -> isServiceRunning(result)
             Keys.METHOD_PLUGIN_UPDATE_NOTIFICATION -> {
-                if (!PreferencesManager.isServiceRunning(context!!)) {
+                if (!IsolateHolderService.isServiceRunning) {
                     return
                 }
 

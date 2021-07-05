@@ -161,19 +161,6 @@ class PreferencesManager {
         }
 
         @JvmStatic
-        fun isServiceRunning(context: Context): Boolean {
-            return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-                    .getBoolean(Keys.PREF_SERVICE_IS_RUNNING, false)
-        }
-
-        @JvmStatic
-        fun setServiceRunning(context: Context, running: Boolean) {
-            context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-                    .edit().putBoolean(Keys.PREF_SERVICE_IS_RUNNING, running)
-                    .apply()
-        }
-
-        @JvmStatic
         fun setCallbackHandle(context: Context, key: String, handle: Long?) {
             if (handle == null) {
                 context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
