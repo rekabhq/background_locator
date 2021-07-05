@@ -146,9 +146,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     _locationManager = [[CLLocationManager alloc] init];
     [_locationManager setDelegate:self];
     _locationManager.pausesLocationUpdatesAutomatically = NO;
-    if (@available(iOS 9.0, *)) {
-        _locationManager.allowsBackgroundLocationUpdates = YES;
-    }
 }
 
 #pragma mark MethodCallHelperDelegate
@@ -193,6 +190,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
       _locationManager.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator;
     }
     
+    if (@available(iOS 9.0, *)) {
+        _locationManager.allowsBackgroundLocationUpdates = YES;
+    }
+    
     [PreferencesManager saveDistanceFilter:distanceFilter];
 
     [PreferencesManager setCallbackHandle:callback key:kCallbackKey];
@@ -215,6 +216,13 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     @synchronized (self) {
         [_locationManager stopUpdatingLocation];
+        
+        if (@available(iOS 9.0, *)) {
+            _locationManager.allowsBackgroundLocationUpdates = NO;
+        }
+        
+        [_locationManager stopMonitoringSignificantLocationChanges];
+
         for (CLRegion* region in [_locationManager monitoredRegions]) {
             [_locationManager stopMonitoringForRegion:region];
         }
