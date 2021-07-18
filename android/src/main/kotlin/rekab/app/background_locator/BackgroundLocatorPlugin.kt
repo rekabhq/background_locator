@@ -149,6 +149,7 @@ class BackgroundLocatorPlugin
             if (!IsolateHolderService.isServiceRunning) {
                 // The service is not running
                 Log.d("BackgroundLocatorPlugin", "Locator service is not running, nothing to stop")
+                result?.success(true)
                 return
             }
 
