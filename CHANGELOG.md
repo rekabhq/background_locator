@@ -1,3 +1,6 @@
+## 1.6.5
+* Fix returning result for unRegisterPlugin method on Android; (#262)
+
 ## 1.6.4
 * Fix triggering location update when plugin is stopped; (#258)
 * Fix saving service start stop status; (#259)
