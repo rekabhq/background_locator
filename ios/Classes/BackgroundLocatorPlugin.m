@@ -37,6 +37,12 @@ static BackgroundLocatorPlugin *instance = nil;
 }
 
 - (void)invokeMethod:(NSString*_Nonnull)method arguments:(id _Nullable)arguments {
+    // Return if flutter engine is not ready
+    NSString *isolateId = [_headlessRunner isolateId];
+    if (_callbackChannel == nil || isolateId == nil) {
+        return;
+    }
+    
     [_callbackChannel invokeMethod:method arguments:arguments];
 }
 

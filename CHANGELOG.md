@@ -1,3 +1,6 @@
+## 1.6.6
+* Fix invoking method on flutter channel when engine is not ready; (#254)
+
 ## 1.6.5
 * Fix returning result for unRegisterPlugin method on Android; (#262)
 
