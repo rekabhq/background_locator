@@ -40,17 +40,16 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
         gpsLocation = client?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
         networkLocation = client?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
         // return the android device last Location after start request location
-        if (gpsLocation == null && networkLocation == null) {
-            // nop
-        } else if (gpsLocation != null && networkLocation != null) {
+        if (gpsLocation != null && networkLocation != null) {
             if (gpsLocation.time < networkLocation.time) {
                 onLocationChanged(networkLocation)
             } else {
                 onLocationChanged(gpsLocation)
             }
-        } else if (gpsLocation == null) {
-            if (networkLocation != null)
-                onLocationChanged(networkLocation)
+        } else if (gpsLocation != null) {
+            onLocationChanged(gpsLocation)
+        } else if (networkLocation != null) {
+            onLocationChanged(networkLocation)
         }
     }
 
