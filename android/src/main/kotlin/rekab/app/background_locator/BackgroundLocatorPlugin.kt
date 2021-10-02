@@ -86,6 +86,7 @@ class BackgroundLocatorPlugin
 
                 val msg = "'registerLocator' requires the ACCESS_FINE_LOCATION permission."
                 result?.error(msg, null, null)
+                return
             }
 
             startIsolateService(context, settings)
