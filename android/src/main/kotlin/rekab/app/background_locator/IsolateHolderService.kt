@@ -96,7 +96,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         intent.action = Keys.NOTIFICATION_ACTION
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(this,
-                1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                1, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
         return NotificationCompat.Builder(this, Keys.CHANNEL_ID)
                 .setContentTitle(notificationTitle)
