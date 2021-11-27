@@ -35,4 +35,6 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
     override fun onProviderEnabled(provider: String) {
         // nop
     }
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+
 }
