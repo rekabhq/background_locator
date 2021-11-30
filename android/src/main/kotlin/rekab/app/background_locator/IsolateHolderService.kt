@@ -41,6 +41,9 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
 
         @JvmStatic
         var isServiceRunning = false
+
+        @JvmStatic
+        var isServiceInitialized = false
     }
 
     private var notificationChannelName = "Flutter Locator Plugin"
