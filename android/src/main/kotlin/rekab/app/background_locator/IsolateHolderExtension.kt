@@ -39,6 +39,7 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
 
                     // We need flutter engine to handle callback, so if it is not available we have to create a
                     // Flutter engine without any view
+                    Log.e("IsolateHolderService", "startLocatorService: Start Flutter Enginer")
                     IsolateHolderService.backgroundEngine = FlutterEngine(context)
 
                     val args = DartExecutor.DartCallback(
@@ -48,7 +49,7 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
                     )
                     IsolateHolderService.backgroundEngine?.dartExecutor?.executeDartCallback(args)
                     isServiceInitialized = true
-                    Log.e("IsolateHolderExtension","service initialized")
+                    Log.e("IsolateHolderExtension", "service initialized")
                 }
             } catch (e: UnsatisfiedLinkError) {
                 e.printStackTrace()
@@ -56,20 +57,22 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
         }
     }
 
-    backgroundChannel =
-        MethodChannel(
-            IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger,
-            Keys.BACKGROUND_CHANNEL_ID
-        )
-    try {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            backgroundChannel.setMethodCallHandler(this)
+    IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
+        backgroundChannel =
+            MethodChannel(
+                binaryMessenger,
+                Keys.BACKGROUND_CHANNEL_ID
+            )
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                backgroundChannel.setMethodCallHandler(this)
+            }
+        } catch (e: RuntimeException) {
+            e.printStackTrace()
         }
-    } catch (e: RuntimeException) {
-        e.printStackTrace()
     }
 }
 

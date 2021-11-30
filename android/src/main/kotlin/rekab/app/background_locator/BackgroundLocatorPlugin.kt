@@ -112,7 +112,7 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         internal fun startIsolateService(context: Context, settings: Map<*, *>) {
-            Log.e("BackgroundLocatorPlugin","startIsolateService")
+            Log.e("BackgroundLocatorPlugin", "startIsolateService")
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
             intent.putExtra(
@@ -320,22 +320,27 @@ class BackgroundLocatorPlugin
             return false
         }
 
-        val notificationCallback =
-            PreferencesManager.getCallbackHandle(activity!!, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY)
-        if (notificationCallback != null && IsolateHolderService.backgroundEngine != null) {
-            val backgroundChannel =
-                MethodChannel(
-                    IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger,
-                    Keys.BACKGROUND_CHANNEL_ID
+        IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
+            val notificationCallback =
+                PreferencesManager.getCallbackHandle(
+                    activity!!,
+                    Keys.NOTIFICATION_CALLBACK_HANDLE_KEY
                 )
-            activity?.mainLooper?.let {
-                Handler(it)
-                    .post {
-                        backgroundChannel.invokeMethod(
-                            Keys.BCM_NOTIFICATION_CLICK,
-                            hashMapOf(Keys.ARG_NOTIFICATION_CALLBACK to notificationCallback)
-                        )
-                    }
+            if (notificationCallback != null && IsolateHolderService.backgroundEngine != null) {
+                val backgroundChannel =
+                    MethodChannel(
+                        binaryMessenger,
+                        Keys.BACKGROUND_CHANNEL_ID
+                    )
+                activity?.mainLooper?.let {
+                    Handler(it)
+                        .post {
+                            backgroundChannel.invokeMethod(
+                                Keys.BCM_NOTIFICATION_CLICK,
+                                hashMapOf(Keys.ARG_NOTIFICATION_CALLBACK to notificationCallback)
+                            )
+                        }
+                }
             }
         }
 
