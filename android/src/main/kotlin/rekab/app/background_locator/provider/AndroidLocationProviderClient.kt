@@ -6,6 +6,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
+import android.os.Bundle
 
 class AndroidLocationProviderClient(context: Context, override var listener: LocationUpdateListener?) : BLLocationProvider, LocationListener {
     private val client: LocationManager? =
@@ -35,4 +36,6 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
     override fun onProviderEnabled(provider: String) {
         // nop
     }
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+
 }
