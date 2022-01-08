@@ -1,6 +1,6 @@
 import background_locator
 import Flutter
-import path_provider
+import path_provider_ios
 import UIKit
 
 func registerPlugins(registry: FlutterPluginRegistry) {
