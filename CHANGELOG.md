@@ -1,3 +1,11 @@
+## 1.6.12
+* Fixes onStatusChanged crash;
+* Fixed issue #94;
+* Fix importing path_provider in ios example;
+* Fix issue #266;
+* Fix Android 12 location permission handling;
+* Add network location provider even gps location data not update;
+
 ## 1.6.6
 * Fix invoking method on flutter channel when engine is not ready; (#254)
 
