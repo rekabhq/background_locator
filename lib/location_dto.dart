@@ -12,7 +12,7 @@ class LocationDto {
   final double heading;
   final double time;
   final bool isMocked;
-  final String provider;
+  final String? provider;
 
   LocationDto._(
     this.latitude,
@@ -40,7 +40,7 @@ class LocationDto {
       json[Keys.ARG_HEADING],
       json[Keys.ARG_TIME],
       isLocationMocked,
-      json[Keys.ARG_PROVIDER] ?? '',
+      json[Keys.ARG_PROVIDER],
     );
   }
 
