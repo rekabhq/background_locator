@@ -99,27 +99,28 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun startIsolateService(context: Context, settings: Map<*, *>) {
+            Log.e("BackgroundLocatorPlugin", "startIsolateService")
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
             intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME,
-                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as String)
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME] as? String)
             intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE,
-                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] as String)
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE] as? String)
             intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_MSG,
-                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] as String)
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_MSG] as? String)
             intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG,
-                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as String)
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_BIG_MSG] as? String)
             intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON,
-                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON] as String)
+                    settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON] as? String)
             intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR,
                     settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
-            intent.putExtra(Keys.SETTINGS_INTERVAL, settings[Keys.SETTINGS_INTERVAL] as Int)
-            intent.putExtra(Keys.SETTINGS_ACCURACY, settings[Keys.SETTINGS_ACCURACY] as Int)
-            intent.putExtra(Keys.SETTINGS_DISTANCE_FILTER, settings[Keys.SETTINGS_DISTANCE_FILTER] as Double)
+            intent.putExtra(Keys.SETTINGS_INTERVAL, settings[Keys.SETTINGS_INTERVAL] as? Int)
+            intent.putExtra(Keys.SETTINGS_ACCURACY, settings[Keys.SETTINGS_ACCURACY] as? Int)
+            intent.putExtra(Keys.SETTINGS_DISTANCE_FILTER, settings[Keys.SETTINGS_DISTANCE_FILTER] as? Double)
 
             if (settings.containsKey(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME)) {
                 intent.putExtra(Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME,
-                        settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] as Int)
+                        settings[Keys.SETTINGS_ANDROID_WAKE_LOCK_TIME] as? Int)
             }
 
             if (PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY) != null) {
@@ -205,7 +206,12 @@ class BackgroundLocatorPlugin
             initializeService(context, args)
 
             val settings = args[Keys.ARG_SETTINGS] as Map<*, *>
-            startIsolateService(context, settings)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                startIsolateService(context, settings)
+            }
         }
     }
 
@@ -269,16 +275,17 @@ class BackgroundLocatorPlugin
             return false
         }
 
-        val notificationCallback = PreferencesManager.getCallbackHandle(activity!!, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY)
-        if (notificationCallback != null && IsolateHolderService.backgroundEngine != null) {
-            val backgroundChannel =
-                    MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
-            activity?.mainLooper?.let {
-                Handler(it)
-                        .post {
-                            backgroundChannel.invokeMethod(Keys.BCM_NOTIFICATION_CLICK,
-                                    hashMapOf(Keys.ARG_NOTIFICATION_CALLBACK to notificationCallback))
-                        }
+        IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
+            val notificationCallback = PreferencesManager.getCallbackHandle(activity!!, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY)
+            if (notificationCallback != null && IsolateHolderService.backgroundEngine != null) {
+                val backgroundChannel = MethodChannel(binaryMessenger,Keys.BACKGROUND_CHANNEL_ID)
+                activity?.mainLooper?.let {
+                    Handler(it)
+                            .post {
+                                backgroundChannel.invokeMethod(Keys.BCM_NOTIFICATION_CLICK,
+                                        hashMapOf(Keys.ARG_NOTIFICATION_CALLBACK to notificationCallback))
+                            }
+                }
             }
         }
 
