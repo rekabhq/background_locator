@@ -1,3 +1,6 @@
+THIS FORK IS MEANT FOR PERSONAL USE ONLY, I DO NOT PLAN TO MAINTAIN IT IN THE FUTURE
+I'm just trying to make it work for me with fixed reboot and fixed callbacks...
+
 
 # background_locator ![](https://github.com/rekab-app/background_locator/workflows/build/badge.svg) [![pub package](https://img.shields.io/pub/v/background_locator.svg)](https://pub.dartlang.org/packages/background_locator) ![](https://img.shields.io/github/contributors/rekab-app/background_locator) ![](https://img.shields.io/github/license/rekab-app/background_locator)
 
