@@ -9,18 +9,31 @@ import rekab.app.background_locator.PreferencesManager
 
 class DisposePluggable : Pluggable {
     override fun setCallback(context: Context, callbackHandle: Long) {
-        PreferencesManager.setCallbackHandle(context, Keys.DISPOSE_CALLBACK_HANDLE_KEY, callbackHandle)
+        PreferencesManager.setCallbackHandle(
+            context,
+            Keys.DISPOSE_CALLBACK_HANDLE_KEY,
+            callbackHandle
+        )
     }
 
     override fun onServiceDispose(context: Context) {
-        (PreferencesManager.getCallbackHandle(context, Keys.DISPOSE_CALLBACK_HANDLE_KEY))?.let { disposeCallback ->
-            val backgroundChannel = MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger,
-                    Keys.BACKGROUND_CHANNEL_ID)
-            Handler(context.mainLooper)
+        (PreferencesManager.getCallbackHandle(
+            context,
+            Keys.DISPOSE_CALLBACK_HANDLE_KEY
+        ))?.let { disposeCallback ->
+            IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
+                val backgroundChannel = MethodChannel(
+                    binaryMessenger,
+                    Keys.BACKGROUND_CHANNEL_ID
+                )
+                Handler(context.mainLooper)
                     .post {
-                        backgroundChannel.invokeMethod(Keys.BCM_DISPOSE,
-                                hashMapOf(Keys.ARG_DISPOSE_CALLBACK to disposeCallback))
+                        backgroundChannel.invokeMethod(
+                            Keys.BCM_DISPOSE,
+                            hashMapOf(Keys.ARG_DISPOSE_CALLBACK to disposeCallback)
+                        )
                     }
+            }
         }
     }
 }
