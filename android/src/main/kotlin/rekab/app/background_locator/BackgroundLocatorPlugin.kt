@@ -24,7 +24,7 @@ import rekab.app.background_locator.pluggables.InitPluggable
 
 class BackgroundLocatorPlugin
     : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {
-    private var context: Context? = null
+    public var context: Context? = null
     private var activity: Activity? = null
 
     companion object {
@@ -212,7 +212,7 @@ class BackgroundLocatorPlugin
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             Keys.METHOD_PLUGIN_INITIALIZE_SERVICE -> {
-                val args: Map<Any, Any> = call.arguments()
+                val args: Map<Any, Any>? = call.arguments()
 
                 // save callback dispatcher to use it when device reboots
                 PreferencesManager.saveCallbackDispatcher(context!!, args)
@@ -221,7 +221,7 @@ class BackgroundLocatorPlugin
                 result.success(true)
             }
             Keys.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE -> {
-                val args: Map<Any, Any> = call.arguments()
+                val args: Map<Any, Any>? = call.arguments()
 
                 // save setting to use it when device reboots
                 PreferencesManager.saveSettings(context!!, args)
@@ -240,7 +240,7 @@ class BackgroundLocatorPlugin
                     return
                 }
 
-                val args: Map<Any, Any> = call.arguments()
+                val args: Map<Any, Any>? = call.arguments()
                 updateNotificationText(context!!, args)
                 result.success(true)
             }
