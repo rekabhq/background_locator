@@ -270,7 +270,7 @@ class BackgroundLocatorPlugin
         channel?.setMethodCallHandler(plugin)
     }
 
-    override fun onNewIntent(intent: Intent?): Boolean {
+    override fun onNewIntent(intent: Intent): Boolean {
         if (intent?.action != Keys.NOTIFICATION_ACTION) {
             // this is not our notification
             return false

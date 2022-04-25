@@ -266,7 +266,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
 
         if (backgroundEngine != null) {
             val backgroundChannel =
-                    MethodChannel(backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
+                    MethodChannel(backgroundEngine?.dartExecutor?.binaryMessenger!!, Keys.BACKGROUND_CHANNEL_ID)
             Handler(context.mainLooper)
                     .post {
                         Log.d("plugin", "sendLocationEvent $result")
