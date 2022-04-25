@@ -279,7 +279,7 @@ class BackgroundLocatorPlugin
         val notificationCallback = PreferencesManager.getCallbackHandle(activity!!, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY)
         if (notificationCallback != null && IsolateHolderService.backgroundEngine != null) {
             val backgroundChannel =
-                    MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger! , Keys.BACKGROUND_CHANNEL_ID)
+                    MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger!! , Keys.BACKGROUND_CHANNEL_ID)
             activity?.mainLooper?.let {
                 Handler(it)
                         .post {
