@@ -214,8 +214,12 @@ class BackgroundLocatorPlugin
             Keys.METHOD_PLUGIN_INITIALIZE_SERVICE -> {
                 val args: Map<Any, Any>? = call.arguments()
 
-                // save callback dispatcher to use it when device reboots
-                PreferencesManager.saveCallbackDispatcher(context!!, args)
+                if(args != null){
+                   // save callback dispatcher to use it when device reboots
+                PreferencesManager.saveCallbackDispatcher(context!!, args!)
+                }
+
+                
 
                 initializeService(context!!, args)
                 result.success(true)
@@ -224,7 +228,9 @@ class BackgroundLocatorPlugin
                 val args: Map<Any, Any>? = call.arguments();
 
                 // save setting to use it when device reboots
-                PreferencesManager.saveSettings(context!!, args)
+                 if(args != null){
+                PreferencesManager.saveSettings(context!!, args!)
+                 }
 
                 registerLocator(context!!,
                         args,
@@ -241,7 +247,10 @@ class BackgroundLocatorPlugin
                 }
 
                 val args: Map<Any, Any>? = call.arguments()
-                updateNotificationText(context!!, args)
+                if(args != null){
+                    updateNotificationText(context!!, args!)
+                }
+                
                 result.success(true)
             }
             else -> result.notImplemented()
