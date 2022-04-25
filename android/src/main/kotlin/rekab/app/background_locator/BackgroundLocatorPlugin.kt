@@ -248,7 +248,7 @@ class BackgroundLocatorPlugin
 
                 val args: Map<Any, Any>? = call.arguments()
                 if(args != null){
-                    updateNotificationText(context!! , args!)
+                    updateNotificationText(context! , args!)
                 }
                 
                 result.success(true)
