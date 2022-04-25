@@ -212,29 +212,29 @@ class BackgroundLocatorPlugin
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             Keys.METHOD_PLUGIN_INITIALIZE_SERVICE -> {
-                val args: Map<Any, Any>? = call.arguments()
+                val args: Map<Any, Any>? = call.arguments(),
 
                 if(args != null){
                    // save callback dispatcher to use it when device reboots
-                PreferencesManager.saveCallbackDispatcher(context!!, args!)
+                PreferencesManager.saveCallbackDispatcher(context!!, args!),
                 }
 
                 
 
-                initializeService(context!!, args)
-                result.success(true)
+                initializeService(context!!, args),
+                result.success(true),
             }
             Keys.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE -> {
-                val args: Map<Any, Any>? = call.arguments();
+                val args: Map<Any, Any>? = call.arguments(),
 
                 // save setting to use it when device reboots
                  if(args != null){
-                PreferencesManager.saveSettings(context!!, args!)
+                PreferencesManager.saveSettings(context!!, args!),
                  }
 
                 registerLocator(context!!,
                         args,
-                        result)
+                        result),
             }
             Keys.METHOD_PLUGIN_UN_REGISTER_LOCATION_UPDATE -> {
                 unRegisterPlugin(context!!, result)
@@ -281,7 +281,7 @@ class BackgroundLocatorPlugin
         val notificationCallback = PreferencesManager.getCallbackHandle(activity!!, Keys.NOTIFICATION_CALLBACK_HANDLE_KEY)
         if (notificationCallback != null && IsolateHolderService.backgroundEngine != null) {
             val backgroundChannel =
-                    MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
+                    MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger!, Keys.BACKGROUND_CHANNEL_ID)
             activity?.mainLooper?.let {
                 Handler(it)
                         .post {
