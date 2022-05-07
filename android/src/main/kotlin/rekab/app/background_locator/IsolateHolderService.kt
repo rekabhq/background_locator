@@ -113,6 +113,8 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null)
+
         if (intent == null) {
             return super.onStartCommand(intent, flags, startId)
         }
@@ -156,7 +158,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         locatorClient?.requestLocationUpdates(getLocationRequest(intent))
 
         // Fill pluggable list
-        if( intent.hasExtra(Keys.SETTINGS_INIT_PLUGGABLE)) {
+        if (intent.hasExtra(Keys.SETTINGS_INIT_PLUGGABLE)) {
             pluggables.add(InitPluggable())
         }
 
@@ -241,8 +243,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onLocationUpdated(location: HashMap<Any, Any>?) {
-        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null)
-
+        val pluggablesInitialized = pluggables.all { it.isInitialized(context) }
+        if (!pluggablesInitialized) {
+            return
+        }
         //https://github.com/flutter/plugins/pull/1641
         //https://github.com/flutter/flutter/issues/36059
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d

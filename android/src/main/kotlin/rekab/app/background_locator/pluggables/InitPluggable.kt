@@ -10,6 +10,10 @@ import rekab.app.background_locator.PreferencesManager
 class InitPluggable : Pluggable {
     private var isInitCallbackCalled = false
 
+    override fun isInitialized(context: Context): Boolean {
+        return isInitCallbackCalled
+    }
+
     override fun setCallback(context: Context, callbackHandle: Long) {
         PreferencesManager.setCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY, callbackHandle)
 
@@ -25,9 +29,9 @@ class InitPluggable : Pluggable {
                         .post {
                             backgroundChannel.invokeMethod(Keys.BCM_INIT,
                                     hashMapOf(Keys.ARG_INIT_CALLBACK to initCallback, Keys.ARG_INIT_DATA_CALLBACK to initialDataMap))
+                            isInitCallbackCalled = true
                         }
             }
-            isInitCallbackCalled = true
         }
     }
 
