@@ -3,13 +3,14 @@ import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'background_locator.dart';
 import 'keys.dart';
 import 'location_dto.dart';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   const MethodChannel _backgroundChannel =
-      MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
+      const MethodChannel(Keys.BACKGROUND_CHANNEL_ID);
   WidgetsFlutterBinding.ensureInitialized();
 
   _backgroundChannel.setMethodCallHandler((MethodCall call) async {
@@ -35,6 +36,8 @@ void callbackDispatcher() {
       Map<dynamic, dynamic>? data = args[Keys.ARG_INIT_DATA_CALLBACK];
       if (initCallback != null) {
         initCallback(data);
+        _backgroundChannel
+            .invokeMethod(Keys.METHOD_SERVICE_INIT_CALLBACK_CALLED);
       }
     } else if (Keys.BCM_DISPOSE == call.method) {
       final Map<dynamic, dynamic> args = call.arguments;
