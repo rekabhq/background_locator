@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:isolate';
 import 'dart:ui';
 
@@ -203,9 +202,10 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> _startLocator() async{
+  Future<void> _startLocator() async {
     Map<String, dynamic> data = {'countInit': 1};
-    return await BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
+    return await BackgroundLocator.registerLocationUpdate(
+        LocationCallbackHandler.callback,
         initCallback: LocationCallbackHandler.initCallback,
         initDataCallback: data,
         disposeCallback: LocationCallbackHandler.disposeCallback,
