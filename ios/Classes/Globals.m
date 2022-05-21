@@ -19,6 +19,7 @@ NSString *const kChannelId = @"app.rekab/locator_plugin";
 NSString *const kBackgroundChannelId = @"app.rekab/locator_plugin_background";
 
 NSString *const kMethodServiceInitialized = @"LocatorService.initialized";
+NSString *const kMethodServiceInitCallbackCalled = @"LocatorService.initCallbackCalled";
 NSString *const kMethodPluginInitializeService = @"LocatorPlugin.initializeService";
 NSString *const kMethodPluginRegisterLocationUpdate = @"LocatorPlugin.registerLocationUpdate";
 NSString *const kMethodPluginUnRegisterLocationUpdate = @"LocatorPlugin.unRegisterLocationUpdate";

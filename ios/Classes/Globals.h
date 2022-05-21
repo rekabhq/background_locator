@@ -22,6 +22,7 @@ FOUNDATION_EXPORT NSString *const kChannelId;
 FOUNDATION_EXPORT NSString *const kBackgroundChannelId;
 
 FOUNDATION_EXPORT NSString *const kMethodServiceInitialized;
+FOUNDATION_EXPORT NSString *const kMethodServiceInitCallbackCalled;
 FOUNDATION_EXPORT NSString *const kMethodPluginInitializeService;
 FOUNDATION_EXPORT NSString *const kMethodPluginRegisterLocationUpdate;
 FOUNDATION_EXPORT NSString *const kMethodPluginUnRegisterLocationUpdate;
