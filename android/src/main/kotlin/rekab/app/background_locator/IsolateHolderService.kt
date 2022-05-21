@@ -37,6 +37,9 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         var backgroundEngine: FlutterEngine? = null
 
         @JvmStatic
+        var backgroundChannel: MethodChannel? = null
+
+        @JvmStatic
         private val notificationId = 1
 
         @JvmStatic
@@ -51,7 +54,6 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     private var icon = 0
     private var wakeLockTime = 60 * 60 * 1000L // 1 hour default wake lock time
     private var locatorClient: BLLocationProvider? = null
-    internal lateinit var backgroundChannel: MethodChannel
     internal lateinit var context: Context
     private var pluggables: ArrayList<Pluggable> = ArrayList()
 
@@ -113,6 +115,8 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null)
+
         if (intent == null) {
             return super.onStartCommand(intent, flags, startId)
         }
@@ -156,7 +160,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         locatorClient?.requestLocationUpdates(getLocationRequest(intent))
 
         // Fill pluggable list
-        if( intent.hasExtra(Keys.SETTINGS_INIT_PLUGGABLE)) {
+        if (intent.hasExtra(Keys.SETTINGS_INIT_PLUGGABLE)) {
             pluggables.add(InitPluggable())
         }
 
@@ -221,6 +225,9 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
             Keys.METHOD_SERVICE_INITIALIZED -> {
                 isServiceRunning = true
             }
+            Keys.METHOD_SERVICE_INIT_CALLBACK_CALLED -> {
+                (pluggables.firstOrNull { it.name() == "InitPluggable" } as InitPluggable).initialized = true
+            }
             else -> result.notImplemented()
         }
 
@@ -241,8 +248,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onLocationUpdated(location: HashMap<Any, Any>?) {
-        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null)
-
+        val pluggablesInitialized = pluggables.all { it.isInitialized(context) }
+        if (isServiceRunning and !pluggablesInitialized) {
+            return
+        }
         //https://github.com/flutter/plugins/pull/1641
         //https://github.com/flutter/flutter/issues/36059
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d
@@ -265,12 +274,9 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         // new version of flutter can not invoke method from background thread
 
         if (backgroundEngine != null) {
-            val backgroundChannel =
-                    MethodChannel(backgroundEngine?.dartExecutor?.binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
             Handler(context.mainLooper)
                     .post {
-                        Log.d("plugin", "sendLocationEvent $result")
-                        backgroundChannel.invokeMethod(Keys.BCM_SEND_LOCATION, result)
+                        backgroundChannel?.invokeMethod(Keys.BCM_SEND_LOCATION, result)
                     }
         }
     }

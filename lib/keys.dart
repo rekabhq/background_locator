@@ -4,6 +4,7 @@ class Keys {
       'app.rekab/locator_plugin_background';
 
   static const String METHOD_SERVICE_INITIALIZED = 'LocatorService.initialized';
+  static const String METHOD_SERVICE_INIT_CALLBACK_CALLED = 'LocatorService.initCallbackCalled';
   static const String METHOD_PLUGIN_INITIALIZE_SERVICE =
       'LocatorPlugin.initializeService';
   static const String METHOD_PLUGIN_REGISTER_LOCATION_UPDATE =

@@ -33,6 +33,9 @@ class Keys {
         val METHOD_SERVICE_INITIALIZED = "LocatorService.initialized"
 
         @JvmStatic
+        val METHOD_SERVICE_INIT_CALLBACK_CALLED = "LocatorService.initCallbackCalled"
+
+        @JvmStatic
         val METHOD_PLUGIN_INITIALIZE_SERVICE = "LocatorPlugin.initializeService"
 
         @JvmStatic

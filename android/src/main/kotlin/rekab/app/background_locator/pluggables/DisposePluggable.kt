@@ -8,6 +8,14 @@ import rekab.app.background_locator.Keys
 import rekab.app.background_locator.PreferencesManager
 
 class DisposePluggable : Pluggable {
+    override fun name(): String {
+        return "DisposePluggable"
+    }
+
+    override fun isInitialized(context: Context): Boolean {
+        return true
+    }
+
     override fun setCallback(context: Context, callbackHandle: Long) {
         PreferencesManager.setCallbackHandle(context, Keys.DISPOSE_CALLBACK_HANDLE_KEY, callbackHandle)
     }

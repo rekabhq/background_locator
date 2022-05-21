@@ -20,6 +20,9 @@
         result(@(YES));
     } else if ([kMethodServiceInitialized isEqualToString:call.method]) {
         result(nil);
+    } else if ([kMethodServiceInitCallbackCalled isEqualToString:call.method]) {
+        // just for android
+        result(nil);
     } else if ([kMethodPluginRegisterLocationUpdate isEqualToString:call.method]) {
         int64_t callbackHandle = [[arguments objectForKey:kArgCallback] longLongValue];
         int64_t initCallbackHandle = [[arguments objectForKey:kArgInitCallback] longLongValue];
