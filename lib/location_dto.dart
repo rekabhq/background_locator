@@ -40,7 +40,7 @@ class LocationDto {
       json[Keys.ARG_HEADING],
       json[Keys.ARG_TIME],
       isLocationMocked,
-      json[Keys.ARG_PROVIDER],
+      json.containsKey(Keys.ARG_PROVIDER) ? json[Keys.ARG_PROVIDER] : "",
     );
   }
 
