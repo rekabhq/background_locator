@@ -31,7 +31,7 @@ class BackgroundLocator {
       AndroidSettings androidSettings = const AndroidSettings(),
       IOSSettings iosSettings = const IOSSettings()}) async {
     if (autoStop) {
-      WidgetsBinding.instance.addObserver(AutoStopHandler());
+      WidgetsBinding.instance?.addObserver(AutoStopHandler());
     }
 
     final args = SettingsUtil.getArgumentsMap(

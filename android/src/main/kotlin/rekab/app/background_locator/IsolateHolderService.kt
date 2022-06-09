@@ -52,7 +52,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                 ?: if (context != null) {
                     backgroundEngine = FlutterEngine(context)
                     backgroundEngine?.dartExecutor?.binaryMessenger
-                }else{
+                } else {
                     messenger
                 }
         }
@@ -113,9 +113,15 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         val intent = Intent(this, getMainActivityClass(this))
         intent.action = Keys.NOTIFICATION_ACTION
 
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             this,
-            1, intent, PendingIntent.FLAG_UPDATE_CURRENT
+            1, intent, flags
         )
 
         return NotificationCompat.Builder(this, Keys.CHANNEL_ID)
