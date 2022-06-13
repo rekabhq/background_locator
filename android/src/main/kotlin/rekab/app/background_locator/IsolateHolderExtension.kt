@@ -57,6 +57,7 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
         }
     }
 
+/*
     IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
         backgroundChannel =
             MethodChannel(
@@ -74,6 +75,11 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
             e.printStackTrace()
         }
     }
+*/
+    backgroundChannel =
+            MethodChannel(IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger!!,
+                    Keys.BACKGROUND_CHANNEL_ID)
+    backgroundChannel.setMethodCallHandler(this)
 }
 
 fun getLocationRequest(intent: Intent): LocationRequestOptions {
