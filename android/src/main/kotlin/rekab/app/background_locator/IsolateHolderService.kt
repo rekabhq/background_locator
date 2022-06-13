@@ -52,7 +52,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                 ?: if (context != null) {
                     backgroundEngine = FlutterEngine(context)
                     backgroundEngine?.dartExecutor?.binaryMessenger
-                } else {
+                }else{
                     messenger
                 }
         }
@@ -113,15 +113,9 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         val intent = Intent(this, getMainActivityClass(this))
         intent.action = Keys.NOTIFICATION_ACTION
 
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
-
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             this,
-            1, intent, flags
+            1, intent, PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         return NotificationCompat.Builder(this, Keys.CHANNEL_ID)
@@ -324,24 +318,18 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
         // new version of flutter can not invoke method from background thread
 
         if (backgroundEngine != null) {
-/*
             context?.let {
                 val backgroundChannel =
                     MethodChannel(
-                        getBinaryMessenger(it)!!,
+                        getBinaryMessenger(it),
                         Keys.BACKGROUND_CHANNEL_ID
                     )
             }
             context?.let {
                 Handler(it.mainLooper)
-*/
-            val backgroundChannel =
-                backgroundEngine?.dartExecutor?.binaryMessenger?.let { MethodChannel(it, Keys.BACKGROUND_CHANNEL_ID) }
-
-            Handler(context.mainLooper)
                     .post {
                         Log.d("plugin", "sendLocationEvent $result")
-                        backgroundChannel?.invokeMethod(Keys.BCM_SEND_LOCATION, result)
+                        backgroundChannel.invokeMethod(Keys.BCM_SEND_LOCATION, result)
                     }
             }
         }

@@ -1,5 +1,3 @@
-DO NOT USE THIS FORK PLEASE, IT'S BROKEN WITH FLUTTER 3.0.0, USE https://github.com/caiobraga/background_locator
-
 
 # background_locator ![](https://github.com/rekab-app/background_locator/workflows/build/badge.svg) [![pub package](https://img.shields.io/pub/v/background_locator.svg)](https://pub.dartlang.org/packages/background_locator) ![](https://img.shields.io/github/contributors/rekab-app/background_locator) ![](https://img.shields.io/github/license/rekab-app/background_locator)
 

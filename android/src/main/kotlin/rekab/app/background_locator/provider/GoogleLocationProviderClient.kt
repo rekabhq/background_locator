@@ -2,7 +2,6 @@ package rekab.app.background_locator.provider
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Looper
 import com.google.android.gms.location.*
 
 class GoogleLocationProviderClient(context: Context, override var listener: LocationUpdateListener?) : BLLocationProvider {
@@ -15,7 +14,7 @@ class GoogleLocationProviderClient(context: Context, override var listener: Loca
 
     @SuppressLint("MissingPermission")
     override fun requestLocationUpdates(request: LocationRequestOptions) {
-        client.requestLocationUpdates(getLocationRequest(request), locationCallback, Looper.myLooper()!!)
+        client.requestLocationUpdates(getLocationRequest(request), locationCallback, null)
     }
 
     private fun getLocationRequest(request: LocationRequestOptions): LocationRequest {
@@ -32,7 +31,7 @@ class GoogleLocationProviderClient(context: Context, override var listener: Loca
 }
 
 private class LocationListener(val listener: LocationUpdateListener?) : LocationCallback() {
-    override fun onLocationResult(p0: LocationResult) {
-        listener?.onLocationUpdated(LocationParserUtil.getLocationMapFromLocation(p0))
+    override fun onLocationResult(location: LocationResult?) {
+        listener?.onLocationUpdated(LocationParserUtil.getLocationMapFromLocation(location))
     }
 }

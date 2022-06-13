@@ -29,11 +29,6 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
                     context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED
                 ) {
-                    // We need flutter engine to handle callback, so if it is not available we have to create a
-                    // Flutter engine without any view
-                    Log.e("IsolateHolderService", "startLocatorService: Start Flutter Enginer")
-                    IsolateHolderService.backgroundEngine = FlutterEngine(context)
-
                     val callbackHandle = context.getSharedPreferences(
                         Keys.SHARED_PREFERENCES_KEY,
                         Context.MODE_PRIVATE
@@ -41,6 +36,11 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
                         .getLong(Keys.CALLBACK_DISPATCHER_HANDLE_KEY, 0)
                     val callbackInfo =
                         FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
+
+                    // We need flutter engine to handle callback, so if it is not available we have to create a
+                    // Flutter engine without any view
+                    Log.e("IsolateHolderService", "startLocatorService: Start Flutter Enginer")
+                    IsolateHolderService.backgroundEngine = FlutterEngine(context)
 
                     val args = DartExecutor.DartCallback(
                         context.assets,
@@ -57,7 +57,6 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
         }
     }
 
-/*
     IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
         backgroundChannel =
             MethodChannel(
@@ -75,14 +74,6 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
             e.printStackTrace()
         }
     }
-*/
-    backgroundChannel =
-        IsolateHolderService.backgroundEngine?.dartExecutor?.binaryMessenger?.let {
-            MethodChannel(
-                it,
-                Keys.BACKGROUND_CHANNEL_ID)
-        }!!
-    backgroundChannel.setMethodCallHandler(this)
 }
 
 fun getLocationRequest(intent: Intent): LocationRequestOptions {

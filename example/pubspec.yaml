@@ -20,8 +20,8 @@ dev_dependencies:
   background_locator:
     path: ../
 
-  path_provider: ^2.0.10
-  location_permissions: ^4.0.1
+  path_provider: ^2.0.8
+  location_permissions: ^3.0.0+1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
