@@ -1,15 +1,4 @@
-THIS FORK IS MEANT FOR PERSONAL USE ONLY, I DO NOT PLAN TO MAINTAIN IT IN THE FUTURE
-I'm just trying to make it work for me with fixed reboot and fixed callbacks...
-
-For now, the example seems broken, I saw a pull request on the main repo about it, I don't know if I'll take time to make it work.
-
-In order to use it in your project, paste this in your pubspec.yaml in dependencies :
-```
-  background_locator:
-    git:
-      url: https://github.com/Yukams/background_locator_fixed
-      ref: master
-```
+DO NOT USE THIS FORK PLEASE, IT'S BROKEN WITH FLUTTER 3.0.0, USE https://github.com/caiobraga/background_locator
 
 
 # background_locator ![](https://github.com/rekab-app/background_locator/workflows/build/badge.svg) [![pub package](https://img.shields.io/pub/v/background_locator.svg)](https://pub.dartlang.org/packages/background_locator) ![](https://img.shields.io/github/contributors/rekab-app/background_locator) ![](https://img.shields.io/github/license/rekab-app/background_locator)
