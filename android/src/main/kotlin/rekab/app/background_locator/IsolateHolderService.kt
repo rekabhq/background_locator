@@ -327,7 +327,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
             context?.let {
                 val backgroundChannel =
                     MethodChannel(
-                        getBinaryMessenger(it),
+                        getBinaryMessenger(it)!!,
                         Keys.BACKGROUND_CHANNEL_ID
                     )
             }

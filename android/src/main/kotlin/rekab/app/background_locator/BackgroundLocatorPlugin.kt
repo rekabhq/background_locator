@@ -218,7 +218,7 @@ class BackgroundLocatorPlugin
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             Keys.METHOD_PLUGIN_INITIALIZE_SERVICE -> {
-                val args: Map<Any, Any> = call.arguments()
+                val args: Map<Any, Any> = call.arguments()!!
 
                 // save callback dispatcher to use it when device reboots
                 PreferencesManager.saveCallbackDispatcher(context!!, args)
@@ -227,7 +227,7 @@ class BackgroundLocatorPlugin
                 result.success(true)
             }
             Keys.METHOD_PLUGIN_REGISTER_LOCATION_UPDATE -> {
-                val args: Map<Any, Any> = call.arguments()
+                val args: Map<Any, Any> = call.arguments()!!
 
                 // save setting to use it when device reboots
                 PreferencesManager.saveSettings(context!!, args)
@@ -246,7 +246,7 @@ class BackgroundLocatorPlugin
                     return
                 }
 
-                val args: Map<Any, Any> = call.arguments()
+                val args: Map<Any, Any> = call.arguments()!!
                 updateNotificationText(context!!, args)
                 result.success(true)
             }
@@ -269,8 +269,8 @@ class BackgroundLocatorPlugin
         channel?.setMethodCallHandler(plugin)
     }
 
-    override fun onNewIntent(intent: Intent?): Boolean {
-        if (intent?.action != Keys.NOTIFICATION_ACTION) {
+    override fun onNewIntent(p0: Intent): Boolean {
+        if (p0?.action != Keys.NOTIFICATION_ACTION) {
             // this is not our notification
             return false
         }
@@ -305,6 +305,4 @@ class BackgroundLocatorPlugin
 
     override fun onDetachedFromActivityForConfigChanges() {
     }
-
-
 }
