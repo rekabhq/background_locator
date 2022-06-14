@@ -297,9 +297,12 @@ class BackgroundLocatorPlugin
                 activity?.mainLooper?.let {
                     Handler(it)
                         .post {
-                            backgroundChannel.invokeMethod(Keys.BCM_NOTIFICATION_CLICK,
-                                    hashMapOf(Keys.ARG_NOTIFICATION_CALLBACK to notificationCallback))
+                            backgroundChannel.invokeMethod(
+                                Keys.BCM_NOTIFICATION_CLICK,
+                                hashMapOf(Keys.ARG_NOTIFICATION_CALLBACK to notificationCallback)
+                            )
                         }
+                }
             }
         }
 
