@@ -137,6 +137,7 @@ class BackgroundLocatorPlugin
         private fun stopIsolateService(context: Context) {
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_SHUTDOWN
+            Log.d("BackgroundLocatorPlugin", "stopIsolateService => Shutting down locator plugin")
             ContextCompat.startForegroundService(context, intent)
         }
 
