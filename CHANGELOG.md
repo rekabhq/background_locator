@@ -1,3 +1,15 @@
+## 2.0.0
+* New fork
+* Support for Flutter 3.0
+* Support for NullSafety
+* Fix initCallback is now called first as expected
+* Fix callback not called
+* Fix example
+* Fix FLAG_IMMUTABLE error for SDK 23+
+* Fix library not working after a phone reboot
+* Fix library not working after an app crash due to revoking permissions
+* Adding a bit more logs
+
 ## 1.6.12
 * Fixes onStatusChanged crash;
 * Fixed issue #94;
