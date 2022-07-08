@@ -1,6 +1,7 @@
 package rekab.app.background_locator
 
 import android.app.*
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -9,6 +10,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import android.content.pm.PackageManager
 import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
@@ -19,6 +21,7 @@ import rekab.app.background_locator.pluggables.InitPluggable
 import rekab.app.background_locator.pluggables.Pluggable
 import rekab.app.background_locator.provider.*
 import java.util.HashMap
+import androidx.core.app.ActivityCompat
 
 class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateListener, Service() {
     companion object {
@@ -135,22 +138,35 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) {
-            return super.onStartCommand(intent, flags, startId)
+        Log.e("IsolateHolderService", "onStartCommand => intent.action : ${intent?.action}")
+        if(intent == null) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e("IsolateHolderService", "app has crashed, stopping it")
+                stopSelf()
+            }
+            else {
+                return super.onStartCommand(intent, flags, startId)
+            }
         }
 
         when {
-            ACTION_SHUTDOWN == intent.action -> {
+            ACTION_SHUTDOWN == intent?.action -> {
                 isServiceRunning = false
                 shutdownHolderService()
             }
-            ACTION_START == intent.action -> {
+            ACTION_START == intent?.action -> {
+                if (isServiceRunning) {
+                    isServiceRunning = false
+                    shutdownHolderService()
+                }
+
                 if (!isServiceRunning) {
                     isServiceRunning = true
                     startHolderService(intent)
                 }
             }
-            ACTION_UPDATE_NOTIFICATION == intent.action -> {
+            ACTION_UPDATE_NOTIFICATION == intent?.action -> {
                 if (isServiceRunning) {
                     updateNotification(intent)
                 }
@@ -324,8 +340,6 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                         getBinaryMessenger(it)!!,
                         Keys.BACKGROUND_CHANNEL_ID
                     )
-            }
-            context?.let {
                 Handler(it.mainLooper)
                     .post {
                         Log.d("plugin", "sendLocationEvent $result")
@@ -334,5 +348,4 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
             }
         }
     }
-
 }

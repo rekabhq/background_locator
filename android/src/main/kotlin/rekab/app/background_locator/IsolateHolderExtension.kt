@@ -23,37 +23,37 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
     // start synchronized block to prevent multiple service instant
     synchronized(serviceStarted) {
         this.context = context
-        if (IsolateHolderService.backgroundEngine == null) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED
-                ) {
-                    // We need flutter engine to handle callback, so if it is not available we have to create a
-                    // Flutter engine without any view
-                    Log.e("IsolateHolderService", "startLocatorService: Start Flutter Enginer")
-                    IsolateHolderService.backgroundEngine = FlutterEngine(context)
+        // resetting the background engine to avoid being stuck after an app crash
+        IsolateHolderService.backgroundEngine = null
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                // We need flutter engine to handle callback, so if it is not available we have to create a
+                // Flutter engine without any view
+                Log.e("IsolateHolderService", "startLocatorService: Start Flutter Engine")
+                IsolateHolderService.backgroundEngine = FlutterEngine(context)
 
-                    val callbackHandle = context.getSharedPreferences(
-                        Keys.SHARED_PREFERENCES_KEY,
-                        Context.MODE_PRIVATE
-                    )
-                        .getLong(Keys.CALLBACK_DISPATCHER_HANDLE_KEY, 0)
-                    val callbackInfo =
-                        FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
+                val callbackHandle = context.getSharedPreferences(
+                    Keys.SHARED_PREFERENCES_KEY,
+                    Context.MODE_PRIVATE
+                )
+                    .getLong(Keys.CALLBACK_DISPATCHER_HANDLE_KEY, 0)
+                val callbackInfo =
+                    FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
 
-                    val args = DartExecutor.DartCallback(
-                        context.assets,
-                        FlutterInjector.instance().flutterLoader().findAppBundlePath(),
-                        callbackInfo
-                    )
-                    IsolateHolderService.backgroundEngine?.dartExecutor?.executeDartCallback(args)
-                    isServiceInitialized = true
-                    Log.e("IsolateHolderExtension", "service initialized")
-                }
-            } catch (e: UnsatisfiedLinkError) {
-                e.printStackTrace()
+                val args = DartExecutor.DartCallback(
+                    context.assets,
+                    FlutterInjector.instance().flutterLoader().findAppBundlePath(),
+                    callbackInfo
+                )
+                IsolateHolderService.backgroundEngine?.dartExecutor?.executeDartCallback(args)
+                isServiceInitialized = true
+                Log.e("IsolateHolderExtension", "service initialized")
             }
+        } catch (e: UnsatisfiedLinkError) {
+            e.printStackTrace()
         }
     }
 
