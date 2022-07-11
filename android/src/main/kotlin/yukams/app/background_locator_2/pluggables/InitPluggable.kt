@@ -1,11 +1,11 @@
-package rekab.app.background_locator.pluggables
+package yukams.app.package:background_locator_2.pluggables
 
 import android.content.Context
 import android.os.Handler
 import io.flutter.plugin.common.MethodChannel
-import rekab.app.background_locator.IsolateHolderService
-import rekab.app.background_locator.Keys
-import rekab.app.background_locator.PreferencesManager
+import yukams.app.package:background_locator_2.IsolateHolderService
+import yukams.app.package:background_locator_2.Keys
+import yukams.app.package:background_locator_2.PreferencesManager
 
 class InitPluggable : Pluggable {
     private var isInitCallbackCalled = false

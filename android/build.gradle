@@ -1,4 +1,4 @@
-group 'rekab.app.background_locator'
+group 'yukams.app.package:background_locator_2'
 version '1.0-SNAPSHOT'
 
 buildscript {

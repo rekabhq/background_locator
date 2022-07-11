@@ -1,4 +1,4 @@
-package rekab.app.background_locator
+package yukams.app.package:background_locator_2
 
 import android.Manifest
 import android.content.Context
@@ -12,8 +12,8 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.FlutterCallbackInformation
-import rekab.app.background_locator.IsolateHolderService.Companion.isServiceInitialized
-import rekab.app.background_locator.provider.LocationRequestOptions
+import yukams.app.package:background_locator_2.IsolateHolderService.Companion.isServiceInitialized
+import yukams.app.package:background_locator_2.provider.LocationRequestOptions
 import java.lang.RuntimeException
 import java.util.concurrent.atomic.AtomicBoolean
 

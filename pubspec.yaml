@@ -1,6 +1,6 @@
 name: background_locator_2
 description: A Flutter plugin to request the location even if the app is killed. Sending the location to a dart function in background, also provide a meter filter
-version: 2.0.2
+version: 2.0.3
 homepage: https://github.com/Yukams/background_locator_fixed
 issue_tracker: https://github.com/Yukams/background_locator_fixed/issues
 platforms:
@@ -23,7 +23,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: rekab.app.background_locator
+        package: yukams.app.background_locator_2
         pluginClass: BackgroundLocatorPlugin
       ios:
         pluginClass: BackgroundLocatorPlugin

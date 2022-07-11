@@ -1,5 +1,5 @@
-import 'package:background_locator/keys.dart';
-import 'package:background_locator/settings/locator_settings.dart';
+import 'package:background_locator_2/keys.dart';
+import 'package:background_locator_2/settings/locator_settings.dart';
 import 'package:flutter/material.dart';
 
 enum LocationClient { google, android }

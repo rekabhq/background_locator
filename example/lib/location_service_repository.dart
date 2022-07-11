@@ -3,7 +3,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:background_locator/location_dto.dart';
+import 'package:background_locator_2/location_dto.dart';
 
 import 'file_manager.dart';
 

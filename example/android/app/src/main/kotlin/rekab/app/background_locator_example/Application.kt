@@ -1,11 +1,11 @@
-package rekab.app.background_locator_example
+package yukams.app.background_locator_example
 
 import io.flutter.app.FlutterApplication
 import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
 import io.flutter.plugins.pathprovider.PathProviderPlugin
 import io.flutter.view.FlutterMain
-import rekab.app.background_locator.IsolateHolderService
+import yukams.app.package:background_locator_2.IsolateHolderService
 
 //class Application : FlutterApplication(), PluginRegistrantCallback {
 //    override fun onCreate() {

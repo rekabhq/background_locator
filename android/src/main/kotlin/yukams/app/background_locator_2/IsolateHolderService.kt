@@ -1,4 +1,4 @@
-package rekab.app.background_locator
+package yukams.app.package:background_locator_2
 
 import android.app.*
 import android.Manifest
@@ -16,10 +16,10 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import rekab.app.background_locator.pluggables.DisposePluggable
-import rekab.app.background_locator.pluggables.InitPluggable
-import rekab.app.background_locator.pluggables.Pluggable
-import rekab.app.background_locator.provider.*
+import yukams.app.package:background_locator_2.pluggables.DisposePluggable
+import yukams.app.package:background_locator_2.pluggables.InitPluggable
+import yukams.app.package:background_locator_2.pluggables.Pluggable
+import yukams.app.package:background_locator_2.provider.*
 import java.util.HashMap
 import androidx.core.app.ActivityCompat
 

@@ -1,3 +1,7 @@
+## 2.0.3
+* Replacing background_locator by background_locator_2
+* Replacing rekab by yukams
+
 ## 2.0.2
 * Adding fields to pubspec.yaml
 * Changing README.md to prepare it to be published on pub.dev

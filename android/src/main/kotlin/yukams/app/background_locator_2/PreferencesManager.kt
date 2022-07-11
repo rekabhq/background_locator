@@ -1,13 +1,13 @@
-package rekab.app.background_locator
+package yukams.app.package:background_locator_2
 
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import rekab.app.background_locator.provider.LocationClient
+import yukams.app.package:background_locator_2.provider.LocationClient
 
 class PreferencesManager {
     companion object {
-        private const val PREF_NAME = "background_locator"
+        private const val PREF_NAME = "package:background_locator_2"
 
         @JvmStatic
         fun saveCallbackDispatcher(context: Context, map: Map<Any, Any>) {

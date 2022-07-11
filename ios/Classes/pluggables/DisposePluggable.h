@@ -1,6 +1,6 @@
 //
 //  DisposePluggable.h
-//  background_locator
+//  package:background_locator_2
 //
 //  Created by Mehdok on 6/7/21.
 //

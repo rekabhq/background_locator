@@ -1,4 +1,4 @@
-package rekab.app.background_locator
+package yukams.app.package:background_locator_2
 
 class Keys {
     companion object {
@@ -24,10 +24,10 @@ class Keys {
         val DISPOSE_CALLBACK_HANDLE_KEY = "DISPOSE_CALLBACK_HANDLE_KEY"
 
         @JvmStatic
-        val CHANNEL_ID = "app.rekab/locator_plugin"
+        val CHANNEL_ID = "app.yukams/locator_plugin"
 
         @JvmStatic
-        val BACKGROUND_CHANNEL_ID = "app.rekab/locator_plugin_background"
+        val BACKGROUND_CHANNEL_ID = "app.yukams/locator_plugin_background"
 
         @JvmStatic
         val METHOD_SERVICE_INITIALIZED = "LocatorService.initialized"
@@ -157,6 +157,6 @@ class Keys {
         val BCM_DISPOSE = "BCM_DISPOSE"
 
         @JvmStatic
-        val NOTIFICATION_ACTION = "com.rekab.background_locator.notification"
+        val NOTIFICATION_ACTION = "com.yukams.package:background_locator_2.notification"
     }
 }

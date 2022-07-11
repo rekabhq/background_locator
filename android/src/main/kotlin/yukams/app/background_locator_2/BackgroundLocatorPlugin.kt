@@ -1,4 +1,4 @@
-package rekab.app.background_locator
+package yukams.app.package:background_locator_2
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -19,8 +19,8 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import rekab.app.background_locator.pluggables.DisposePluggable
-import rekab.app.background_locator.pluggables.InitPluggable
+import yukams.app.package:background_locator_2.pluggables.DisposePluggable
+import yukams.app.package:background_locator_2.pluggables.InitPluggable
 
 class BackgroundLocatorPlugin
     : MethodCallHandler, FlutterPlugin, PluginRegistry.NewIntentListener, ActivityAware {

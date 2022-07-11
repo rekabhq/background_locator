@@ -1,4 +1,4 @@
-package rekab.app.background_locator.provider
+package yukams.app.package:background_locator_2.provider
 
 interface BLLocationProvider {
     var listener: LocationUpdateListener?

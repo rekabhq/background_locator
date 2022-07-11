@@ -1,6 +1,6 @@
 //
 //  PreferencesManager.m
-//  background_locator
+//  package:background_locator_2
 //
 //  Created by Mehdi Sohrabi on 6/28/20.
 //

@@ -1,7 +1,7 @@
 class Keys {
-  static const String CHANNEL_ID = 'app.rekab/locator_plugin';
+  static const String CHANNEL_ID = 'app.yukams/locator_plugin';
   static const String BACKGROUND_CHANNEL_ID =
-      'app.rekab/locator_plugin_background';
+      'app.yukams/locator_plugin_background';
 
   static const String METHOD_SERVICE_INITIALIZED = 'LocatorService.initialized';
   static const String METHOD_PLUGIN_INITIALIZE_SERVICE =
