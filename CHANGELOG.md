@@ -1,3 +1,8 @@
+## 2.0.2
+* Adding fields to pubspec.yaml
+* Changing README.md to prepare it to be published on pub.dev
+* Changing LICENCE file
+
 ## 2.0.1
 * Reverting minSdk from 31 to 29
 
