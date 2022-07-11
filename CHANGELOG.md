@@ -1,3 +1,6 @@
+## 2.0.1
+* Reverting minSdk from 31 to 29
+
 ## 2.0.0
 * New fork
 * Support for Flutter 3.0
@@ -9,6 +12,7 @@
 * Fix library not working after a phone reboot
 * Fix library not working after an app crash due to revoking permissions
 * Adding a bit more logs
+* Changin minSdk from 29 to 31
 
 ## 1.6.12
 * Fixes onStatusChanged crash;
