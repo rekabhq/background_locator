@@ -45,6 +45,7 @@ NSString *const kArgCallbackDispatcher = @"callbackDispatcher";
 NSString *const kSettingsAccuracy = @"settings_accuracy";
 NSString *const kSettingsDistanceFilter = @"settings_distanceFilter";
 NSString *const kSettingsShowsBackgroundLocationIndicator = @"settings_ios_showsBackgroundLocationIndicator";
+NSString *const kSettingsStopWithTerminate = @"settings_ios_stopWithTerminate";
 
 NSString *const kBCMSendLocation = @"BCM_SEND_LOCATION";
 NSString *const kBCMInit = @"BCM_INIT";
@@ -52,6 +53,7 @@ NSString *const kBCMDispose = @"BCM_DISPOSE";
 
 NSString *const kPrefObservingRegion = @"pref_observingRegion";
 NSString *const kPrefServiceRunning = @"pref_serviceRunning";
+NSString *const kPrefStopWithTerminate = @"pref_isStopWithTerminate";
 
 
 @end
