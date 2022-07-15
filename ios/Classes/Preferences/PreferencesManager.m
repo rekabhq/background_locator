@@ -64,4 +64,12 @@
     return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefServiceRunning];
 }
 
++ (void)setStopWithTerminate:(BOOL)terminate {
+    [[NSUserDefaults standardUserDefaults] setBool:terminate forKey:kPrefStopWithTerminate];
+}
+
++ (BOOL)isStopWithTerminate {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefStopWithTerminate];
+}
+
 @end
