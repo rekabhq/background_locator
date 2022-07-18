@@ -1,6 +1,6 @@
 # background_locator_example
 
-Demonstrates how to use the package:background_locator_2 plugin.
+Demonstrates how to use the background_locator_2 plugin.
 
 ## Getting Started
 

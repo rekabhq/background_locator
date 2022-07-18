@@ -5,7 +5,7 @@ import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
 import io.flutter.plugins.pathprovider.PathProviderPlugin
 import io.flutter.view.FlutterMain
-import yukams.app.package:background_locator_2.IsolateHolderService
+import yukams.app.background_locator_2.IsolateHolderService
 
 //class Application : FlutterApplication(), PluginRegistrantCallback {
 //    override fun onCreate() {

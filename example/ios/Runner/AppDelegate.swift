@@ -1,4 +1,4 @@
-import package:background_locator_2
+import background_locator_2
 import Flutter
 import path_provider_ios
 import UIKit

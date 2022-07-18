@@ -42,14 +42,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name="yukams.app.package:background_locator_2.BootBroadcastReceiver"
+        <receiver android:name="yukams.app.background_locator_2.BootBroadcastReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
         <service
-            android:name="yukams.app.package:background_locator_2.IsolateHolderService"
+            android:name="yukams.app.background_locator_2.IsolateHolderService"
             android:permission="android.permission.FOREGROUND_SERVICE"
             android:exported="true"
             android:foregroundServiceType = "location"
