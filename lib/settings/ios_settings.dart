@@ -8,6 +8,8 @@ class IOSSettings extends LocatorSettings {
   /// [distanceFilter] distance in meter to trigger location update, Default is 0 meter.
   ///
   /// [showsBackgroundLocationIndicator] The background location usage indicator is a blue bar or a blue pill in the status bar on iOS. Default is false.
+  ///
+  /// [stopWithTerminate] stops the location usage when the app is on background
 
   final bool showsBackgroundLocationIndicator;
   final bool stopWithTerminate;
