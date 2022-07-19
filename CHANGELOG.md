@@ -1,3 +1,6 @@
+##2.0.4-dev.2 :
+* Adding auto stop on app terminate on iOS
+
 ##2.0.4-dev.1 :
 * Fixing iOS build
 * Replacing package:background_locator_2 by background_locator_2
