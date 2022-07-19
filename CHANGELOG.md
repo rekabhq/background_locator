@@ -1,5 +1,16 @@
+## 2.0.4
+* Merging 2.0.4-dev1 and 2.0.4-dev2 to the main branch
+
+## 2.0.4-dev.2
+* Adding auto stop on app terminate on iOS
+* Fixing import on example test script
+
+## 2.0.4-dev.1
+* Fixing iOS build
+* Replacing package:background_locator_2 by background_locator_2
+
 ## 2.0.3
-* Replacing background_locator by background_locator_2
+* Replacing background_locator by background_locator_2 **(BREAKING CHANGE)**
 * Replacing rekab by yukams
 
 ## 2.0.2
@@ -21,7 +32,7 @@
 * Fix library not working after a phone reboot
 * Fix library not working after an app crash due to revoking permissions
 * Adding a bit more logs
-* Changin minSdk from 29 to 31
+* Changing minSdk from 29 to 31
 
 ## 1.6.12
 * Fixes onStatusChanged crash;

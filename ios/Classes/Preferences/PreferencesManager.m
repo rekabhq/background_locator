@@ -1,6 +1,6 @@
 //
 //  PreferencesManager.m
-//  package:background_locator_2
+//  background_locator_2
 //
 //  Created by Mehdi Sohrabi on 6/28/20.
 //
@@ -62,6 +62,14 @@
 
 + (BOOL)isServiceRunning {
     return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefServiceRunning];
+}
+
++ (void)setStopWithTerminate:(BOOL)terminate {
+    [[NSUserDefaults standardUserDefaults] setBool:terminate forKey:kPrefStopWithTerminate];
+}
+
++ (BOOL)isStopWithTerminate {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kPrefStopWithTerminate];
 }
 
 @end

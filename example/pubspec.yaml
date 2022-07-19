@@ -1,5 +1,5 @@
 name: background_locator_2_example
-description: Demonstrates how to use the package:background_locator_2 plugin.
+description: Demonstrates how to use the background_locator_2 plugin.
 publish_to: 'none'
 
 environment:

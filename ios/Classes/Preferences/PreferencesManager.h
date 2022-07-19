@@ -1,6 +1,6 @@
 //
 //  PreferencesManager.h
-//  package:background_locator_2
+//  background_locator_2
 //
 //  Created by Mehdi Sohrabi on 6/28/20.
 //
@@ -21,6 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isObservingRegion;
 + (void)setServiceRunning:(BOOL) running;
 + (BOOL)isServiceRunning;
++ (void)setStopWithTerminate:(BOOL) terminate;
++ (BOOL)isStopWithTerminate;
 
 @end
 

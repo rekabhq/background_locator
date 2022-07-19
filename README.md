@@ -1,4 +1,4 @@
-This package is a V2 of the package:background_locator_2 package, fixing it and making it work for the newest versions of Flutter.
+This package is a V2 of the background_locator package, fixing it and making it work for the newest versions of Flutter.
 
 # background_locator_2 ! [![pub package](https://img.shields.io/pub/v/background_locator_2.svg)](https://pub.dartlang.org/packages/background_locator_2) ![](https://img.shields.io/github/contributors/Yukams/background_locator_fixed) ![](https://img.shields.io/github/license/Yukams/background_locator_fixed)
 

@@ -1,6 +1,6 @@
 //
 //  Constants.h
-//  package:background_locator_2
+//  background_locator_2
 //
 //  Created by Mehdi Sohrabi on 6/3/20.
 //
@@ -48,6 +48,7 @@ FOUNDATION_EXPORT NSString *const kArgCallbackDispatcher;
 FOUNDATION_EXPORT NSString *const kSettingsAccuracy;
 FOUNDATION_EXPORT NSString *const kSettingsDistanceFilter;
 FOUNDATION_EXPORT NSString *const kSettingsShowsBackgroundLocationIndicator;
+FOUNDATION_EXPORT NSString *const kSettingsStopWithTerminate;
 
 FOUNDATION_EXPORT NSString *const kBCMSendLocation;
 FOUNDATION_EXPORT NSString *const kBCMInit;
@@ -55,6 +56,7 @@ FOUNDATION_EXPORT NSString *const kBCMDispose;
 
 FOUNDATION_EXPORT NSString *const kPrefObservingRegion;
 FOUNDATION_EXPORT NSString *const kPrefServiceRunning;
+FOUNDATION_EXPORT NSString *const kPrefStopWithTerminate;
 
 @end
 

@@ -1,4 +1,4 @@
-package yukams.app.package:background_locator_2.pluggables
+package yukams.app.background_locator_2.pluggables
 
 import android.content.Context
 
