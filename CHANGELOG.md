@@ -1,3 +1,6 @@
+## 2.0.5
+* Fixing demo gif
+
 ## 2.0.4
 * Merging 2.0.4-dev1 and 2.0.4-dev2 to the main branch
 

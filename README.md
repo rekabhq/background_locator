@@ -4,7 +4,7 @@ This package is a V2 of the background_locator package, fixing it and making it 
 
 A Flutter plugin for getting location updates even when the app is killed.
 
-![demo](https://raw.githubusercontent.com/RomanJos/package:background_locator_2/master/demo.gif)
+![demo](https://raw.githubusercontent.com/RomanJos/background_locator/master/demo.gif)
 
 Refer to [wiki](https://github.com/Yukams/background_locator_fixed/wiki) page for install and setup instruction or jump to specific subject with below links:
 
