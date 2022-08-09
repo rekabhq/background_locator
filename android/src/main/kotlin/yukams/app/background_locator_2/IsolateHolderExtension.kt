@@ -24,6 +24,7 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
     synchronized(serviceStarted) {
         this.context = context
         // resetting the background engine to avoid being stuck after an app crash
+        IsolateHolderService.backgroundEngine?.destroy();
         IsolateHolderService.backgroundEngine = null
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
