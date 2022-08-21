@@ -44,6 +44,11 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
                 val callbackInfo =
                     FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
 
+                if(callbackInfo == null) {
+                    Log.e("IsolateHolderExtension", "Fatal: failed to find callback");
+                    return;
+                }
+
                 val args = DartExecutor.DartCallback(
                     context.assets,
                     FlutterInjector.instance().flutterLoader().findAppBundlePath(),
