@@ -1,3 +1,8 @@
+## 2.0.6
+* Fixing iOS build
+* Fixing memory leak on Android
+* Fixing callbacks on older Android devices
+
 ## 2.0.5
 * Fixing demo gif
 
