@@ -4,6 +4,7 @@ import 'package:background_locator/location_dto.dart';
 
 import 'location_service_repository.dart';
 
+@pragma('vm:entry-point')
 class LocationCallbackHandler {
   static Future<void> initCallback(Map<dynamic, dynamic> params) async {
     LocationServiceRepository myLocationCallbackRepository =
