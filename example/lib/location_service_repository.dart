@@ -55,7 +55,7 @@ class LocationServiceRepository {
     print('$_count location in dart: ${locationDto.toString()}');
     await setLogPosition(_count, locationDto);
     final SendPort send = IsolateNameServer.lookupPortByName(isolateName);
-    send?.send(locationDto);
+    send?.send(locationDto.toJson());
     _count++;
 
   }
