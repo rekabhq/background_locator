@@ -12,7 +12,7 @@ class LocationDto {
   final double heading;
   final double time;
   final bool isMocked;
-  final String provider;
+  final String? provider;
 
   LocationDto._(
     this.latitude,
