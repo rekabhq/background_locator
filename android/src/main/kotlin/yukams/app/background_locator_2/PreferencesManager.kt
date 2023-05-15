@@ -25,11 +25,19 @@ class PreferencesManager {
             val sharedPreferences =
                     context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
-            val callback = map[Keys.ARG_CALLBACK] as Number
-            sharedPreferences.edit()
-                    .putLong(Keys.ARG_CALLBACK,
-                            callback.toLong())
-                    .apply()
+           
+
+        if(map[Keys.ARG_CALLBACK] as? Int != null) {
+                 val callback = map[Keys.ARG_CALLBACK] as Int
+print("int je")
+                sharedPreferences.edit()
+                        .putInt(Keys.ARG_CALLBACK,
+                                map[Keys.ARG_CALLBACK] as Int)
+                        .apply()
+        }
+        else {
+                print("nije int")
+        }
 
             if (map[Keys.ARG_NOTIFICATION_CALLBACK] as? Long != null) {
                 sharedPreferences.edit()
@@ -66,8 +74,8 @@ class PreferencesManager {
                     .apply()
 
             sharedPreferences.edit()
-                    .putLong(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR,
-                            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Long)
+                    .putInt(Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR,
+                            settings[Keys.SETTINGS_ANDROID_NOTIFICATION_ICON_COLOR] as Int)
                     .apply()
 
             sharedPreferences.edit()
